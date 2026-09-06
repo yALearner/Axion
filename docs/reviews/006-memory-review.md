@@ -99,4 +99,4 @@ Agent 主动 recall_memory(keyword) → MemoryService.recall → 后端只搜归
   - sqlite 档实机（env 覆盖换档：装配启动正常 + schema 自动建表 + 真模型写入查表 scope=ARCHIVAL/ISO-8601 + MEMORY.md 未被写入的换档隔离）
   - 故障三测实机：非法 backend 启动报错；mem0 缺凭证启动报错；mem0 不可达 chat 快速失败（请求路径无 /v1/ 前缀再实证 H3）
 - `mvn clean verify` 全绿：342 tests（006 新增 43）+ 全静态门禁；SpotBugs 2 项按 004 先例修复（CRLF 日志净化 + EI_EXPOSE_REP2 抑制）
-- **剩余待办（如实记录，不阻塞合并）**：① 真实自托管 Mem0 实例验证（本地无实例，mock 层已验协议翻译，需业务方实例时补跑）② 004 遗留「接口中立性自查」用户思维练习
+- **剩余待办（如实记录，不阻塞合并）**：① 真实自托管 Mem0 实例验证（本地无实例，mock 层已验协议翻译，需业务方实例时补跑——**详细五步跑法见 `specs/006-memory/quickstart.md`「mem0 真机验证跑法」**）② 004 遗留「接口中立性自查」用户思维练习

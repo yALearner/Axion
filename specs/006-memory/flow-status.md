@@ -23,7 +23,7 @@ WARNING 记录: （累计 0/3）
 - [x] sqlite 档实机（2026-09-06 用户实跑 + jshell 查库）：`AXION_MEMORY_BACKEND=sqlite` 启动装配正常（schema.sql 自动建 memory_entries 表）；真模型 save_memory 写入 → 查表 id=1 content=GitLab CI 部署、scope=ARCHIVAL（缺省 ✓）、created_at ISO-8601 ✓；换档隔离——MEMORY.md 无 GitLab 条目（sqlite 档未碰 markdown 文件）；审计 id=11 success=1
 - [x] mem0 档故障快速失败实机（2026-09-06 环境变量覆盖跑通）：无凭证启动报错「需要环境变量 MEM0_BASE_URL 与 MEM0_API_KEY」；不可达地址 chat 快速失败「Mem0 读取失败: I/O error on GET http://127.0.0.1:9/memories」不静默不降级（请求路径无 /v1/ 前缀 = H3 结论再实证）
 - [x] 非法 backend 值启动报错（2026-09-06 实跑）：`backend=bogus` 启动失败，异常根因「axion.memory.backend 非法值: bogus（取值 markdown/sqlite/mem0）」不静默
-- [ ] 真实自托管 Mem0 实例验证：本地无实例 → **如实记待办**（mock 层已验协议翻译；验证口径见需求文档自审拍板）
+- [ ] 真实自托管 Mem0 实例验证：本地无实例 → **如实记待办**（mock 层已验协议翻译；验证口径见需求文档自审拍板）；**详细跑法已沉淀进 `quickstart.md`「mem0 真机验证跑法」（五步：Docker 起实例 → env 换档写入 → mem0 侧核对 → 语义检索验证 → 预期差异口径与回写）**
 - [x] 无 yaml 改动（全程 `$env:AXION_MEMORY_BACKEND` 会话级覆盖）→ 无需恢复，默认仍 markdown
 
 停止清单触发记录:
