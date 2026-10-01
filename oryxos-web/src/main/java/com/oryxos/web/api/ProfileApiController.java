@@ -19,6 +19,9 @@ public class ProfileApiController {
 
   private final ProfileRegistry profileRegistry;
 
+  @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+      value = "EI_EXPOSE_REP2",
+      justification = "ProfileRegistry 为装配处注入的单例（只读使用、不暴露引用）——AgentScheduler 同款先例")
   public ProfileApiController(ProfileRegistry profileRegistry) {
     this.profileRegistry = profileRegistry;
   }

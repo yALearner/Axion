@@ -23,6 +23,7 @@ import com.oryxos.tool.WhitelistSandbox;
 import com.oryxos.tool.notify.NotifyChannelAdapter;
 import com.oryxos.tool.notify.NotifyChannelRegistry;
 import com.oryxos.tool.notify.NotifyTarget;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -195,8 +196,9 @@ class NotifyToolsTest {
   void whitelistSandboxBlocksSend() {
     WhitelistSandbox whitelist =
         new WhitelistSandbox(
+            Path.of("."),
             new FileSandboxProperties(List.of()),
-            new ShellSandboxProperties(List.of()),
+            new ShellSandboxProperties(List.of(), List.of()),
             new HttpSandboxProperties(List.of("wttr.in")));
     NotifyTools tool = new NotifyTools(whitelist, Map.of("webhook", adapter), registry);
     when(registry.resolve("team-lark")).thenReturn(teamLarkTarget());

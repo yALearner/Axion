@@ -12,13 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 上下文加载器（Bootstrap + Skill 元数据供给者，归 core——Agent 目录不是 Tool）。
+ * 上下文加载器（Bootstrap + AGENT.md 正文 + Skill 元数据供给者，归 core——Agent 目录不是 Tool）。
  *
- * <p>两条铁律（坑五）：① 每次组装 prompt 重新读文件、**不缓存**——用户改完立即生效；② 显式引用的文件缺失**报错**、 Bootstrap 缺失至少
- * **WARN**——静默跳过会造成"人格悄悄丢了"这类最难查的软故障。
+ * <p>三条铁律：① 每次组装 prompt 重新读文件、**不缓存**——用户改完立即生效（坑五/坑三：正文改了即时生效，011 FR-2）；② 显式引用的文件缺失
+ * **报错**、Bootstrap 缺失至少 **WARN**——静默跳过会造成"人格悄悄丢了"这类最难查的软故障；③ AGENT.md 缺失**报错**（坑四）。
  *
- * <p>Skill 绑定真相源按宪法 IV 的软连接集合：只注入已绑定 Skill 的 name + description + 本地绝对读取路径， 正文与附属资源不预载（第 20 节起经
- * read_file/shell 按需取用）。AGENT.md 正文注入归第 29 节，本节不交付。
+ * <p>Skill 绑定真相源按宪法 IV 的软连接集合：只注入已绑定 Skill 的 name + description + **绑定路径**（011 修订说明 ⑦：{@code
+ * <agentDir>/skills/<name>/SKILL.md}，经软连接/junction 透传读公共实体——配合沙箱 FILE_READ 动态根实现"未绑定不可见"），
+ * 正文与附属资源不预载（经 read_file/shell 按需取用）。AGENT.md 正文注入于 011-plugin-agent 交付（FR-2）。
  */
 public final class ContextLoader {
 
@@ -27,18 +28,30 @@ public final class ContextLoader {
   private final Path workspaceRoot;
 
   /**
-   * @param workspaceRoot 工作区根（即 .oryxos/ 目录：bootstrap 在其根、skills 在其 skills/ 子目录）
+   * @param workspaceRoot 工作区根（即 .oryxos/ 目录：bootstrap 在其根、skills 在其 skills/ 子目录、agents 在其 agents/
+   *     子目录）
    */
   public ContextLoader(Path workspaceRoot) {
     this.workspaceRoot = workspaceRoot;
   }
 
-  /** 每轮组装 prompt 时现读（无缓存）：Bootstrap 文件 + 已绑定 Skill 元数据。 */
+  /** 每轮组装 prompt 时现读（无缓存）：AGENT.md 正文 + Bootstrap 文件 + 已绑定 Skill 元数据。 */
   public String load(Profile profile) {
     StringBuilder context = new StringBuilder();
+    context.append(loadBody(profile));
     context.append(loadBootstrap(profile));
     context.append(loadSkillMetadata(profile));
     return context.toString();
+  }
+
+  /**
+   * AGENT.md 正文（011 FR-2）：每轮从 agents/<name>/AGENT.md 现读、去 frontmatter（坑三：不缓存——正文改了即时生效）；
+   * 缺失报错（坑四：不静默）。拆分复用 {@link AgentLoader}（坑一：拆分与派生同一解析器）。
+   */
+  private String loadBody(Profile profile) {
+    Path agentDir = workspaceRoot.resolve("agents").resolve(profile.name());
+    String body = new AgentLoader().loadBody(agentDir);
+    return body == null || body.isEmpty() ? "" : body + System.lineSeparator();
   }
 
   private String loadBootstrap(Profile profile) {
@@ -86,25 +99,28 @@ public final class ContextLoader {
 
   private String skillMetadataOf(Path binding) {
     Path realDir = resolveRealSkillDir(binding);
-    Path skillMd = realDir.resolve("SKILL.md");
-    if (!Files.isRegularFile(skillMd)) {
+    Path realSkillMd = realDir.resolve("SKILL.md");
+    if (!Files.isRegularFile(realSkillMd)) {
       throw new IllegalStateException("Skill 缺失 SKILL.md: " + binding.getFileName());
     }
     String content;
     try {
-      content = Files.readString(skillMd);
+      content = Files.readString(realSkillMd);
     } catch (IOException e) {
       throw new IllegalStateException("Skill 读取失败: " + binding.getFileName(), e);
     }
     String frontmatter = extractFrontmatter(content);
     String name = valueOf(frontmatter, "name");
     String description = valueOf(frontmatter, "description");
+    // 011 修订说明 ⑦：注入绑定路径（<agentDir>/skills/<name>/SKILL.md）而非实体真实路径——
+    // 配合沙箱 FILE_READ 动态根（= 当前 Agent 目录）实现"未绑定不可见"；技术方案 §12.2 验收口径
+    Path bindingSkillMd = binding.toAbsolutePath().normalize().resolve("SKILL.md");
     return "- 技能: "
         + (name == null ? String.valueOf(binding.getFileName()) : name)
         + " — "
         + (description == null ? "" : description)
         + "（读取路径: "
-        + skillMd
+        + bindingSkillMd
         + "）"
         + System.lineSeparator();
   }

@@ -73,6 +73,8 @@ class PromptBuilderTest {
   }
 
   private PromptBuilder builder(Path workspace, List<OryxTool> tools) {
+    // 011 改造点适配：ContextLoader 现注入 AGENT.md 正文（FR-2）——fixture 补 agent 目录（frontmatter-only，正文为空）
+    writeAgentDir(workspace);
     Map<String, OryxTool> toolSet = new java.util.HashMap<>();
     for (OryxTool t : tools) {
       toolSet.put(t.getName(), t);
@@ -81,6 +83,17 @@ class PromptBuilderTest {
     when(memoryService.buildContext(org.mockito.ArgumentMatchers.any(Session.class)))
         .thenReturn("## 长期记忆\n记忆上下文: 核心条目测试");
     return new PromptBuilder(new ContextLoader(workspace), adapter, toolSet, memoryService);
+  }
+
+  /** 011 改造点适配：建 agents/ops-agent/AGENT.md（frontmatter-only 且无尾换行：正文为空）。 */
+  private static void writeAgentDir(Path workspace) {
+    try {
+      Path agentDir =
+          java.nio.file.Files.createDirectories(workspace.resolve("agents").resolve("ops-agent"));
+      java.nio.file.Files.writeString(agentDir.resolve("AGENT.md"), "---\nname: ops-agent\n---");
+    } catch (java.io.IOException e) {
+      throw new IllegalStateException("fixture 创建失败", e);
+    }
   }
 
   @Test

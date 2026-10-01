@@ -23,6 +23,10 @@ public final class AgentService {
   private final SessionManager sessionManager;
   private final ConcurrentMap<String, Lock> sessionLocks = new ConcurrentHashMap<>();
 
+  @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+      value = "EI_EXPOSE_REP2",
+      justification =
+          "ProfileRegistry/ReActLoop/SessionManager 为装配处注入的单例（只读使用、不暴露引用）——AgentScheduler 同款先例")
   public AgentService(
       ProfileRegistry profileRegistry, ReActLoop reActLoop, SessionManager sessionManager) {
     this.profileRegistry = profileRegistry;

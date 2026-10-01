@@ -8,8 +8,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.zone.ZoneRulesException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -83,28 +81,42 @@ public class AgentScheduler {
 
   /** 启动注册：扫所有 Profile 的 schedules 逐条动态注册（坑一——不用 @Scheduled 写死），并登记进 scheduled_tasks。 */
   public void registerAll() {
-    Map<String, String> owners = new HashMap<>();
     for (Profile profile : profileRegistry.list()) {
-      for (Profile.Schedule sc : profile.schedules()) {
-        String taskId = sc.id();
-        // id 全局唯一（跨 Profile 冲突启动报错，指明冲突的 Profile——两个 Agent 同 id 时运营方猜不出来，⑦ P2）
-        String previous = owners.putIfAbsent(taskId, profile.name());
-        if (previous != null) {
-          throw new IllegalStateException(
-              "定时任务 id 冲突: " + taskId + "（Profile " + previous + " 与 " + profile.name() + "）");
-        }
-        // ⑦b：非法 zone/cron 在触发构造处启动报错（008 口径），先于登记
-        CronTrigger trigger =
-            sc.zone() == null || sc.zone().isBlank()
-                ? new CronTrigger(sc.cron()) // zone 缺省按系统时区（Profile javadoc）
-                : new CronTrigger(sc.cron(), validatedZone(profile.name(), sc.zone()));
-        store.register(toView(profile, sc), nextRunAfter(sc.cron(), sc.zone(), Instant.now()));
-        ScheduledFuture<?> future = taskScheduler.schedule(() -> runOnce(profile, sc), trigger);
-        if (future != null) { // 真实调度器恒非空；mock 返回 null 时跳过登记（⑦c 句柄只对真实注册有意义）
-          scheduledTasks.put(taskId, future);
-        }
-        registrations.put(taskId, new Registration(profile, sc));
+      registerProfile(profile);
+    }
+  }
+
+  /**
+   * 单 Profile 注册全部 schedules（011-plugin-agent FR-4：registerAll 循环体抽出——30 节运行时注册与启动扫描同一段代码）： id 冲突查
+   * registrations（报错文案与 010 一致）→ 登记 scheduled_tasks（含 next_run_at）→ 注册 cron 触发 → 句柄入
+   * scheduledTasks。
+   */
+  public void registerProfile(Profile profile) {
+    for (Profile.Schedule sc : profile.schedules()) {
+      String taskId = sc.id();
+      // id 全局唯一（跨 Profile 冲突启动报错，指明冲突的 Profile——两个 Agent 同 id 时运营方猜不出来，⑦ P2）
+      Registration previous = registrations.get(taskId);
+      if (previous != null) {
+        throw new IllegalStateException(
+            "定时任务 id 冲突: "
+                + taskId
+                + "（Profile "
+                + previous.profile().name()
+                + " 与 "
+                + profile.name()
+                + "）");
       }
+      // ⑦b：非法 zone/cron 在触发构造处启动报错（008 口径），先于登记
+      CronTrigger trigger =
+          sc.zone() == null || sc.zone().isBlank()
+              ? new CronTrigger(sc.cron()) // zone 缺省按系统时区（Profile javadoc）
+              : new CronTrigger(sc.cron(), validatedZone(profile.name(), sc.zone()));
+      store.register(toView(profile, sc), nextRunAfter(sc.cron(), sc.zone(), Instant.now()));
+      ScheduledFuture<?> future = taskScheduler.schedule(() -> runOnce(profile, sc), trigger);
+      if (future != null) { // 真实调度器恒非空；mock 返回 null 时跳过登记（⑦c 句柄只对真实注册有意义）
+        scheduledTasks.put(taskId, future);
+      }
+      registrations.put(taskId, new Registration(profile, sc));
     }
   }
 
@@ -165,7 +177,7 @@ public class AgentScheduler {
       success = false;
       errorMessage = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
       // 两行日志满足 FindSecBugs CRLF 门禁——带变量的用 (String, Object) 形式（值已 sanitize），
-      // 异常栈用常量 + Throwable 双参（ProfileLoader 先例；用户可控值不入带 Throwable 的三参重载）
+      // 异常栈用常量 + Throwable 双参（AgentLoader 先例；用户可控值不入带 Throwable 的三参重载）
       LOG.error("定时任务执行失败: {}", sanitize(taskId));
       LOG.error("定时任务执行失败详情", e);
     } finally {

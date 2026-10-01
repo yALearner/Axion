@@ -8,12 +8,14 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -26,8 +28,9 @@ class WhitelistSandboxTest {
 
   private WhitelistSandbox shellOnly(String... commands) {
     return new WhitelistSandbox(
+        Path.of("."),
         new FileSandboxProperties(List.of()),
-        new ShellSandboxProperties(List.of(commands)),
+        new ShellSandboxProperties(List.of(commands), List.of()),
         new HttpSandboxProperties(List.of()));
   }
 
@@ -94,8 +97,9 @@ class WhitelistSandboxTest {
     // 白名单只有 /workspace，构造 .. 序列爬到白名单之外
     WhitelistSandbox sandbox =
         new WhitelistSandbox(
+            Path.of("."),
             new FileSandboxProperties(List.of("/workspace")),
-            new ShellSandboxProperties(List.of()),
+            new ShellSandboxProperties(List.of(), List.of()),
             new HttpSandboxProperties(List.of()));
     assertThatThrownBy(
             () ->
@@ -111,8 +115,9 @@ class WhitelistSandboxTest {
     // 白名单：*.example.com
     WhitelistSandbox sandbox =
         new WhitelistSandbox(
+            Path.of("."),
             new FileSandboxProperties(List.of()),
-            new ShellSandboxProperties(List.of()),
+            new ShellSandboxProperties(List.of(), List.of()),
             new HttpSandboxProperties(List.of("*.example.com")));
     assertThatCode(
             () ->
@@ -133,8 +138,9 @@ class WhitelistSandboxTest {
 
   private WhitelistSandbox filesOnly(String... roots) {
     return new WhitelistSandbox(
+        Path.of("."),
         new FileSandboxProperties(List.of(roots)),
-        new ShellSandboxProperties(List.of()),
+        new ShellSandboxProperties(List.of(), List.of()),
         new HttpSandboxProperties(List.of()));
   }
 
@@ -195,8 +201,9 @@ class WhitelistSandboxTest {
 
   private WhitelistSandbox httpOnly(String... domains) {
     return new WhitelistSandbox(
+        Path.of("."),
         new FileSandboxProperties(List.of()),
-        new ShellSandboxProperties(List.of()),
+        new ShellSandboxProperties(List.of(), List.of()),
         new HttpSandboxProperties(List.of(domains)));
   }
 
@@ -249,8 +256,9 @@ class WhitelistSandboxTest {
   void emptyConfigRejectsAll() {
     WhitelistSandbox sandbox =
         new WhitelistSandbox(
+            Path.of("."),
             new FileSandboxProperties(List.of()),
-            new ShellSandboxProperties(List.of()),
+            new ShellSandboxProperties(List.of(), List.of()),
             new HttpSandboxProperties(List.of()));
 
     assertThatThrownBy(() -> sandbox.enforce(new SandboxAction(ActionType.FILE_READ, "/x")))
@@ -271,8 +279,9 @@ class WhitelistSandboxTest {
     logger.addAppender(appender);
     try {
       new WhitelistSandbox(
+          Path.of("."),
           new FileSandboxProperties(List.of()),
-          new ShellSandboxProperties(List.of()),
+          new ShellSandboxProperties(List.of(), List.of()),
           new HttpSandboxProperties(List.of()));
     } finally {
       logger.detachAppender(appender);
@@ -301,8 +310,9 @@ class WhitelistSandboxTest {
   void allFourActionTypesRouted() {
     WhitelistSandbox sandbox =
         new WhitelistSandbox(
+            Path.of("."),
             new FileSandboxProperties(List.of("/workspace")),
-            new ShellSandboxProperties(List.of("ls")),
+            new ShellSandboxProperties(List.of("ls"), List.of()),
             new HttpSandboxProperties(List.of("wttr.in")));
 
     // FILE_READ 与 FILE_WRITE 同路由：两者都经 checkFilePath 前缀匹配
@@ -320,5 +330,64 @@ class WhitelistSandboxTest {
     assertThatCode(
             () -> sandbox.enforce(new SandboxAction(ActionType.HTTP_REQUEST, "https://wttr.in/x")))
         .doesNotThrowAnyException();
+  }
+
+  // ---- 011-plugin-agent（FR-5，③ 拍板）：解释器双白名单与子集 WARN ----
+
+  @Test
+  @DisplayName("双白名单：解释器命令须首 token 同时命中 allowed_commands 与 allowed_interpreters（只命中其一不按 L3 处理）")
+  void interpreterRequiresBothWhitelists(@TempDir Path workspace) throws Exception {
+    Path agentsRoot = Files.createDirectories(workspace.resolve("agents"));
+    Path agentDir = Files.createDirectories(agentsRoot.resolve("ops-agent"));
+    Files.writeString(agentDir.resolve("AGENT.md"), "---\nname: ops-agent\n---\n");
+
+    // 只命中 commands（不在 interpreters）：非解释器语义——首 token 白名单即全部校验，不要求 Agent 上下文
+    WhitelistSandbox commandOnly =
+        new WhitelistSandbox(
+            workspace,
+            new FileSandboxProperties(List.of()),
+            new ShellSandboxProperties(List.of("python"), List.of()),
+            new HttpSandboxProperties(List.of()));
+    assertThatCode(
+            () ->
+                commandOnly.enforce(
+                    new SandboxAction(ActionType.SHELL_COMMAND, "python /etc/x.py")))
+        .doesNotThrowAnyException();
+
+    // 双命中：L3 校验生效——无 Agent 上下文一律拒绝（⑥ fail-closed）
+    WhitelistSandbox both =
+        new WhitelistSandbox(
+            workspace,
+            new FileSandboxProperties(List.of()),
+            new ShellSandboxProperties(List.of("python"), List.of("python")),
+            new HttpSandboxProperties(List.of()));
+    assertThatThrownBy(
+            () -> both.enforce(new SandboxAction(ActionType.SHELL_COMMAND, "python scripts/x.py")))
+        .isInstanceOf(SandboxViolationException.class)
+        .hasMessageContaining("Agent 上下文");
+  }
+
+  @Test
+  @DisplayName("③ 拍板子集 WARN：allowed_interpreters 含未进 allowed_commands 的项 → 构造期 WARN（消息只含配置键名）")
+  void interpreterSubsetViolationWarns() {
+    Logger logger = (Logger) LoggerFactory.getLogger(WhitelistSandbox.class);
+    ListAppender<ILoggingEvent> appender = new ListAppender<>();
+    appender.start();
+    logger.addAppender(appender);
+    try {
+      new WhitelistSandbox(
+          Path.of("."),
+          new FileSandboxProperties(List.of()),
+          new ShellSandboxProperties(List.of("ls"), List.of("python")),
+          new HttpSandboxProperties(List.of()));
+    } finally {
+      logger.detachAppender(appender);
+    }
+    assertThat(appender.list)
+        .anyMatch(
+            event ->
+                event.getLevel() == Level.WARN
+                    && event.getFormattedMessage().contains("allowed_interpreters")
+                    && event.getFormattedMessage().contains("allowed_commands"));
   }
 }

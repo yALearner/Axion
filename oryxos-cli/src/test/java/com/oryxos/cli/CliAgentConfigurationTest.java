@@ -22,6 +22,7 @@ import com.oryxos.storage.SessionRepository;
 import com.oryxos.storage.TaskExecutionRepository;
 import com.oryxos.storage.ToolInvocationRepository;
 import com.oryxos.tool.ToolRegistry;
+import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -119,7 +120,12 @@ class CliAgentConfigurationTest {
 
   @Test
   @DisplayName("MemoryService 注入 PromptBuilder：build 后 system 含长期记忆段")
-  void memoryServiceInjectedIntoPromptBuilder() {
+  void memoryServiceInjectedIntoPromptBuilder() throws Exception {
+    // 011 改造点适配：ContextLoader 现注入 AGENT.md 正文（FR-2）——fixture 建 .oryxos/agents/ops-agent
+    // （frontmatter-only 且无尾换行：正文为空；load 在 build 时现读，故在 runner.run 之前建）
+    java.nio.file.Path agentDir =
+        java.nio.file.Files.createDirectories(Path.of(".oryxos", "agents", "ops-agent"));
+    java.nio.file.Files.writeString(agentDir.resolve("AGENT.md"), "---\nname: ops-agent\n---");
     runner.run(
         context -> {
           Session session =

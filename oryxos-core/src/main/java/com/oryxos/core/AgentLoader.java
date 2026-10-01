@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,20 +19,99 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 
 /**
- * Profile 派生与加载（基础版）。
+ * Agent 目录解析与 Profile 派生（003 交付物 ProfileLoader 更名 + 011-plugin-agent 扩职责，修订说明 ④）。
  *
- * <p>扫 {@code .oryxos/agents/} 下各子目录，把每个 {@code AGENT.md} 的 frontmatter 派生成 {@link
- * Profile}。本节的校验范围只有一条：{@code provider.name} 必须命中 全局层 {@code oryxos.providers} 声明；其余字段的校验规则归后续各节补充。
- * 校验失败的 Agent 不阻断启动（记错误日志、跳过注册）。
+ * <p>一个目录 = 一个 Agent（宪法 IV）：扫 {@code .oryxos/agents/} 下各子目录，把每个 {@code AGENT.md} 拆成
+ * frontmatter（运行配置）与正文（任务指令）——拆分与派生**同一解析器**（坑一：两套解析各拆各的会 frontmatter/正文错位）； 认出 {@code
+ * scripts/}、{@code skills/}、{@code REFERENCE.md} 资源所在；{@code deriveProfile} 把 frontmatter 派生成底座认识的
+ * {@link Profile}（正文不进 Profile 值对象——由 {@link ContextLoader} 每轮现读，修订说明 ⑤）。
+ *
+ * <p>校验范围（失败报错点名文件与键，坑二）：缺 {@code name}/{@code provider}、provider 引用全局层不存在（001 口径）、 {@code name}
+ * 与目录名不一致（坑八：唯一标识 = 目录名，不校验则注册成功、首次触发才炸的晚失败）、schedules 缺 id （010 ⑦c）。校验失败的 Agent
+ * 不阻断启动（记错误日志、跳过注册，003 口径）。
  */
-public final class ProfileLoader {
+public final class AgentLoader {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ProfileLoader.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AgentLoader.class);
 
   private static final String AGENT_FILE = "AGENT.md";
 
+  /** AGENT.md 拆分结果：frontmatter（YAML 映射）+ 正文（frontmatter 之后原样文本，不做二次加工——坑一）。 */
+  public record FrontMatterAndBody(Map<String, Object> frontmatter, String body) {
+
+    public FrontMatterAndBody {
+      frontmatter = new LinkedHashMap<>(frontmatter); // 防御性拷贝：不保留外部可变 Map 引用（Profile 先例）
+    }
+
+    @Override
+    public Map<String, Object> frontmatter() {
+      return Collections.unmodifiableMap(frontmatter); // 不暴露可变集合的内部表示（Profile 先例）
+    }
+  }
+
   /**
-   * 从单个 Agent 目录派生 Profile。校验失败抛 {@link IllegalArgumentException}（信息清晰）。
+   * 拆 AGENT.md 内容：frontmatter（首个 --- 分隔的 YAML 头，YAML 映射）+ 正文（原样文本）。
+   *
+   * @throws IllegalArgumentException frontmatter 缺失/未闭合/非 YAML 映射时点名文件（003 口径）
+   */
+  public static FrontMatterAndBody split(String content, Path agentFile) {
+    int start = content.indexOf("---");
+    if (start < 0) {
+      throw new IllegalArgumentException("AGENT.md 缺少 frontmatter（--- 分隔的 YAML 头）: " + agentFile);
+    }
+    int end = content.indexOf("---", start + 3);
+    if (end < 0) {
+      throw new IllegalArgumentException("AGENT.md frontmatter 未闭合: " + agentFile);
+    }
+    String yamlText = content.substring(start + 3, end);
+    Object loaded = new Yaml(new LoaderOptions()).load(yamlText);
+    if (loaded == null) {
+      return new FrontMatterAndBody(Map.of(), content.substring(end + 3));
+    }
+    if (!(loaded instanceof Map<?, ?> rawMap)) {
+      throw new IllegalArgumentException("AGENT.md frontmatter 不是合法 YAML 映射: " + agentFile);
+    }
+    @SuppressWarnings("unchecked")
+    Map<String, Object> map = (Map<String, Object>) rawMap;
+    return new FrontMatterAndBody(map, content.substring(end + 3));
+  }
+
+  /**
+   * 现读并返回 Agent 正文（去 frontmatter）——ContextLoader 每轮调用，无缓存（坑三：缓存正文则"改完即时生效"破产）。
+   *
+   * @throws IllegalArgumentException 缺 AGENT.md 时点名路径
+   */
+  public String loadBody(Path agentDir) {
+    Path agentFile = agentDir.resolve(AGENT_FILE);
+    if (!Files.isRegularFile(agentFile)) {
+      throw new IllegalArgumentException("Agent 目录缺少 " + AGENT_FILE + ": " + agentDir);
+    }
+    String content;
+    try {
+      content = Files.readString(agentFile, StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new IllegalArgumentException("读取 AGENT.md 失败: " + agentFile, e);
+    }
+    return split(content, agentFile).body();
+  }
+
+  /** 认出资源：{@code scripts/}、{@code skills/} 目录与 {@code REFERENCE.md} 文件中存在的集合。 */
+  public Set<String> detectResources(Path agentDir) {
+    Set<String> resources = new LinkedHashSet<>();
+    if (Files.isDirectory(agentDir.resolve("scripts"))) {
+      resources.add("scripts");
+    }
+    if (Files.isDirectory(agentDir.resolve("skills"))) {
+      resources.add("skills");
+    }
+    if (Files.isRegularFile(agentDir.resolve("REFERENCE.md"))) {
+      resources.add("REFERENCE.md");
+    }
+    return Collections.unmodifiableSet(resources);
+  }
+
+  /**
+   * 从单个 Agent 目录派生 Profile。校验失败抛 {@link IllegalArgumentException}（信息清晰、点名文件与键）。
    *
    * @param agentDir Agent 目录（含 AGENT.md）
    * @param providerNames 全局层声明的 Provider 名集合
@@ -41,13 +121,27 @@ public final class ProfileLoader {
     if (!Files.isRegularFile(agentFile)) {
       throw new IllegalArgumentException("Agent 目录缺少 " + AGENT_FILE + ": " + agentDir);
     }
-    Map<String, Object> fm = parseFrontmatter(agentFile);
+    String content;
+    try {
+      content = Files.readString(agentFile, StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new IllegalArgumentException("读取 AGENT.md 失败: " + agentFile, e);
+    }
+    Map<String, Object> fm = split(content, agentFile).frontmatter();
 
     String name =
         stringValue(fm, "name")
             .orElseThrow(
                 () ->
                     new IllegalArgumentException("AGENT.md frontmatter 缺少必填项 name: " + agentFile));
+    Path fileName =
+        agentDir.getFileName(); // 单次取值：SpotBugs NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE 契约——二次调用判空无效
+    String dirName = fileName == null ? "" : fileName.toString();
+    // 坑八：唯一标识 = 目录名——不校验则注册成功、ContextLoader 按 profile.name 找错目录、首次触发才炸的晚失败
+    if (!name.equals(dirName)) {
+      throw new IllegalArgumentException(
+          "Agent 目录名与 frontmatter name 不一致: 目录 " + dirName + " / frontmatter " + name);
+    }
     String description = stringValue(fm, "description").orElse(null);
 
     Map<?, ?> identity = mapValue(fm, "identity").orElse(Map.of());
@@ -123,34 +217,6 @@ public final class ProfileLoader {
       LOG.error("扫描 agents 目录失败", e);
     }
     return result;
-  }
-
-  /** 解析 AGENT.md 的 frontmatter（首个 --- 分隔的 YAML 头）。 */
-  private Map<String, Object> parseFrontmatter(Path agentFile) {
-    try {
-      String content = Files.readString(agentFile, StandardCharsets.UTF_8);
-      int start = content.indexOf("---");
-      if (start < 0) {
-        throw new IllegalArgumentException("AGENT.md 缺少 frontmatter（--- 分隔的 YAML 头）: " + agentFile);
-      }
-      int end = content.indexOf("---", start + 3);
-      if (end < 0) {
-        throw new IllegalArgumentException("AGENT.md frontmatter 未闭合: " + agentFile);
-      }
-      String yamlText = content.substring(start + 3, end);
-      Object loaded = new Yaml(new LoaderOptions()).load(yamlText);
-      if (loaded == null) {
-        return Map.of();
-      }
-      if (!(loaded instanceof Map<?, ?> rawMap)) {
-        throw new IllegalArgumentException("AGENT.md frontmatter 不是合法 YAML 映射: " + agentFile);
-      }
-      @SuppressWarnings("unchecked")
-      Map<String, Object> map = (Map<String, Object>) rawMap;
-      return map;
-    } catch (IOException e) {
-      throw new IllegalArgumentException("读取 AGENT.md 失败: " + agentFile, e);
-    }
   }
 
   private Optional<String> stringValue(Map<?, ?> map, String key) {

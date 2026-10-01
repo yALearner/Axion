@@ -2,13 +2,13 @@ package com.oryxos.cli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oryxos.channel.cli.CliChannel;
+import com.oryxos.core.AgentLoader;
 import com.oryxos.core.AgentScheduler;
 import com.oryxos.core.AgentService;
 import com.oryxos.core.ContextLoader;
 import com.oryxos.core.LongTermMemoryStore;
 import com.oryxos.core.MemoryService;
 import com.oryxos.core.Profile;
-import com.oryxos.core.ProfileLoader;
 import com.oryxos.core.ProfileRegistry;
 import com.oryxos.core.PromptBuilder;
 import com.oryxos.core.ReActLoop;
@@ -103,7 +103,7 @@ public class CliAgentConfiguration {
       return registry; // 空表：chat 时"Profile 未注册"清晰报错，不静默
     }
     Set<String> providerNames = providerNamesOf(environment);
-    Map<String, Profile> profiles = new ProfileLoader().loadAll(agentsRoot, providerNames);
+    Map<String, Profile> profiles = new AgentLoader().loadAll(agentsRoot, providerNames);
     profiles.values().forEach(registry::register);
     return registry;
   }
@@ -128,7 +128,8 @@ public class CliAgentConfiguration {
       FileSandboxProperties fileProps,
       ShellSandboxProperties shellProps,
       HttpSandboxProperties httpProps) {
-    return new WhitelistSandbox(fileProps, shellProps, httpProps);
+    // 011 FR-5/FR-6：workspaceRoot 供 FILE_READ 动态根（当前 Agent 目录）与解释器命令 scripts/ 限定派生
+    return new WhitelistSandbox(Path.of(".oryxos"), fileProps, shellProps, httpProps);
   }
 
   /**
@@ -234,13 +235,17 @@ public class CliAgentConfiguration {
       RestClient restClient,
       NotifyTools notifyTools,
       MemoryService memoryService,
+      ShellSandboxProperties shellProps,
       ObjectProvider<MethodToolCallbackProvider> methodProvider,
       ObjectMapper objectMapper) {
     ToolRegistry registry = new ToolRegistry();
     registry.register(new ReadFileTool(sandbox));
     registry.register(new WriteFileTool(sandbox));
     registry.register(new ListDirTool(sandbox));
-    registry.register(new ShellTools(sandbox, 30_000));
+    // 011 FR-5：解释器集合 + workspaceRoot 注入（坑六：解释器命令 cwd = 当前 Agent 目录）
+    registry.register(
+        new ShellTools(
+            sandbox, 30_000, Set.copyOf(shellProps.allowedInterpreters()), Path.of(".oryxos")));
     registry.register(new HttpGetTool(sandbox, restClient));
     registry.register(new HttpPostTool(sandbox, restClient));
     registry.register(notifyTools);

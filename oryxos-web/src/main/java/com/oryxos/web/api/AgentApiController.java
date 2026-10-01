@@ -37,6 +37,10 @@ public class AgentApiController {
   private final SessionManager sessionManager;
   private final ProfileRegistry profileRegistry;
 
+  @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+      value = "EI_EXPOSE_REP2",
+      justification =
+          "AgentService/SessionManager/ProfileRegistry 为装配处注入的单例（只读使用、不暴露引用）——AgentScheduler 同款先例")
   public AgentApiController(
       AgentService agentService, SessionManager sessionManager, ProfileRegistry profileRegistry) {
     this.agentService = agentService;

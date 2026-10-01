@@ -12,7 +12,9 @@ import com.oryxos.tool.builtin.ReadFileTool;
 import com.oryxos.tool.builtin.ShellTools;
 import com.oryxos.tool.builtin.WriteFileTool;
 import com.oryxos.tool.notify.NotifyChannelRegistry;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,7 +44,7 @@ class OryxToolContractTest {
     registry.register(new ReadFileTool(sandbox));
     registry.register(new WriteFileTool(sandbox));
     registry.register(new ListDirTool(sandbox));
-    registry.register(new ShellTools(sandbox, 30_000));
+    registry.register(new ShellTools(sandbox, 30_000, Set.of(), Path.of(".")));
     registry.register(new HttpGetTool(sandbox, restClient));
     registry.register(new HttpPostTool(sandbox, restClient));
     registry.register(

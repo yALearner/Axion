@@ -134,8 +134,9 @@ class FileToolsTest {
   void whitelistSandboxBlocksWriteOutsideRoot(@TempDir Path tmp) {
     WhitelistSandbox sandbox =
         new WhitelistSandbox(
+            Path.of("."),
             new FileSandboxProperties(List.of("/workspace")),
-            new ShellSandboxProperties(List.of()),
+            new ShellSandboxProperties(List.of(), List.of()),
             new HttpSandboxProperties(List.of()));
     WriteFileTool tool = new WriteFileTool(sandbox);
     Path file = tmp.resolve("blocked.txt"); // @TempDir 路径在白名单外
