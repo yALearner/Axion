@@ -17,7 +17,7 @@ feature.json 指针: specs/005-tool/（切换前: specs/004-notify）
 WARNING 记录: （累计 0/3）
 
 人工验收待办（机器已判卷之外的部分，跑法见 quickstart.md 人工验证）:
-- [x] `oryxos tool list` 可见全部注册工具（2026-09-05 用户 PowerShell 实跑：7 工具中文描述正常）
+- [x] `axion tool list` 可见全部注册工具（2026-09-05 用户 PowerShell 实跑：7 工具中文描述正常）
 - [x] 方式三真跑（2026-09-05）：临时 @Tool 示例 Bean → `tool list` 出现 `echo_tool` → 按方法论删除。H3 实测记录：spring-ai-autoconfigure-model-tool 1.1.8 只注册 ToolCallingManager、不自动扫描 @Tool beans 成 Provider（Provider 仅接受显式 toolObjects）→ 方式三扫描以**显式装配**落地（CliAgentConfiguration 扫描 bean 类型收集 @Tool beans 构建 Provider，FR-6 契约内形态）；包装链路另有 AnnotatedMethodToolAdapterTest 3/3 覆盖
 - [x] 004 遗留补验（2026-09-05）：企业微信群收到「005 工具体系验证消息」；日志铁证完整 ReAct 闭环（第 1 轮含工具请求=true → notify 执行 success=true 370ms → 第 2 轮生成最终回复）——"LLM 对话内自动调 notify"端到端闭环
 - [x] Demo 一对话版补跑（2026-09-05）：weather profile 真调 http_get 多轮（第 1 轮失败 3041ms → 模型重试 4 轮成功 → 最终回复含西安真实天气数据与穿搭建议）——ReAct 失败重试闭环实拍。模型行为记录：前两次 prompt 下 DeepSeek 拒绝调工具（"无法联网"措辞），prompt 强化（声明工具能力 + wttr.in 示例 + 禁止猜测）后开始调用——属模型行为差异非代码缺陷

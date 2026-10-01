@@ -1,0 +1,110 @@
+/* axion-admin-ui skill 设计 token——值取自 website/.vitepress/theme/custom.css，照抄勿改 */
+:root {
+  --bg: #000000;
+  --card: #111111;
+  --hover: #1a1a1a;
+  --border: #222222;
+  --primary: #f97316;
+  --primary-hover: #ea6a00;
+  --primary-dark: #c2550a;
+  --text: #f5f5f5;
+  --text-secondary: #a3a3a3;
+  --text-weak: #666666;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, 'Segoe UI', sans-serif;
+}
+
+h2 {
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+code {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--primary);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+}
+
+.placeholder {
+  color: var(--text-weak);
+  padding: 32px 0;
+  text-align: center;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-dot.ok {
+  background: #22c55e;
+}
+
+.status-dot.err {
+  background: #ef4444;
+}
+
+.status-dot.warn {
+  background: #f97316;
+}
+
+.retry-btn {
+  margin-top: 12px;
+  padding: 6px 14px;
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.retry-btn:hover {
+  background: var(--primary-hover);
+  color: #000000;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 64px;
+  }
+  .brand span,
+  .nav-item {
+    font-size: 0;
+  }
+}

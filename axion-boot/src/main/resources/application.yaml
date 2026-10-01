@@ -1,0 +1,130 @@
+# ============================================================
+# Axion — Agent OS 统一底座
+# ============================================================
+# 核心阶段最小配置。Provider API key 等敏感配置通过环境变量注入。
+
+spring:
+  application:
+    name: axion
+  threads:
+    virtual:
+      enabled: true
+
+  # 宪法 II：禁用 Spring AI 的 eager 模型自动装配。deepseek 走 spring-ai-openai starter，OpenAi*AutoConfiguration
+  # 会急切实例化 ChatModel 并索要 spring.ai.openai.api-key——Axion 不用这些自动 Bean（Provider 由
+  # ProviderChatModelFactory 按宪法 III 显式构造）；不排除则 serve 逼运营方配两个 key、卡死 31 节干净部署。
+  # H3 核实（009）：spring-ai 1.1.8 的类名是 org.springframework.ai.model.openai.autoconfigure.*
+  # （课件旧写法 org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration 已过时）。
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiChatAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration
+      - com.alibaba.cloud.ai.autoconfigure.dashscope.DashScopeAutoConfiguration
+
+  # SQLite 数据源
+  datasource:
+    url: jdbc:sqlite:.axion/axion.db
+    driver-class-name: org.sqlite.JDBC
+
+  # JPA（SQLite 下禁用自动 DDL，手动维护建表脚本）
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+  # 手工建表脚本接线（003-cli：001 review 留白的"建表脚本无人自动执行"在本课到期）——
+  # SQLite 不被 Spring Boot 视为 embedded 数据库，mode 必须显式 always；
+  # schema.sql 全部 CREATE TABLE IF NOT EXISTS（幂等，每次启动执行安全）
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+  # Spring AI — 核心阶段通过环境变量注入真实 API key
+  ai:
+    openai:
+      api-key: unused
+      chat:
+        enabled: false
+
+# 全局层 Provider 声明（核心能力一）：这个实例接了哪些模型服务——"连不连得上"。
+# Agent 层在 AGENT.md frontmatter 的 provider.name 里引用这里的 name（"怎么用"）。
+# 凭证只允许 ${ENV_VAR} 占位；缺失或非法时启动校验报错，不静默失败。
+axion:
+  providers:
+    - name: deepseek
+      api-key: ${DEEPSEEK_API_KEY}
+      base-url: https://api.deepseek.com
+    - name: kimi
+      api-key: ${KIMI_API_KEY}
+      base-url: https://api.moonshot.cn/v1
+
+  # Memory 后端切换（006-memory FR-6）：markdown（缺省）/ sqlite / mem0——一行换档，上层零改动。
+  # 非法值启动校验明确报错不静默；后端故障快速失败不静默空记忆、不自动降级换档。
+  # mem0 档凭证与地址走环境变量占位（自托管实例，数据不出域；自托管应 HTTPS）：
+  #   MEM0_BASE_URL=http://自托管地址
+  #   MEM0_API_KEY=${MEM0_API_KEY}
+  memory:
+    backend: markdown
+
+# Sandbox 三层白名单（007-sandbox FR-2）——核心阶段唯一实现 WhitelistSandbox 的配置源。
+# 空 = 什么都不允许（fail-closed，不是"不校验"）；任一为空启动打 WARN 诊断。
+# 相对根按启动目录解析（构造期 toAbsolutePath）；配置构造期拷贝、不可热更新——改后须重启。
+# 诚实标注：应用层白名单是劝阻级防线——防模型犯傻误操作、防不住蓄意攻击（软链/DNS rebinding 等不覆盖）。
+# 010 FR-7 Demo 前置：http 白名单「加」三样域名（保留 007 既有条目——存量 weather Agent 的 prompt 写死 wttr.in）：
+# ① 天气源 api.open-meteo.com ② 团队通知 webhook 域名（按实际渠道选一：飞书 *.feishu.cn / 企业微信 qyapi.weixin.qq.com）
+# ③ 新闻源域名按需。
+# 011 FR-5/FR-8（⑨：010 FR-7"file/shell 保持原状"结论到期——29 节 Demo 要跑 python 脚本）：
+# allowed_commands 增补解释器 python/bash；新键 allowed_interpreters（③ 拍板：解释器集合，须为 allowed_commands 子集——
+# 首 token 双白名单命中才按 L3 脚本校验处理（简单形态 + 限本 Agent scripts/ 目录 + cwd=Agent 目录）；
+# 声明了但不在 allowed_commands 的项构造期 WARN 永不命中）。file.allowed_paths 静态条目不变——
+# Agent 自有资源读取走 FILE_READ 动态白名单（当前 Agent 目录，运行时生效，非配置键）。
+file:
+  allowed_paths:
+    - .axion/workspace
+    - /data/reports
+shell:
+  allowed_commands:
+    - ls
+    - cat
+    - python
+    - bash
+  allowed_interpreters:
+    - python
+    - bash
+http:
+  allowed_domains:
+    - wttr.in
+    - api.example.com
+    - api.open-meteo.com
+    - "*.feishu.cn"
+    # - qyapi.weixin.qq.com   # 企业微信渠道时启用
+    # - news.example.com      # 新闻源域名按需启用
+
+# 日志
+logging:
+  level:
+    com.axion: INFO
+
+# 监控（Actuator + Prometheus）
+# Web Service（009-web-service FR-3）：HTTP 服务端口
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: axion

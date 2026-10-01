@@ -29,7 +29,7 @@
   <rect x="20" y="140" width="10" height="78" rx="4" fill="#f59e0b"/>
   <text x="45" y="183" font-size="13" font-weight="bold" fill="#b45309">方式二</text>
   <text x="110" y="163" font-size="12" font-weight="bold" fill="#b45309">轻代码 自写 MCP Server</text>
-  <text x="110" y="181" font-size="9" fill="#92400e">业务方用任意语言写 MCP server，配置在 mcp_servers.yaml — OryxOS 作为 MCP Client 启动时连接</text>
+  <text x="110" y="181" font-size="9" fill="#92400e">业务方用任意语言写 MCP server，配置在 mcp_servers.yaml — Axion 作为 MCP Client 启动时连接</text>
   <text x="110" y="200" font-size="8" fill="#b45309">JSON-RPC over stdio — tools/list 拿工具列表，tools/call 执行调用</text>
   <text x="110" y="216" font-size="7" fill="#fcd34d">适合接入企业自有系统 (ERP / CRM) · 任何语言皆可 · 安全隔离在独立进程</text>
 
@@ -40,7 +40,7 @@
   <text x="110" y="251" font-size="12" font-weight="bold" fill="#1d4ed8">重代码 Java @Tool 注解</text>
   <text x="110" y="269" font-size="9" fill="#1e40af">Java Spring Bean + @Tool 注解 → 自动注册到 ToolRegistry，进程内直接调用</text>
   <text x="110" y="288" font-size="8" fill="#3b82f6">性能最好 (不走序列化、不起独立进程) · 适合深度集成企业 Java 服务</text>
-  <text x="110" y="304" font-size="7" fill="#93c5fd">走 Spring AI @Tool → JSON Schema 生成 → OryxTool 包装 → ToolRegistry</text>
+  <text x="110" y="304" font-size="7" fill="#93c5fd">走 Spring AI @Tool → JSON Schema 生成 → AxionTool 包装 → ToolRegistry</text>
 
   <!-- Bottom -->
   <text x="410" y="326" font-size="8" fill="#94a3b8">三种方式均在 ToolRegistry 统一管理 · 均走 Sandbox 白名单校验 · 均写入 tool_invocations 审计</text>

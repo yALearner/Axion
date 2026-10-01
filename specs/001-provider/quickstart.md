@@ -29,17 +29,17 @@ mvn clean verify     # 全绿（含静态检查门禁）才算实现完成
 ## 集成冒烟（手动，验真连通）
 
 ```bash
-# bash: DEEPSEEK_API_KEY=xxx mvn -pl oryxos-provider -am test -Dtest.groups=integration -Dtest.excludedGroups=
+# bash: DEEPSEEK_API_KEY=xxx mvn -pl axion-provider -am test -Dtest.groups=integration -Dtest.excludedGroups=
 # PowerShell（逐行执行）:
 #   $env:DEEPSEEK_API_KEY = "xxx"
-#   mvn -pl oryxos-provider -am test "-Dtest.groups=integration" "-Dtest.excludedGroups="
+#   mvn -pl axion-provider -am test "-Dtest.groups=integration" "-Dtest.excludedGroups="
 ```
 
 预期：`ProviderSmokeIT` 真调一次模型，拿到非空响应，且 `llm_calls` 新增一条 `success=true` 记录。
 
 ## 人工核对
 
-1. 打开 `.oryxos/oryxos.db` 核对 `llm_calls`：provider/model/token 与 API 实际返回一致
+1. 打开 `.axion/axion.db` 核对 `llm_calls`：provider/model/token 与 API 实际返回一致
 2. `grep -r "sk-"`（或所用 key 前缀）在代码与配置中无明文命中
 3. 显式映射实现 review：无扫描容器 `ChatModel` 集合的代码路径
 4. 需求文档 §13 要求两家真实跑通——无 KIMI key 时先跑通 DeepSeek 并记录待办

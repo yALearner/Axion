@@ -21,7 +21,7 @@
 
 ## 行为不变量
 
-1. **轻重分流**：轻命令零 Spring 启动（无 Spring 日志）；重命令统一以 `OryxOsApplication` 启动（坑九：JPA 扫描根已显式声明，Found N > 0）
+1. **轻重分流**：轻命令零 Spring 启动（无 Spring 日志）；重命令统一以 `AxionApplication` 启动（坑九：JPA 扫描根已显式声明，Found N > 0）
 2. **三元组纪律**：CLI 只提供三元组 (channel="cli", user=本机用户名, profileName)，session_id 拼接只在 SessionManager 一处——任何命令不得自行拼字符串（H4 不变量四）
 3. **chat 薄壳**：读输入 → `AgentService.process(session, line)` → 打印；唯一自判断逻辑是 `/quit`；`--message` 单条处理后退
 4. **api-key 零泄漏**：所有查询输出不含凭证（provider list 只打 name/model/base-url）

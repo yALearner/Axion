@@ -1,6 +1,6 @@
 # Spec-Kit 流程编排 Skill 分析方案
 
-> 目标：把 6 步 Spec-Kit 流程（specify → clarify → plan → tasks → analyze → implement）沉淀为一个可传参的 Skill，执行时附上需求文档编号即可跑完全流程，且全程遵守 OryxOS 宪法与项目原则。
+> 目标：把 6 步 Spec-Kit 流程（specify → clarify → plan → tasks → analyze → implement）沉淀为一个可传参的 Skill，执行时附上需求文档编号即可跑完全流程，且全程遵守 Axion 宪法与项目原则。
 >
 > 状态：已定稿（§10 决策已拍板；2026-08-30 追加 §4.1 判断权 / §4.2 停止清单，commit 决策修订为全程不自动同步） | 关联文档：`docs/AiProgrammingGuide.md`、`.specify/memory/constitution.md`（v1.0.0）、`CLAUDE.md`
 
@@ -31,7 +31,7 @@
 ### 2.1 命令形态
 
 ```
-/oryx-spec <编号> [--from <stage>] [--dry-run]
+/axion-spec <编号> [--from <stage>] [--dry-run]
 ```
 
 - `编号`：需求文档编号（解析规则见 2.2）
@@ -42,9 +42,9 @@
 
 | 优先级 | 输入形态 | 解析 | 例子 |
 |-------|---------|------|------|
-| 1 | `NNN-slug` 且 `docs/requirements/NNN-slug.md` 存在 | 新需求文档 → 全程产物进 `specs/NNN-slug/` | `/oryx-spec 002-memory` |
-| 2 | `US-n`（n=1..5） | 映射到 `AiProgrammingGuide.md` §4.n 的 user story，需求源 = `DemandAnalysis.md` 对应能力章节 + 第 13 章验收 Demo；产物目录建议新 `specs/NNN-slug/`（需用户确认） | `/oryx-spec US-3` |
-| 3 | `NNN-slug` 且 `specs/NNN-slug/` 已存在但无需求文档 | 断点续跑模式（提示 `--from`） | `/oryx-spec 001-react-runtime --from analyze` |
+| 1 | `NNN-slug` 且 `docs/requirements/NNN-slug.md` 存在 | 新需求文档 → 全程产物进 `specs/NNN-slug/` | `/axion-spec 002-memory` |
+| 2 | `US-n`（n=1..5） | 映射到 `AiProgrammingGuide.md` §4.n 的 user story，需求源 = `DemandAnalysis.md` 对应能力章节 + 第 13 章验收 Demo；产物目录建议新 `specs/NNN-slug/`（需用户确认） | `/axion-spec US-3` |
+| 3 | `NNN-slug` 且 `specs/NNN-slug/` 已存在但无需求文档 | 断点续跑模式（提示 `--from`） | `/axion-spec 001-react-runtime --from analyze` |
 
 ### 2.3 需求文档编号规范（提案，需确认）
 
@@ -78,10 +78,10 @@ docs/requirements/
 ### 3.1 G2：plan 人工 review 清单（继承 `AiProgrammingGuide.md` §3.4，逐条核对）
 
 - [ ] Memory 没有被简化成跟 Session 合并（应为 `MemoryService` 三层统一门面）
-- [ ] Tool 没有被拆成多个模块（应为合并的 `oryxos-tool` 一个模块，宪法原则 IX）
+- [ ] Tool 没有被拆成多个模块（应为合并的 `axion-tool` 一个模块，宪法原则 IX）
 - [ ] `AgentLoader` / `AGENT.md` 没有被当成 Tool（Agent 目录归 core 的 `ContextLoader`）
 - [ ] 没有启用 Spring AI 自动 tool 执行（宪法原则 II，**最容易被写错的一条**）
-- [ ] plan 的模块结构 = 技术方案第 10 章的 9 个模块（新增 Channel/Tool 只加新模块，不改 `oryxos-core`）
+- [ ] plan 的模块结构 = 技术方案第 10 章的 9 个模块（新增 Channel/Tool 只加新模块，不改 `axion-core`）
 - [ ] 核心阶段不做清单被遵守（无认证/SSE/WebSocket/限流/RBAC 等扩展项混入）
 
 ### 3.2 G3：tasks 复核要点
@@ -150,7 +150,7 @@ docs/requirements/
 
 - **进度文件**：`specs/NNN-slug/flow-status.md`，记录每阶段状态（`pending / in_progress / done / failed`）+ 每阶段产物哈希/时间戳 + 门禁结果 + feature.json 切换前指针
 - **任务清单镜像**：编排器用 TaskCreate 建 6 个阶段任务，与进度文件互相印证
-- **恢复**：`/oryx-spec NNN-slug --from tasks` → 预检阶段读进度文件，校验前置产物存在且未变（哈希比对），从指定阶段续跑；产物被外部改动时警告并要求确认
+- **恢复**：`/axion-spec NNN-slug --from tasks` → 预检阶段读进度文件，校验前置产物存在且未变（哈希比对），从指定阶段续跑；产物被外部改动时警告并要求确认
 - **幂等**：speckit 各命令本身可重跑；重跑阶段产物覆盖前先备份旧文件为 `.bak`
 
 ---
@@ -158,7 +158,7 @@ docs/requirements/
 ## 6. Skill 本体结构（渐进式披露，与项目哲学一致）
 
 ```
-.claude/skills/oryx-spec/
+.claude/skills/axion-spec/
 ├── SKILL.md                        # 编排主逻辑：编号解析、阶段状态机、门禁触发、恢复
 │                                   #   正文只放"怎么走流程"，不放细则
 └── references/
@@ -199,7 +199,7 @@ docs/requirements/
 
 ## 9. 验收标准
 
-1. **全流程 dry-run**：`/oryx-spec 002-xxx --dry-run` 打印出 6 阶段计划 + 每阶段注入的宪法检查点，无文件产出
+1. **全流程 dry-run**：`/axion-spec 002-xxx --dry-run` 打印出 6 阶段计划 + 每阶段注入的宪法检查点，无文件产出
 2. **真跑**：拿一个新需求文档完整跑通，四件套（spec/plan/tasks/analyze 报告）质量对齐 `specs/001-react-runtime/`，且收尾 DoD 七项证据齐全（含 `mvn clean verify` 全绿与变更总结）
 3. **门禁有效**：人为注入违反原则 IX（Tool 拆模块）的 spec → G2 必须拦截；人为制造 spec/tasks 不一致 → G4 必须拦截
 4. **断点恢复**：在 tasks 阶段中断后，`--from tasks` 能无损续跑
@@ -213,6 +213,6 @@ docs/requirements/
 | # | 问题 | 决策 |
 |---|------|------|
 | 1 | 需求文档编号规范 | **`docs/requirements/NNN-slug.md`**（与 specs 目录对齐），US-n 作别名 |
-| 2 | skill 名称 | **`oryx-spec`** |
+| 2 | skill 名称 | **`axion-spec`** |
 | 3 | 门禁严格度 | **ERROR 阻断、WARNING 记录放行**（累计 3 个 WARNING 升级为 ERROR 提示人工） |
 | 4 | commit 粒度 | **全程不自动 commit / push / 运行 package.sh，同步时机由用户决定**（2026-08-30 修订，覆盖原"阶段+task 粒度"决策） |

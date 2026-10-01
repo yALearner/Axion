@@ -2,7 +2,7 @@
 
 > **跨节契约**：本节交付后，第 25 节（定时触发后的记忆读写）、第 31 节（Demo 二/三日报的记忆偏好）为消费方；Web Service 节如做记忆管理端点直接消费本契约与 memory_entries 表口径。**后续节不得改动已验收行为**；修改本契约视为修改公共接口，必须停下报告。
 
-## 接口形态（依赖倒置端口，落 oryxos-core）
+## 接口形态（依赖倒置端口，落 axion-core）
 
 ```java
 MemoryService.buildContext(Session session)          // 给 PromptBuilder：核心记忆 + 会话历史
@@ -37,7 +37,7 @@ MemoryScope = CORE | ARCHIVAL
 | SqliteMemoryStore | `sqlite` | memory_entries 表；LIMIT 截断；LIKE 检索 |
 | Mem0MemoryStore | `mem0` | 自托管 REST（add/get/search）；语义检索；数据不出域 |
 
-- 配置键 `oryxos.memory.backend`：非法值启动校验明确报错；装配处显式 @Bean 按值装配（宪法 III 哲学）
+- 配置键 `axion.memory.backend`：非法值启动校验明确报错；装配处显式 @Bean 按值装配（宪法 III 哲学）
 - 换档 = 一行配置，上层零改动（接口墙价值兑现）
 
 ## 演进

@@ -11,14 +11,14 @@
 
   <!-- Entry -->
   <rect x="30" y="52" width="250" height="36" rx="6" fill="#1e293b" filter="url(#sh)"/>
-  <text x="155" y="74" text-anchor="middle" fill="#f1f5f9" font-size="9" font-weight="bold">oryxos init | status | chat | profile …（12 子命令，Picocli）</text>
+  <text x="155" y="74" text-anchor="middle" fill="#f1f5f9" font-size="9" font-weight="bold">axion init | status | chat | profile …（12 子命令，Picocli）</text>
   <line x1="95" y1="88" x2="95" y2="102" stroke="#64748b" stroke-width="1.2" marker-end="url(#a)"/>
   <line x1="215" y1="88" x2="215" y2="102" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#a)"/>
 
   <!-- Light commands -->
   <rect x="30" y="104" width="120" height="170" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="1.2" filter="url(#sh)"/>
   <text x="90" y="122" text-anchor="middle" font-size="9" font-weight="bold" fill="#334155">轻命令（不启 Spring）</text>
-  <text x="90" y="142" text-anchor="middle" font-size="8" fill="#475569">init 幂等建 .oryxos/</text>
+  <text x="90" y="142" text-anchor="middle" font-size="8" fill="#475569">init 幂等建 .axion/</text>
   <text x="90" y="160" text-anchor="middle" font-size="8" fill="#475569">profile ×4</text>
   <text x="90" y="178" text-anchor="middle" font-size="8" fill="#475569">status · provider list</text>
   <text x="90" y="196" text-anchor="middle" font-size="8" fill="#475569">tool list · session list</text>

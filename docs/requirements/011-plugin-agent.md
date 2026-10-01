@@ -6,7 +6,7 @@
 > 修订说明（2026-09-13）：
 >
 > ① **课件口径**：核心阶段范围 = 课件 §二「本节交付物」（目录扫描 → 派生 → 注册 + 运行时注册就位 + L3 脚本沙箱 + daily-reconcile 示例 Agent）；课件 §2.4「先别做」清单全部进「明确不做」。
-> ② **冲突拍板一——Skill 模型（用户拍板 2026-09-13，按宪法 IV）**：课件"skill 收进 Agent 目录内部、不做跨 Agent 共享能力库" vs 宪法 IV/技术方案 §11.1"公共 Skill 实体存 `.oryxos/skills/`、Agent 以相对软连接绑定、软连接集合是唯一绑定真相源"——**按宪法 IV**。理由：零回退（ContextLoader 已按软连接模型交付并测试钉死，002 起）；共享规范单点维护不漂移（报告规范/合规清单这类子指令天生跨 Agent 复用）；绑定层是 30 节「一句话生成 + Skill 治理」的接缝。课件 §1.3 示例的 `skills/report-format.md` 按宪法 IV 落为公共实体 `.oryxos/skills/report-format/SKILL.md` + Agent 目录软连接绑定。
+> ② **冲突拍板一——Skill 模型（用户拍板 2026-09-13，按宪法 IV）**：课件"skill 收进 Agent 目录内部、不做跨 Agent 共享能力库" vs 宪法 IV/技术方案 §11.1"公共 Skill 实体存 `.axion/skills/`、Agent 以相对软连接绑定、软连接集合是唯一绑定真相源"——**按宪法 IV**。理由：零回退（ContextLoader 已按软连接模型交付并测试钉死，002 起）；共享规范单点维护不漂移（报告规范/合规清单这类子指令天生跨 Agent 复用）；绑定层是 30 节「一句话生成 + Skill 治理」的接缝。课件 §1.3 示例的 `skills/report-format.md` 按宪法 IV 落为公共实体 `.axion/skills/report-format/SKILL.md` + Agent 目录软连接绑定。
 > ③ **冲突拍板二——notify_channels（用户拍板 2026-09-13，按 004 拍板）**：课件示例 frontmatter 内联 `notify_channels: [{type: webhook, url: ...}]` vs 004-notify 拍板（2026-09-03）"SQLite 全局注册表、frontmatter 不含此字段、正文按渠道名引用"——**按 004 拍板**。理由：渠道是第一类可管理资源（密钥轮换改一行、30 节管理台直接管 CRUD）；已交付已人工验收，零回退。daily-reconcile 示例据此改写（正文按名引用渠道，渠道实体落 `notify_channels` 表）。
 > ④ **命名拍板**：课件交付物点名 `AgentLoader`（CLAUDE.md 原则四/技术方案 §11.2/DemandAnalysis §5.2 同口径）——003 交付的 `ProfileLoader` **更名**为 `AgentLoader`，承担"拆 frontmatter/正文 + 认资源 + 派生 Profile"三职责；`ProfileLoaderTest` → `AgentLoaderTest`（003 交付物演进，装配处引用同步更名）。
 > ⑤ **正文即时生效（无缓存）沿用 002 铁律**：正文**不进 Profile 值对象**——ContextLoader 每轮从 `AGENT.md` 现读并去 frontmatter（坑五同款：缓存正文则"改完即时生效"破产）。资源路径一律由 `workspaceRoot + profile.name` 派生，不给 `Profile` 加字段（正文与资源目录的"绑定"是路径级绑定，Profile 已有 name 足够——为实现级明确）。
@@ -20,17 +20,17 @@
 
 先回答一门课悬着的问题——凭什么叫 OS：一个能跑单个程序的东西不叫 OS；OS 的定义是"一套内核之上，能装、能跑任意多个程序，彼此隔离、不改内核、免重编译"——让它成为 OS 的从来不是内核有多强，而是那套"定义一个程序、把它装上去、让它跑起来"的标准机制（可执行文件格式 + 加载器 + 调度）（课件 §开篇）。
 
-到 28 节为止，底座（内核）造齐了——Provider、ReAct、内置 Tool、Memory、Sandbox、定时、Web，这些系统基础能力所有 Agent 共享（技术方案 §11.1）。但此刻想跑一个业务 Agent，还得把指令硬写进配置、手工拼装：**缺的正是那套"定义一个 Agent、把它装上去、让它跑起来"的标准机制**——做完这一节，"定义一个 Agent"退化成往 `.oryxos/agents/` 丢一个目录：任意多个、互不干扰、不动底座、到点自己跑。OryxOS 才从"一个能跑 Agent 的框架"真正变成"一台能跑 N 个 Agent 的 OS"（课件 §开篇/§1.1）。
+到 28 节为止，底座（内核）造齐了——Provider、ReAct、内置 Tool、Memory、Sandbox、定时、Web，这些系统基础能力所有 Agent 共享（技术方案 §11.1）。但此刻想跑一个业务 Agent，还得把指令硬写进配置、手工拼装：**缺的正是那套"定义一个 Agent、把它装上去、让它跑起来"的标准机制**——做完这一节，"定义一个 Agent"退化成往 `.axion/agents/` 丢一个目录：任意多个、互不干扰、不动底座、到点自己跑。Axion 才从"一个能跑 Agent 的框架"真正变成"一台能跑 N 个 Agent 的 OS"（课件 §开篇/§1.1）。
 
 贯穿本节一条原则：**不重写底座，只给 Profile 添一个来源**。底座（16~28 节）——`AgentService`、`ReActLoop`、`PromptBuilder`、`AgentScheduler`——都是吃 `Profile` 这个值对象的；本节一行底座都不动，只是把"从 Agent 目录的 `AGENT.md` frontmatter 派生 Profile"坐实成唯一来源（`AgentLoader.deriveProfile`），走同一套注册和校验——派生 Profile 就等于让 Agent 目录零改动复用整台底座，触发一次跟 CLI / Web 人推走同一个 `AgentService.process`（课件 §二、技术方案 §11.2）。
 
-形态借鉴 Anthropic Agent Skills 的**目录 + 渐进式披露**，但定义的是 Agent：在 OryxOS，**一个目录 = 一个 Agent**，"skill"只是这个 Agent 目录里的一个组成部分（指向公共实体的软连接绑定视图），不是顶层单位；不做跨 Agent 的 `use_skill`/能力库/全局索引（技术方案 §11.1、宪法 IV）。一个 Agent 目录里的东西按需分阶段进上下文：正文常驻 system prompt（ContextLoader 现读）、子指令/参考用到才 `read_file`、脚本用到才 `shell` 跑（产出进上下文、代码不进）（课件 §1.2/§1.4、技术方案 §11.1）。
+形态借鉴 Anthropic Agent Skills 的**目录 + 渐进式披露**，但定义的是 Agent：在 Axion，**一个目录 = 一个 Agent**，"skill"只是这个 Agent 目录里的一个组成部分（指向公共实体的软连接绑定视图），不是顶层单位；不做跨 Agent 的 `use_skill`/能力库/全局索引（技术方案 §11.1、宪法 IV）。一个 Agent 目录里的东西按需分阶段进上下文：正文常驻 system prompt（ContextLoader 现读）、子指令/参考用到才 `read_file`、脚本用到才 `shell` 跑（产出进上下文、代码不进）（课件 §1.2/§1.4、技术方案 §11.1）。
 
 安全边界落在 L3 脚本：Agent 的脚本经底座 shell/python 跑，沙箱放行"解释器（python/bash）+ 限定只能跑这个 Agent 自己 `scripts/` 目录下的脚本"。**必须说清的信任边界**：脚本是任意代码，`python scripts/foo.py` 一旦放行，它能读写文件、能自己发网络请求——绕过 `http_get` 那道域名白名单（白名单只管内置工具，管不到子进程的网络）。**装一个带脚本的 Agent = 信任写它的人**；核心阶段沙箱对脚本只做"解释器 + 目录"两道白名单，容器/网络隔离是扩展阶段的事（课件 §2.4、技术方案 §12.3）。
 
 ## 用户场景
 
-**场景一（本节验收场景）：运营方丢一个目录，一个 Agent 上线并到点自己跑**——运营方把 `daily-reconcile/`（AGENT.md + REFERENCE.md + skills/ 绑定 + scripts/reconcile.py）放进 `.oryxos/agents/`，启动扫描后 `oryxos profile list` / `GET /api/v1/profiles` 出现这个 Agent；到它声明的 `schedules` 时间点自动跑完"想 → 调系统能力 → 答 → 推送"，`llm_calls`/`tool_invocations` 逐笔留账——全程没写一行 Java、没动一行底座（课件 §1.1 终点、§三）。
+**场景一（本节验收场景）：运营方丢一个目录，一个 Agent 上线并到点自己跑**——运营方把 `daily-reconcile/`（AGENT.md + REFERENCE.md + skills/ 绑定 + scripts/reconcile.py）放进 `.axion/agents/`，启动扫描后 `axion profile list` / `GET /api/v1/profiles` 出现这个 Agent；到它声明的 `schedules` 时间点自动跑完"想 → 调系统能力 → 答 → 推送"，`llm_calls`/`tool_invocations` 逐笔留账——全程没写一行 Java、没动一行底座（课件 §1.1 终点、§三）。
 
 **场景二：正文改完即时生效**——运营方改 `daily-reconcile/AGENT.md` 正文里的措辞（如报告推送渠道名），**不重启**，下一轮触发就用新说明；改 frontmatter 里 provider/model/temperature/schedules 才需重启（课件 §2.2、§三）。
 
@@ -46,14 +46,14 @@
 
 | 编号 | 需求 | 交付物（落位模块） | 来源 |
 |------|------|-------------------|------|
-| FR-1 | **`AgentLoader`（`ProfileLoader` 更名 + 扩职责，003 交付物演进）**：解析 `.oryxos/agents/<name>/` 目录——读 `AGENT.md` **拆出 frontmatter（配置）与正文（指令）**（frontmatter 剥离后正文原样、不做二次加工，**坑一**：拆分与派生必须同一解析器，两套解析各拆各的会 frontmatter/正文错位）；**认出资源** `scripts/`、`skills/`、`REFERENCE.md` 所在（`detectResources(agentDir)`）；`deriveProfile(agentDir, providerNames)` 把 frontmatter 映射成 `Profile`（003 已有：缺 name/provider 报错**点名文件与缺失键**——**坑二**：报错不点名，运营方对着 N 个 Agent 目录猜不出来）；**校验 frontmatter `name` 与目录名一致**（课件"唯一标识 = 目录名"——**坑八**：不校验则注册成功、ContextLoader 每轮按 `profile.name` 找错目录、首次触发才炸的晚失败）；schedules 解析含 id 校验（010 ⑦c：id 缺失启动报错）；`loadAll(agentsRoot, providerNames)` 扫描注册前身（003 已有，单目录失败记错误日志跳过不阻断启动） | `AgentLoader`（oryxos-core；`ProfileLoader` 删除，装配处与测试同步更名） | 课件 §1.3/§2.1；技术方案 §11.2；DemandAnalysis §5.2；003 FR-6/010 FR-4 演进 |
-| FR-2 | **`ContextLoader` 注入 Agent 正文（002 交付物演进）**：`load(profile)` = **AGENT.md 正文**（从 `agents/<name>/AGENT.md` 现读、去 frontmatter）+ Bootstrap + 已绑定 Skill 元数据。**现读不缓存**（**坑三**：缓存正文则"改完即时生效"破产——002 坑五同款铁律）；AGENT.md 缺失**报错**（**坑四**：静默跳过=人格悄悄丢了，最难查的软故障）；Skill 元数据注入**绑定路径** `<agentDir>/skills/<name>/SKILL.md`（修订说明 ⑦：绑定目标仍校验位于公共 Skill 根 `.oryxos/skills/` 内、逃逸即报错，002 逻辑保留） | `ContextLoader.load` 扩展（oryxos-core） | 课件 §1.4/§2.2；技术方案 §11.1/§12.2；002 FR 演进 |
-| FR-3 | **`ProfileRegistry` 运行时注册（001 交付物演进）**：`register(Profile)` 已有；新增 `remove(String name)`、`exists(String name)`。运行时新增 Agent 与启动扫描**走同一段 `AgentLoader.deriveProfile` + `register`**——同一套校验、同一异常类型、同一消息（**坑五**：另写一段注册代码，两处校验漂移，非法配置两条路径报两种错） | `ProfileRegistry` 增两方法（oryxos-core） | 课件 §2.4；技术方案 §11.3；001 FR-6 演进 |
-| FR-4 | **`AgentScheduler.registerProfile`（008/010 交付物演进）**：把 `registerAll()` 循环体抽成 `registerProfile(Profile)`——登记 `scheduled_tasks`（含 next_run_at）、按 `Profile.Schedule` 的 cron/zone 注册触发、句柄存 `scheduledTasks`（008 ⑦c 已就位）、注册信息存 `registrations`；`registerAll()` = 遍历 `ProfileRegistry.list()` 调 `registerProfile`。id 冲突检查从局部 owners 表改为查 `registrations`（**报错文案不变**："定时任务 id 冲突: X（Profile A 与 B）"）。30 节注销/更新时直接调 `unregisterProfile`/重注册（本节只交付注册侧） | `AgentScheduler` 改造（oryxos-core） | 课件 §2.4；技术方案 §11.3；008 FR-5/010 FR-3 演进 |
-| FR-5 | **L3 脚本沙箱（007 交付物演进，③ 拍板配置化）**：**新配置键 `shell.allowed_interpreters`**（`ShellSandboxProperties` 增 `allowedInterpreters` 字段）——解释器命令首 token 须**同时命中** `shell.allowed_commands` 与 `shell.allowed_interpreters` 双白名单（声明了但未进 commands 的解释器构造期 WARN：永不命中，007 ⑦c 同款——启动诊断消息只含配置键名）；`WhitelistSandbox` 构造器增 `workspaceRoot`（实现级参数，接口 `Sandbox.enforce` 不变）；`checkShellCommand` 增第二层校验——首 token ∈ `allowed_interpreters` 时：① 当前无 Agent 上下文（`ProfileContext.current() == null`）**一律拒绝**（fail-closed）；② **简单形态钉死（坑九）**——只接受"解释器 + 单个 `scripts/` 下相对路径参数（+ 可选脚本参数）"形态（脚本参数透传：token[2..]，Clarifications 2026-09-13），带选项（`-c`/`-u`）、引号、shell 元字符（`;`/`|`/`&`/`$()`/反引号）等一切链式形态**一律拒绝**（首 token 校验挡不住 `python scripts/x.py ; curl ...` 的链式穿透）；③ 脚本路径（相对路径按 Agent 目录解析、绝对路径原样校验）必须落在当前 Agent 的 `scripts/` 目录下（Windows 大小写不敏感归一，007 ⑦b 口径），越界抛 `SandboxViolationException`。**`ShellTools`** 构造器增解释器集合（装配处从 `ShellSandboxProperties` 注入）：仅对解释器命令把子进程 cwd 设为 Agent 目录（相对路径按"这个 Agent 的目录"解析，**坑六**：cwd 不设则 `python scripts/foo.py` 按进程启动目录解析，要么找不到、要么跑到别的目录的同名脚本）；非解释器命令（`ls`/`cat` 等）cwd 行为不变 | `WhitelistSandbox` + `ShellTools` + `ShellSandboxProperties` 增字段（oryxos-tool）；`shell.allowed_interpreters` 配置键（application.yaml） | 课件 §2.4；技术方案 §12.3；007 FR-1 演进；修订说明 ⑥（③ 拍板） |
-| FR-6 | **FILE_READ 动态白名单（007 交付物演进）**：`checkFilePath` 的 FILE_READ 分支在静态 `file.allowed_paths` 之外**动态并入当前 Agent 目录**（`workspaceRoot/agents/<name>`，ProfileContext 提供；无上下文按静态白名单）。Agent 自己的 REFERENCE.md、绑定路径下的 SKILL.md 可读；其他 Agent 目录与未绑定 Skill 实体路径不可读（未绑定不可见）。**FILE_WRITE 不动**（静态白名单原状——最小权限：Agent 不需要写自己的目录）。**坑七**：不加这条，渐进式披露断链——`read_file` 读自己 REFERENCE.md/绑定 SKILL.md 全被静态白名单拒，正文指引用不上 | `WhitelistSandbox.checkFilePath` 扩展（oryxos-tool） | 课件 §2.2；技术方案 §11.1/§12.2；007 FR-1 演进 |
-| FR-7 | **示例 Agent `daily-reconcile/`（课件 §1.3~1.4 全文按拍板②③改写）**：AGENT.md（frontmatter：name/description/identity/provider/tools/schedules——**无 notify_channels**；正文：拿数据→判断→写报告→推送+留痕，渠道**按名引用**）+ `scripts/reconcile.py`（纯标准库、无 key、吐差异 JSON）+ 公共技能实体 `skills/report-format/`（SKILL.md = 报告规范 + P0/P1/P2 分级）+ `REFERENCE.md`（字段字典/已知可接受差异）。四文件完整收录于本设计文档（作手动路径参照物）+ 测试资源落位（AgentScanRegisterTest/ProgressiveDisclosureTest fixture） | 示例 Agent 目录 + 技能实体（测试资源 oryxos-core/src/test/resources；设计文档全文收录） | 课件 §1.3/§1.4/§二 |
-| FR-8 | **装配接线（003 装配处演进）**：`CliAgentConfiguration` 的 `profileRegistry` Bean 改用 `AgentLoader.loadAll`（更名适配）；`WhitelistSandbox`/`ShellTools` 构造参数接线（`workspaceRoot` + 解释器集合）；**Demo 前置**：`shell.allowed_commands` 增补 `python`/`bash`（修订说明 ⑨——`application.yaml` 注释同步修正，010 FR-7 "shell 保持原状"结论到期）；**`shell.allowed_interpreters` 新键接线**（③ 拍板：`[python, bash]`，application.yaml 注释说明双白名单与子集 WARN 语义） | `CliAgentConfiguration` + `application.yaml`（oryxos-cli/oryxos-boot） | 课件 §2.4；010 FR-7 到期；修订说明 ⑥/⑨（③ 拍板） |
+| FR-1 | **`AgentLoader`（`ProfileLoader` 更名 + 扩职责，003 交付物演进）**：解析 `.axion/agents/<name>/` 目录——读 `AGENT.md` **拆出 frontmatter（配置）与正文（指令）**（frontmatter 剥离后正文原样、不做二次加工，**坑一**：拆分与派生必须同一解析器，两套解析各拆各的会 frontmatter/正文错位）；**认出资源** `scripts/`、`skills/`、`REFERENCE.md` 所在（`detectResources(agentDir)`）；`deriveProfile(agentDir, providerNames)` 把 frontmatter 映射成 `Profile`（003 已有：缺 name/provider 报错**点名文件与缺失键**——**坑二**：报错不点名，运营方对着 N 个 Agent 目录猜不出来）；**校验 frontmatter `name` 与目录名一致**（课件"唯一标识 = 目录名"——**坑八**：不校验则注册成功、ContextLoader 每轮按 `profile.name` 找错目录、首次触发才炸的晚失败）；schedules 解析含 id 校验（010 ⑦c：id 缺失启动报错）；`loadAll(agentsRoot, providerNames)` 扫描注册前身（003 已有，单目录失败记错误日志跳过不阻断启动） | `AgentLoader`（axion-core；`ProfileLoader` 删除，装配处与测试同步更名） | 课件 §1.3/§2.1；技术方案 §11.2；DemandAnalysis §5.2；003 FR-6/010 FR-4 演进 |
+| FR-2 | **`ContextLoader` 注入 Agent 正文（002 交付物演进）**：`load(profile)` = **AGENT.md 正文**（从 `agents/<name>/AGENT.md` 现读、去 frontmatter）+ Bootstrap + 已绑定 Skill 元数据。**现读不缓存**（**坑三**：缓存正文则"改完即时生效"破产——002 坑五同款铁律）；AGENT.md 缺失**报错**（**坑四**：静默跳过=人格悄悄丢了，最难查的软故障）；Skill 元数据注入**绑定路径** `<agentDir>/skills/<name>/SKILL.md`（修订说明 ⑦：绑定目标仍校验位于公共 Skill 根 `.axion/skills/` 内、逃逸即报错，002 逻辑保留） | `ContextLoader.load` 扩展（axion-core） | 课件 §1.4/§2.2；技术方案 §11.1/§12.2；002 FR 演进 |
+| FR-3 | **`ProfileRegistry` 运行时注册（001 交付物演进）**：`register(Profile)` 已有；新增 `remove(String name)`、`exists(String name)`。运行时新增 Agent 与启动扫描**走同一段 `AgentLoader.deriveProfile` + `register`**——同一套校验、同一异常类型、同一消息（**坑五**：另写一段注册代码，两处校验漂移，非法配置两条路径报两种错） | `ProfileRegistry` 增两方法（axion-core） | 课件 §2.4；技术方案 §11.3；001 FR-6 演进 |
+| FR-4 | **`AgentScheduler.registerProfile`（008/010 交付物演进）**：把 `registerAll()` 循环体抽成 `registerProfile(Profile)`——登记 `scheduled_tasks`（含 next_run_at）、按 `Profile.Schedule` 的 cron/zone 注册触发、句柄存 `scheduledTasks`（008 ⑦c 已就位）、注册信息存 `registrations`；`registerAll()` = 遍历 `ProfileRegistry.list()` 调 `registerProfile`。id 冲突检查从局部 owners 表改为查 `registrations`（**报错文案不变**："定时任务 id 冲突: X（Profile A 与 B）"）。30 节注销/更新时直接调 `unregisterProfile`/重注册（本节只交付注册侧） | `AgentScheduler` 改造（axion-core） | 课件 §2.4；技术方案 §11.3；008 FR-5/010 FR-3 演进 |
+| FR-5 | **L3 脚本沙箱（007 交付物演进，③ 拍板配置化）**：**新配置键 `shell.allowed_interpreters`**（`ShellSandboxProperties` 增 `allowedInterpreters` 字段）——解释器命令首 token 须**同时命中** `shell.allowed_commands` 与 `shell.allowed_interpreters` 双白名单（声明了但未进 commands 的解释器构造期 WARN：永不命中，007 ⑦c 同款——启动诊断消息只含配置键名）；`WhitelistSandbox` 构造器增 `workspaceRoot`（实现级参数，接口 `Sandbox.enforce` 不变）；`checkShellCommand` 增第二层校验——首 token ∈ `allowed_interpreters` 时：① 当前无 Agent 上下文（`ProfileContext.current() == null`）**一律拒绝**（fail-closed）；② **简单形态钉死（坑九）**——只接受"解释器 + 单个 `scripts/` 下相对路径参数（+ 可选脚本参数）"形态（脚本参数透传：token[2..]，Clarifications 2026-09-13），带选项（`-c`/`-u`）、引号、shell 元字符（`;`/`|`/`&`/`$()`/反引号）等一切链式形态**一律拒绝**（首 token 校验挡不住 `python scripts/x.py ; curl ...` 的链式穿透）；③ 脚本路径（相对路径按 Agent 目录解析、绝对路径原样校验）必须落在当前 Agent 的 `scripts/` 目录下（Windows 大小写不敏感归一，007 ⑦b 口径），越界抛 `SandboxViolationException`。**`ShellTools`** 构造器增解释器集合（装配处从 `ShellSandboxProperties` 注入）：仅对解释器命令把子进程 cwd 设为 Agent 目录（相对路径按"这个 Agent 的目录"解析，**坑六**：cwd 不设则 `python scripts/foo.py` 按进程启动目录解析，要么找不到、要么跑到别的目录的同名脚本）；非解释器命令（`ls`/`cat` 等）cwd 行为不变 | `WhitelistSandbox` + `ShellTools` + `ShellSandboxProperties` 增字段（axion-tool）；`shell.allowed_interpreters` 配置键（application.yaml） | 课件 §2.4；技术方案 §12.3；007 FR-1 演进；修订说明 ⑥（③ 拍板） |
+| FR-6 | **FILE_READ 动态白名单（007 交付物演进）**：`checkFilePath` 的 FILE_READ 分支在静态 `file.allowed_paths` 之外**动态并入当前 Agent 目录**（`workspaceRoot/agents/<name>`，ProfileContext 提供；无上下文按静态白名单）。Agent 自己的 REFERENCE.md、绑定路径下的 SKILL.md 可读；其他 Agent 目录与未绑定 Skill 实体路径不可读（未绑定不可见）。**FILE_WRITE 不动**（静态白名单原状——最小权限：Agent 不需要写自己的目录）。**坑七**：不加这条，渐进式披露断链——`read_file` 读自己 REFERENCE.md/绑定 SKILL.md 全被静态白名单拒，正文指引用不上 | `WhitelistSandbox.checkFilePath` 扩展（axion-tool） | 课件 §2.2；技术方案 §11.1/§12.2；007 FR-1 演进 |
+| FR-7 | **示例 Agent `daily-reconcile/`（课件 §1.3~1.4 全文按拍板②③改写）**：AGENT.md（frontmatter：name/description/identity/provider/tools/schedules——**无 notify_channels**；正文：拿数据→判断→写报告→推送+留痕，渠道**按名引用**）+ `scripts/reconcile.py`（纯标准库、无 key、吐差异 JSON）+ 公共技能实体 `skills/report-format/`（SKILL.md = 报告规范 + P0/P1/P2 分级）+ `REFERENCE.md`（字段字典/已知可接受差异）。四文件完整收录于本设计文档（作手动路径参照物）+ 测试资源落位（AgentScanRegisterTest/ProgressiveDisclosureTest fixture） | 示例 Agent 目录 + 技能实体（测试资源 axion-core/src/test/resources；设计文档全文收录） | 课件 §1.3/§1.4/§二 |
+| FR-8 | **装配接线（003 装配处演进）**：`CliAgentConfiguration` 的 `profileRegistry` Bean 改用 `AgentLoader.loadAll`（更名适配）；`WhitelistSandbox`/`ShellTools` 构造参数接线（`workspaceRoot` + 解释器集合）；**Demo 前置**：`shell.allowed_commands` 增补 `python`/`bash`（修订说明 ⑨——`application.yaml` 注释同步修正，010 FR-7 "shell 保持原状"结论到期）；**`shell.allowed_interpreters` 新键接线**（③ 拍板：`[python, bash]`，application.yaml 注释说明双白名单与子集 WARN 语义） | `CliAgentConfiguration` + `application.yaml`（axion-cli/axion-boot） | 课件 §2.4；010 FR-7 到期；修订说明 ⑥/⑨（③ 拍板） |
 | NFR-1 | 全程同步阻塞，不引入异步模型（宪法 VII）；运行时注册与启动扫描共用同一段代码（同一异常同一消息，harness 钉死） | — | 宪法 VII；课件 §2.4 |
 | NFR-2 | 底座零重写：`AgentService`/`ReActLoop`/`PromptBuilder`/`AgentScheduler` 全吃 `Profile`，本节只改 Profile 的来源（deriveProfile），不碰它们的处理逻辑（课件 §二原则） | — | 课件 §二；技术方案 §11.1 |
 | NFR-3 | 正文即时生效（无缓存）+ 未绑定不可见（渐进式披露三守点：正文常驻/子指令按需/脚本产出进上下文代码不进） | — | 课件 §三；宪法 IV |
@@ -64,7 +64,7 @@
 ### 核心代码骨架（与课件 §二一致，签名级契约）
 
 ```java
-// oryxos-core：AgentLoader（ProfileLoader 更名 + 扩职责——拆 frontmatter/正文 + 认资源 + 派生）
+// axion-core：AgentLoader（ProfileLoader 更名 + 扩职责——拆 frontmatter/正文 + 认资源 + 派生）
 public final class AgentLoader {
   /** 拆 AGENT.md：frontmatter（YAML Map）+ 正文（frontmatter 之后原样文本）。 */
   public static FrontMatterAndBody split(String content) { /* 首个 --- 到下一个 --- 之间为 frontmatter */ }
@@ -79,7 +79,7 @@ public final class AgentLoader {
   public Map<String, Profile> loadAll(Path agentsRoot, Set<String> providerNames) { /* ... */ }
 }
 
-// oryxos-core：ProfileRegistry（001 演进——补运行时注销与存在性查询）
+// axion-core：ProfileRegistry（001 演进——补运行时注销与存在性查询）
 public final class ProfileRegistry {
   public void register(Profile profile) { /* 已有 */ }
   public void remove(String name) { /* 新增：不存在时静默（幂等注销） */ }
@@ -88,7 +88,7 @@ public final class ProfileRegistry {
   public Collection<Profile> list() { /* 已有 */ }
 }
 
-// oryxos-core：AgentScheduler（010 演进——registerAll 循环体抽出，为 30 节注销/更新铺路）
+// axion-core：AgentScheduler（010 演进——registerAll 循环体抽出，为 30 节注销/更新铺路）
 public class AgentScheduler {
   public void registerAll() { // = profileRegistry.list().forEach(this::registerProfile)
   }
@@ -97,7 +97,7 @@ public class AgentScheduler {
   // scheduledTasks（008 ⑦c）与 registrations（010）两张表已就位——30 节注销/更新直接消费
 }
 
-// oryxos-core：ContextLoader（002 演进——正文注入 + 绑定路径）
+// axion-core：ContextLoader（002 演进——正文注入 + 绑定路径）
 public final class ContextLoader {
   public String load(Profile profile) {
     // = loadBody(agents/<name>/AGENT.md) 现读去 frontmatter（坑三：不缓存）
@@ -106,7 +106,7 @@ public final class ContextLoader {
   }
 }
 
-// oryxos-tool：WhitelistSandbox（007 演进——L3 脚本两道白名单 + FILE_READ 动态根）
+// axion-tool：WhitelistSandbox（007 演进——L3 脚本两道白名单 + FILE_READ 动态根）
 public class WhitelistSandbox implements Sandbox {
   public WhitelistSandbox(Path workspaceRoot, FileSandboxProperties fileProps,
       ShellSandboxProperties shellProps, HttpSandboxProperties httpProps) { /* ... */ }
@@ -119,15 +119,15 @@ public class WhitelistSandbox implements Sandbox {
   // checkFilePath：FILE_READ = 静态 allowedRoots ∪ 当前 Agent 目录（动态根）；FILE_WRITE 不动
 }
 
-// oryxos-tool：ShellTools（005 演进——解释器命令的 cwd 绑定 Agent 目录）
-public class ShellTools implements OryxTool {
+// axion-tool：ShellTools（005 演进——解释器命令的 cwd 绑定 Agent 目录）
+public class ShellTools implements AxionTool {
   // 构造器增解释器集合（装配处从 ShellSandboxProperties 注入）
   // execute：sandbox.enforce 先于执行（既有）
   //   首 token ∈ 解释器集合 → ProcessBuilder.directory(agentDir)（坑六）；其余命令行为不变
 }
 ```
 
-### 本节交付物清单（Spec-Kit 拆解锚点 / oryx-spec 交付清单比对基准）
+### 本节交付物清单（Spec-Kit 拆解锚点 / axion-spec 交付清单比对基准）
 
 **代码**：`AgentLoader`（ProfileLoader 更名 + split/loadBody/detectResources）、`ProfileRegistry.register/remove/exists`、`AgentScheduler.registerProfile`、`ContextLoader.load` 正文注入 + 绑定路径、`WhitelistSandbox` 解释器/scripts 校验 + FILE_READ 动态根、`ShellTools` 解释器 cwd、`CliAgentConfiguration` 装配适配、`application.yaml` shell 白名单增补
 
@@ -135,12 +135,12 @@ public class ShellTools implements OryxTool {
 
 **配置**：`shell.allowed_commands` 增补 `python`/`bash`（Demo 前置；已有键加条目）；**新键 `shell.allowed_interpreters`**（③ 拍板配置化：解释器集合，须为 `allowed_commands` 子集才生效，双白名单命中才放行解释器命令）
 
-**约定**：一个目录 = 一个 Agent（`.oryxos/profiles/` 手工 YAML 已取消，本节不翻案）；Profile 唯一来源 = Agent 目录 frontmatter；Skill 绑定唯一真相源 = `skills/` 软连接集合；正文即时生效（无缓存）；信任边界诚实标注
+**约定**：一个目录 = 一个 Agent（`.axion/profiles/` 手工 YAML 已取消，本节不翻案）；Profile 唯一来源 = Agent 目录 frontmatter；Skill 绑定唯一真相源 = `skills/` 软连接集合；正文即时生效（无缓存）；信任边界诚实标注
 
 ### 配置形态示例
 
 ```yaml
-# application.yaml（oryxos-boot）——shell 白名单增补解释器（010 FR-7 "保持原状"结论到期）
+# application.yaml（axion-boot）——shell 白名单增补解释器（010 FR-7 "保持原状"结论到期）
 shell:
   allowed_commands:
     - ls
@@ -184,8 +184,8 @@ schedules:
 
 > 渠道实体由 004 拍板口径落 `notify_channels` 表（不在 frontmatter）：
 > `INSERT INTO notify_channels (name, type, url, description) VALUES ('team-ops', 'webhook', '${OPS_WEBHOOK_URL}', '运维群');`
-> Skill 实体与绑定（宪法 IV）：`.oryxos/skills/report-format/SKILL.md` 为公共实体；Agent 目录内
-> `.oryxos/agents/daily-reconcile/skills/report-format` 为指向它的相对软连接（Windows 无软连接特权时用 junction `mklink /J`）。
+> Skill 实体与绑定（宪法 IV）：`.axion/skills/report-format/SKILL.md` 为公共实体；Agent 目录内
+> `.axion/agents/daily-reconcile/skills/report-format` 为指向它的相对软连接（Windows 无软连接特权时用 junction `mklink /J`）。
 
 ## 明确不做
 
@@ -198,7 +198,7 @@ schedules:
 - **L3 脚本的容器/网络隔离**：扩展阶段——核心阶段只到"解释器 + 目录"两道白名单（技术方案 §12.3 信任边界）
 - **Agent 同名冲突策略**：扩展阶段（课件 §2.4）
 - **通知渠道 CRUD 端点与管理页**：004 拍板归 Web 扩展，本节不翻案
-- **`.oryxos/profiles/` 手工 Profile YAML**：已取消（Profile 唯一来源 = Agent 目录），本节不翻案（课件 §1.3）
+- **`.axion/profiles/` 手工 Profile YAML**：已取消（Profile 唯一来源 = Agent 目录），本节不翻案（课件 §1.3）
 - **正文缓存/预载 Skill 正文**：不做——正文每轮现读（宪法 IV/002 铁律），Skill 正文经 `read_file` 按需取
 
 ## 验收标准
@@ -250,11 +250,11 @@ assertThatThrownBy(() -> sandbox.enforce(
 
 ### 人工部分（做完怎么验）
 
-- **一个目录定义一个 Agent**：`oryxos init` 后把 daily-reconcile 四文件放入 `.oryxos/agents/`（skills 绑定按本机能力走软连接或 junction），`oryxos serve` 启动 → `oryxos profile list` 与 `GET /api/v1/profiles` 出现 daily-reconcile——全程没写一行 Java（课件 §三）
+- **一个目录定义一个 Agent**：`axion init` 后把 daily-reconcile 四文件放入 `.axion/agents/`（skills 绑定按本机能力走软连接或 junction），`axion serve` 启动 → `axion profile list` 与 `GET /api/v1/profiles` 出现 daily-reconcile——全程没写一行 Java（课件 §三）
 - **真模型链路到点自跑**（真 key 人工项，008/010 SchedulerFlowIT 同款临时 harness 模式）：配好 `notify_channels` 表 team-ops 真 webhook + `RECON_ORDERS_CSV`/`RECON_SETTLE_CSV` 两路径，等到（或 runNow 补跑）`reconcile-morning` 触发：webhook 收到报告；`sessions` scheduler 会话复用；`llm_calls`/`tool_invocations` 逐笔核对——`shell` 跑脚本、`read_file` 读绑定路径、`notify` 推送、`save_memory` 留痕，全部 success（课件 §三）
 - **正文即时生效反例**：不改 frontmatter、只改正文一处措辞 → 下一轮触发用新措辞（不重启）；改 frontmatter 的 temperature → 需重启才生效
 - **越界反例**：手工让模型（或直接构造）读 B 的 REFERENCE.md、跑 `python /abs/他处/x.py`、未绑定 Skill 实体路径 → 全部被 `SandboxViolationException` 拒绝，`tool_invocations` 记 success=false；**链式命令反例**：`python scripts/reconcile.py ; curl ...` 形态被拒（坑九）
-- **存量 Agent 迁移核对（修订说明 ⑩）**：`oryxos chat` 对话一次存量 `weather` Agent——system prompt 无重复人格（identity.prompt 与正文去重后）、行为不回退（仍会调 http_get）
+- **存量 Agent 迁移核对（修订说明 ⑩）**：`axion chat` 对话一次存量 `weather` Agent——system prompt 无重复人格（identity.prompt 与正文去重后）、行为不回退（仍会调 http_get）
 - **日志/审计核对**：一次触发一条日志主线（按会话 id 串起）；`tool_invocations` 里 `read_file` 的 `input_json` 是绑定路径（`<agentDir>/skills/report-format/SKILL.md`，技术方案 §12.2 验收口径）
 
 ## 依赖与假设
@@ -262,7 +262,7 @@ assertThatThrownBy(() -> sandbox.enforce(
 ### 前序交付物（已就位，本节直接依赖）
 
 - `Profile`/`ProfileRegistry`（001 FR-6）、`ProfileLoader`（003，本节更名演进）、`ContextLoader`（002，Bootstrap + Skill 元数据 + 软连接/junction 解析）、`AgentScheduler` + `scheduledTasks` 句柄表 + `registrations`（008 ⑦c/010）、`WhitelistSandbox` 三层白名单 + `ShellTools`（005/007）、`ProfileContext` ThreadLocal（002）、`notify_channels` 表 + `NotifyTools`（004）、`llm_calls`/`tool_invocations` 双审计（001/002/005）、`ToolExecutor` 执行权唯一（002）
-- **现状确认（2026-09-13 实测）**：全部就位——`ProfileLoader.deriveProfile/loadAll` 已扫 `.oryxos/agents/` 派生 Profile（含 010 的 schedules id 校验）；`ProfileRegistry` 已可变 ConcurrentHashMap 但缺 `remove/exists`；`AgentScheduler.scheduledTasks`/`registrations` 已就位、缺 `registerProfile` 抽取；`ContextLoader` javadoc 明注"AGENT.md 正文注入归第 29 节，本节不交付"、Skill 元数据当前注入**真实路径**（本节改绑定路径，修订说明 ⑦）；`WhitelistSandbox` 构造器当前三参数（本节增 workspaceRoot）；`shell.allowed_commands` 当前 `ls/cat`（本节增补 python/bash）；装配处工具引用校验已交付（005，修订说明 ⑧）
+- **现状确认（2026-09-13 实测）**：全部就位——`ProfileLoader.deriveProfile/loadAll` 已扫 `.axion/agents/` 派生 Profile（含 010 的 schedules id 校验）；`ProfileRegistry` 已可变 ConcurrentHashMap 但缺 `remove/exists`；`AgentScheduler.scheduledTasks`/`registrations` 已就位、缺 `registerProfile` 抽取；`ContextLoader` javadoc 明注"AGENT.md 正文注入归第 29 节，本节不交付"、Skill 元数据当前注入**真实路径**（本节改绑定路径，修订说明 ⑦）；`WhitelistSandbox` 构造器当前三参数（本节增 workspaceRoot）；`shell.allowed_commands` 当前 `ls/cat`（本节增补 python/bash）；装配处工具引用校验已交付（005，修订说明 ⑧）
 
 ### 前序缺口（H0 依赖检查）
 

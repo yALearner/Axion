@@ -6,7 +6,7 @@
 ## 一、全景：一条调用链看懂全貌
 
 ```
-application.yaml (oryxos.providers 全局层)
+application.yaml (axion.providers 全局层)
         ↓ Binder 绑定
 ProviderConfiguration ──→ 逐条 new OpenAiChatModel ──→ Map<String, ChatModel>
         ↓ 构造                                                ↓ 按名取
@@ -23,7 +23,7 @@ AGENT.md frontmatter ──→ ProfileLoader.deriveProfile ──→ Profile（�
 
 ## 二、逐文件梳理
 
-### oryxos-core（7 个类，纯抽象、无框架依赖）
+### axion-core（7 个类，纯抽象、无框架依赖）
 
 | 文件 | 干什么 | 值得注意的点 |
 |------|--------|-------------|
@@ -32,10 +32,10 @@ AGENT.md frontmatter ──→ ProfileLoader.deriveProfile ──→ Profile（�
 | `ProfileLoader.java:129-154` | 手写 frontmatter 解析（`---` 分隔 + SnakeYAML） | 没有引 Jackson dataformat-yaml，少一个依赖 |
 | `ProfileRegistry.java` | 内存索引，ConcurrentHashMap | 启动扫描是唯一注册路径，`register()` 是后续节预留入口 |
 | `Message.java:10-43` | 对话消息 record，toolCall/toolResult 用轻量嵌套类型承载 | **core 保持框架无关**——与 Spring AI 消息格式的转换留给 provider 适配层，这是刻意边界（补充修订 2026-09-01：002-react 已拍板 core 引入 spring-ai 数据模型依赖用于 Prompt/ChatResponse/ToolCall 的构造与解析；此边界收窄为"Message 保持框架无关（Session 历史落库的序列化形态），core 禁用的只是 Spring AI 的 Agent 抽象与自动 tool 执行"） |
-| `OryxTool.java` | 四方法接口 | 与 CLAUDE.md 逐字一致；`execute` 归 ToolExecutor 调度 |
+| `AxionTool.java` | 四方法接口 | 与 CLAUDE.md 逐字一致；`execute` 归 ToolExecutor 调度 |
 | `ToolResult.java` / `JsonSchema.java` | 配套 record | 均有防御性拷贝 |
 
-### oryxos-provider（5 个类，本 feature 主角）
+### axion-provider（5 个类，本 feature 主角）
 
 | 文件 | 干什么 | 值得注意的点 |
 |------|--------|-------------|
@@ -44,10 +44,10 @@ AGENT.md frontmatter ──→ ProfileLoader.deriveProfile ──→ Profile（�
 | `ProviderService.java:99-141` | 两个审计方法 | 审计本身失败只记日志、不影响调用结果/原异常；**日志不带 sessionId/provider 参数**（防 CRLF 注入，`:117, 138` 注释说明） |
 | `ProviderConfiguration.java:26-45` | Spring 装配：Binder 绑定 → 逐条 new → 显式 Map | 宪法原则 III：**无任何扫描容器 Bean 的代码**；配置缺失直接 `IllegalStateException` |
 | `ProviderConfiguration.java:48-56` | 启动校验 | name/api-key 空白即报错（key 必须是 `${ENV}` 解析后的值） |
-| `ToolSchemaAdapter.java:25-36` | OryxTool → `ToolDefinition` 纯数据 | 只翻译；ObjectMapper 也做了防御性拷贝 |
+| `ToolSchemaAdapter.java:25-36` | AxionTool → `ToolDefinition` 纯数据 | 只翻译；ObjectMapper 也做了防御性拷贝 |
 | `ProviderProperties.java` / `ProviderNotFoundException.java` | 配置 POJO / 异常 | 异常信息含 provider 名 |
 
-### oryxos-storage（3 个类 + schema.sql）
+### axion-storage（3 个类 + schema.sql）
 
 | 文件 | 干什么 | 值得注意的点 |
 |------|--------|-------------|
@@ -92,4 +92,4 @@ AGENT.md frontmatter ──→ ProfileLoader.deriveProfile ──→ Profile（�
 
 - 机器判卷：`mvn clean verify` 全绿（15 单测 + checkstyle/P3C-PMD/SpotBugs）
 - 人工：DeepSeek 冒烟已跑通（非空响应 + 审计 success=true）
-- 待办：Kimi 冒烟（无 key 跳过）、oryxos.db 真实落库核对（顺延 US-2 后）
+- 待办：Kimi 冒烟（无 key 跳过）、axion.db 真实落库核对（顺延 US-2 后）

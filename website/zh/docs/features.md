@@ -1,6 +1,6 @@
 # 功能特性
 
-## 核心阶段（当前）— OryxOS 1.0 运行时内核
+## 核心阶段（当前）— Axion 1.0 运行时内核
 
 ### 🤖 Agent 是配置出来的
 一个目录 = 一个 Agent。`AGENT.md` = frontmatter 配置 + 正文指令。不写 Agent 后端代码。
@@ -9,7 +9,7 @@
 基于 Spring AI，支持 DeepSeek、通义、Kimi、智谱、混元、豆包等十余个 Provider。显式映射确保运行时路由正确——切换模型只需改一行配置。
 
 ### 🧠 自实现 ReAct Loop
-OryxOS 自己实现 Agent 大脑循环（不用 Spring AI 的自动 tool 执行）。完整掌控思考→行动→观察循环，保留未来定制循环行为的空间。
+Axion 自己实现 Agent 大脑循环（不用 Spring AI 的自动 tool 执行）。完整掌控思考→行动→观察循环，保留未来定制循环行为的空间。
 
 ### 📝 三层记忆系统
 - **会话记忆**：最近 `max_history_turns` 轮对话
@@ -33,7 +33,7 @@ OryxOS 自己实现 Agent 大脑循环（不用 Spring AI 的自动 tool 执行�
 Agent 按 cron 表达式到点自动运行——日报生成、定时巡检、数据同步。无需人工发起。
 
 ### 📋 审计 Day One
-`tool_invocations` 和 `llm_calls` 表从第一天写入。每次 Tool 调用和 LLM 请求完整记录——可审计是 OryxOS 的核心差异化能力。
+`tool_invocations` 和 `llm_calls` 表从第一天写入。每次 Tool 调用和 LLM 请求完整记录——可审计是 Axion 的核心差异化能力。
 
 ## 扩展阶段（社区共建）— 企业级治理
 

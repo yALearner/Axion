@@ -9,15 +9,15 @@
 ## Phase 1 — Core Runtime (Current)
 
 **Week 1**: Provider abstraction + ReAct Loop
-- `oryxos-core`, `oryxos-provider`, `oryxos-channel-cli`, `oryxos-cli`
-- Demo: `oryxos chat` multi-turn conversation, Agent calling HTTP Tool
+- `axion-core`, `axion-provider`, `axion-channel-cli`, `axion-cli`
+- Demo: `axion chat` multi-turn conversation, Agent calling HTTP Tool
 
 **Week 2**: Memory + Tool system
-- `oryxos-memory`, `oryxos-tool`
+- `axion-memory`, `axion-tool`
 - Demo: Agent remembers preferences across sessions; calls local files and external MCP servers
 
 **Week 3**: Web Service
-- `oryxos-web`, `oryxos-storage`
+- `axion-web`, `axion-storage`
 - Demo: 10 REST endpoints fully functional
 
 **Week 4**: Multi-Agent demo + engineering polish

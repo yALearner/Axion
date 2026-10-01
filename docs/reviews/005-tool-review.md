@@ -8,7 +8,7 @@
 ```
 LLM tool call（Profile.tools 过滤后的子集注入 prompt）
   → ToolExecutor.execute（按名调度 + 成败都落 tool_invocations 审计，002 交付零改动）
-  → 各 OryxTool.execute：
+  → 各 AxionTool.execute：
       内置六件/NotifyTools —— execute 首行 sandbox.enforce(...) 先于 IO（坑十）
       方式二 MCP —— McpToolAdapter 经 JSON-RPC 转发（McpSyncClient 同步门面）
       方式三 @Tool —— AnnotatedMethodToolAdapter 调方法（仅借 Spring AI 扫描与 schema，坑二）
@@ -19,7 +19,7 @@ LLM tool call（Profile.tools 过滤后的子集注入 prompt）
 
 ## 二、逐文件梳理
 
-### oryxos-tool/com/oryxos/tool（注册与包装，3 个文件）
+### axion-tool/com/axion/tool（注册与包装，3 个文件）
 
 | 文件 | 职责与关键点 |
 |------|-------------|
@@ -27,7 +27,7 @@ LLM tool call（Profile.tools 过滤后的子集注入 prompt）
 | `PermissiveSandbox` | 拍板方案 A：全放行，javadoc 标注「第 24 节替换 WhitelistSandbox、替换后本类删除」；安全窗口纪律（20~23 节保守 Profile） |
 | `AnnotatedMethodToolAdapter` | 方式三包装器：getName/description/schema 映射 ToolDefinition；execute 调 `callback.call`、返回 JSON 序列化文本；**ToolExecutionException 解包还原原样上抛**（坑十一口径） |
 
-### oryxos-tool/com/oryxos/tool/builtin（内置六件 + 004 的 NotifyTools）
+### axion-tool/com/axion/tool/builtin（内置六件 + 004 的 NotifyTools）
 
 | 文件 | 关键点 |
 |------|--------|
@@ -36,7 +36,7 @@ LLM tool call（Profile.tools 过滤后的子集注入 prompt）
 | `HttpGetTool`/`HttpPostTool` | 首行 `enforce(HTTP_REQUEST, url)` 先于请求；1MB 上限（MAX_RESPONSE_BYTES 常量）；4xx/5xx 异常上抛；EI_EXPOSE_REP2 抑制（004 先例） |
 | `NotifyTools` | 004 已交付原样使用，本课完成生产接线 |
 
-### oryxos-tool/com/oryxos/tool/mcp（方式二，3 个文件）
+### axion-tool/com/axion/tool/mcp（方式二，3 个文件）
 
 | 文件 | 关键点 |
 |------|--------|
@@ -44,7 +44,7 @@ LLM tool call（Profile.tools 过滤后的子集注入 prompt）
 | `McpClientService` | `@Component` + `@PostConstruct connectAll`；**坑十三**：单 server 失败 catch + WARN 带名、不抛、不拖垮启动；配置缺失/空列表正常、结构非法明确报错；`${ENV_VAR}` 占位未解析报错；测试 seam（protected connect/loadConfigs） |
 | `McpToolAdapter` | 三件套映射 tools/list 返回；execute arguments(Map) 转发（TypeReference 转换）、结果包 ToolResult（isError → failure retryable=true）；TextContent 拼接 |
 
-### oryxos-cli（装配与命令改造，2 个文件）
+### axion-cli（装配与命令改造，2 个文件）
 
 | 文件 | 关键点 |
 |------|--------|
@@ -56,7 +56,7 @@ LLM tool call（Profile.tools 过滤后的子集注入 prompt）
 | 坑/点 | 测试落点 |
 |------|---------|
 | 坑十 enforce 先于 IO / 违规零 IO | FileToolsTest（write 违规后文件不存在）/ ShellToolsTest（InOrder）/ HttpToolsTest（违规后 getRequestCount==0） |
-| 坑十二契约三件套 | OryxToolContractTest（参数化遍历 7 真实工具） |
+| 坑十二契约三件套 | AxionToolContractTest（参数化遍历 7 真实工具） |
 | 坑十三失联隔离 | McpClientServiceTest.failedServerDoesNotBreakOthers（课件最值钱测试之二逐字） |
 | 坑十四过滤不多不少 + 重名 + 未知名 | ToolRegistryTest（5 例） |
 | 坑二无自动执行 / 转发包装 | AnnotatedMethodToolAdapterTest（3 例，含 ToolExecutionException 还原） |
@@ -82,7 +82,7 @@ LLM tool call（Profile.tools 过滤后的子集注入 prompt）
 - **MCP initialize 20s SDK 默认超时 + reactor onErrorDropped 日志噪音** → SDK 行为（flow-status 已记录）
 - **tool list 自轻命令改重命令** → 数据源变为 Spring bean 的必然分类调整（需求文档改造点已记录）
 - **执行层无 Profile 过滤**（LLM 幻觉请求未声明工具时 ToolExecutor 仍会执行）→ Tool Policy 扩展阶段（技术方案 §6.7 要点二）
-- **DeepSeek 工具调用意愿**（前两次拒绝调 http_get）→ 模型行为，prompt 三件套解决（oryx-design template §六）
+- **DeepSeek 工具调用意愿**（前两次拒绝调 http_get）→ 模型行为，prompt 三件套解决（axion-design template §六）
 
 ## 五、建议 review 顺序
 

@@ -21,7 +21,7 @@
 **Acceptance Scenarios**:
 
 1. **Given** 业务系统发 POST /sessions，**When** 创建成功，**Then** 返回 ApiResponse 信封含新 session_id
-2. **Given** 已建会话，**When** POST /sessions/{id}/messages 发消息（≤32KB），**Then** 走 agentService.process 完整 ReAct 返回答复（ApiResponse 信封）——与 oryxos chat 同一入口（宪法 VIII）
+2. **Given** 已建会话，**When** POST /sessions/{id}/messages 发消息（≤32KB），**Then** 走 agentService.process 完整 ReAct 返回答复（ApiResponse 信封）——与 axion chat 同一入口（宪法 VIII）
 3. **Given** 消息为空或超 32KB，**When** 发消息，**Then** 400 + ErrorResponse 信封（防呆不是治理）
 4. **Given** 会话 id 不存在，**When** 发消息/查历史，**Then** 404 + ErrorResponse 信封
 5. **Given** 历史超过 100 条，**When** GET /sessions/{id}，**Then** 只返回最近 100 条
@@ -82,7 +82,7 @@
 
 ### User Story 5 - serve 单 key 启动（Priority: P2）
 
-干净机器只配 `DEEPSEEK_API_KEY` 一个环境变量，`oryxos serve` 正常起在 8080：virtual thread 直进直出（已配）；`spring.autoconfigure.exclude` 排除 `OpenAiAutoConfiguration` + `DashScopeAutoConfiguration`（课件坑：Spring AI eager 装配急切实例化索要 spring.ai.openai.api-key 卡死 serve；宪法 II；排除类全限定名 H3 核实）。
+干净机器只配 `DEEPSEEK_API_KEY` 一个环境变量，`axion serve` 正常起在 8080：virtual thread 直进直出（已配）；`spring.autoconfigure.exclude` 排除 `OpenAiAutoConfiguration` + `DashScopeAutoConfiguration`（课件坑：Spring AI eager 装配急切实例化索要 spring.ai.openai.api-key 卡死 serve；宪法 II；排除类全限定名 H3 核实）。
 
 **Why this priority**: 本节第一次真正让人跑 serve 常驻——不排掉 eager 装配会逼运营方配两个 key，卡死 31 节「干净机器 30 分钟部署」。
 
@@ -90,7 +90,7 @@
 
 **Acceptance Scenarios**:
 
-1. **Given** 只配 DEEPSEEK_API_KEY，**When** oryxos serve 启动，**Then** 起在 8080 不因缺 spring.ai.openai.api-key 失败
+1. **Given** 只配 DEEPSEEK_API_KEY，**When** axion serve 启动，**Then** 起在 8080 不因缺 spring.ai.openai.api-key 失败
 2. **Given** 请求进入，**When** 处理，**Then** 在 virtual thread 上同步直进直出（宪法 VII，不引入响应式）
 3. **Given** Agent 调用，**When** 超 60 秒，**Then** 504（FutureTask.get(60s) + 虚线程承载，无自建线程池）
 
@@ -98,7 +98,7 @@
 
 ### User Story 6 - 只读管理台 + 风格 skill（Priority: P2）
 
-`/admin` 静态前端（Vue3+Vite 与官网同栈同风格）：五页（会话/Profile/Tool/长期记忆/运行状态）调五个 GET 端点渲染、无任何写按钮、错误时展示错误信封 message；`frontend-maven-plugin` 构建绑进 mvn（拍板 B，含 `-Dskip.npm` 跳过参数 + node 版本锁定与 .nvmrc 同步）；SPA 回落 /admin/** → index.html；风格固化进 `.claude/skills/oryxos-admin-ui/SKILL.md`（设计 token/工程约定/三态/响应式/验收清单 + **内置双信封统一请求封装**——成功取 data、错误取 errorCode/message，页面不手写两套解析）。
+`/admin` 静态前端（Vue3+Vite 与官网同栈同风格）：五页（会话/Profile/Tool/长期记忆/运行状态）调五个 GET 端点渲染、无任何写按钮、错误时展示错误信封 message；`frontend-maven-plugin` 构建绑进 mvn（拍板 B，含 `-Dskip.npm` 跳过参数 + node 版本锁定与 .nvmrc 同步）；SPA 回落 /admin/** → index.html；风格固化进 `.claude/skills/axion-admin-ui/SKILL.md`（设计 token/工程约定/三态/响应式/验收清单 + **内置双信封统一请求封装**——成功取 data、错误取 errorCode/message，页面不手写两套解析）。
 
 **Why this priority**: 第二个交付物（课件）；管理台没有自己的后端 = 顺带验证 API 完备性；skill 是 30 节 Agent 管理页的复用资产。
 
@@ -135,7 +135,7 @@
 - **FR-004**: 防呆限制：单条消息 32KB（超→400）；历史返回最近 100 条
 - **FR-005**: springdoc-openapi 自动文档（/swagger-ui），pom 新增 springdoc-openapi-starter-webmvc-ui
 - **FR-006**: 管理台 v1 只读：Vue3+Vite 五页调五 GET；无写按钮；frontend-maven-plugin 绑进 mvn（拍板 B：-Dskip.npm 跳过参数 + node 版本锁进 pom 与 .nvmrc 同步 + 内网离线构建注记）；vite base '/admin/' 产出 static/admin/；SPA 回落 /admin/** → index.html（/api/v1/** 不受影响）
-- **FR-007**: 风格 skill .claude/skills/oryxos-admin-ui/SKILL.md：首页设计 token + 工程约定 + 三态规范 + 响应式 + 验收清单 + **内置双信封统一请求封装**（成功取 data、错误取 errorCode/message）；不引外部 skill
+- **FR-007**: 风格 skill .claude/skills/axion-admin-ui/SKILL.md：首页设计 token + 工程约定 + 三态规范 + 响应式 + 验收清单 + **内置双信封统一请求封装**（成功取 data、错误取 errorCode/message）；不引外部 skill
 - **NFR-001**: 全程同步阻塞，请求在 virtual thread 直进直出；不引入 WebFlux/响应式（宪法 VII）
 - **NFR-002**: 核心阶段不做：认证（内网假设）、SSE、WebSocket、限流、RBAC
 - **NFR-003**: 门面分寸：500 兜底不含内部异常 message，细节只进日志
@@ -146,7 +146,7 @@
 - **ErrorResponse**（地基已有，不改）：errorCode/message/timestamp——错误信封（拍板 B）
 - **ErrorCode**（地基已有，补值）：BAD_REQUEST/NOT_FOUND/INTERNAL_ERROR/SERVICE_UNAVAILABLE + **GATEWAY_TIMEOUT(504)**
 - **新增 5 异常类**：InvalidRequestException/SessionNotFoundException/ResourceNotFoundException/ProviderUnavailableException/AgentTimeoutException
-- **六 Controller**：Session/Agent/Profile/Memory/Tool/System（oryxos-web/api）
+- **六 Controller**：Session/Agent/Profile/Memory/Tool/System（axion-web/api）
 - **SessionManager.findById**（改造点 a，⑨b 一致性核实前置）
 
 ## Success Criteria *(mandatory)*
@@ -163,7 +163,7 @@
 
 ## Assumptions
 
-- **前序交付物已实测就位**（2026-09-08）：AgentService.process/SessionManager（getOrCreate 三元组）/ProfileRegistry.list/ToolRegistry/LongTermMemoryStore.load 就位；oryxos-web 有地基 5 件（java-spring-init 产物）；ServeCommand 占位（web(NONE)）；spring.threads.virtual.enabled 已在 application.yaml——纯增量 + 4 处改造点
+- **前序交付物已实测就位**（2026-09-08）：AgentService.process/SessionManager（getOrCreate 三元组）/ProfileRegistry.list/ToolRegistry/LongTermMemoryStore.load 就位；axion-web 有地基 5 件（java-spring-init 产物）；ServeCommand 占位（web(NONE)）；spring.threads.virtual.enabled 已在 application.yaml——纯增量 + 4 处改造点
 - **课件口径（用户拍板 2026-09-08）**：整体方案参考 26 节课件；与四文档冲突处以课件为准（002 先例）
 - **拍板 B 双信封**：保留地基双信封（成功 ApiResponse/错误 ErrorResponse），契约漂移由测试钉死；**拍板 B 构建**：frontend-maven-plugin 绑进 mvn（含 skip 开关）
 - **⑨ 四维修正**：503 映射收紧（IllegalStateException 归 500）；SessionManager.findById 缓存/库一致性实施前 H3 核实（⑨b）；504 任务体语义明示（⑨c）；三触发源同场 Session 并发面实施前核实（⑨d，无保护则补 per-session 互斥）

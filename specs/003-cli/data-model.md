@@ -2,7 +2,7 @@
 
 ## SessionEntity（会话存档行，新表 `sessions`）
 
-oryxos-storage 新增 JPA 实体。手工 schema.sql 增量建表（坑八口径，与 llm_calls/tool_invocations 同源）。
+axion-storage 新增 JPA 实体。手工 schema.sql 增量建表（坑八口径，与 llm_calls/tool_invocations 同源）。
 
 | 字段 | 列 | 类型 | 说明 |
 |------|------|------|------|
@@ -33,8 +33,8 @@ oryxos-storage 新增 JPA 实体。手工 schema.sql 增量建表（坑八口径
 
 | 命令 | 分类 | 数据源 | 输出 |
 |------|------|--------|------|
-| init | 轻 | 文件系统 | 建 .oryxos/ 目录树（幂等） |
-| profile list | 轻 | `.oryxos/agents/` 目录 | Agent 名列表 |
+| init | 轻 | 文件系统 | 建 .axion/ 目录树（幂等） |
+| profile list | 轻 | `.axion/agents/` 目录 | Agent 名列表 |
 | profile create \<name> | 轻 | 文件系统 | 生成 agents/\<name>/AGENT.md 模板 |
 | profile show \<name> | 轻 | AGENT.md frontmatter | 配置概要（不含 api-key 值） |
 | profile delete \<name> | 轻 | 文件系统 | 删除目录 + 输出路径 |

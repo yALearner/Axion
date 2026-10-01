@@ -11,7 +11,7 @@
   <!-- Title -->
   <rect x="0" y="0" width="960" height="36" fill="#d7e2f2" rx="6"/>
   <rect x="0" y="18" width="960" height="18" fill="#d7e2f2"/>
-  <text x="480" y="23" text-anchor="middle" fill="#141b2c" font-size="13" font-weight="bold">OryxOS 整体架构</text>
+  <text x="480" y="23" text-anchor="middle" fill="#141b2c" font-size="13" font-weight="bold">Axion 整体架构</text>
 
   <!-- LEFT: LLM Providers -->
   <rect x="18" y="50" width="140" height="390" rx="8" fill="#141b2c" stroke="#33435e" stroke-width="1.2"/>
@@ -59,15 +59,15 @@
 
   <line x1="802" y1="240" x2="752" y2="240" stroke="#9db0c9" stroke-width="1.8" stroke-dasharray="4,3" marker-end="url(#aGray)"/>
 
-  <!-- CENTER: OryxOS -->
+  <!-- CENTER: Axion -->
   <rect x="215" y="48" width="530" height="430" rx="10" fill="#101623" stroke="#9db0c9" stroke-width="2.5"/>
-  <text x="480" y="70" text-anchor="middle" font-size="12" font-weight="bold" fill="#d7e2f2">OryxOS · Agent 运行时</text>
+  <text x="480" y="70" text-anchor="middle" font-size="12" font-weight="bold" fill="#d7e2f2">Axion · Agent 运行时</text>
 
   <!-- Band 1: Trigger (Blue) -->
   <rect x="225" y="83" width="510" height="54" rx="6" fill="#0c1a30" stroke="#1d3a6e" stroke-width="1"/>
   <text x="240" y="100" font-size="9" font-weight="bold" fill="#93c5fd">Trigger · 三种触发源 → 一个统一入口</text>
   <rect x="240" y="108" width="135" height="22" rx="4" fill="#10203f"/>
-  <text x="307" y="123" text-anchor="middle" font-size="9" fill="#93c5fd">💻 CLI · oryxos chat</text>
+  <text x="307" y="123" text-anchor="middle" font-size="9" fill="#93c5fd">💻 CLI · axion chat</text>
   <rect x="382" y="108" width="135" height="22" rx="4" fill="#10203f"/>
   <text x="449" y="123" text-anchor="middle" font-size="9" fill="#93c5fd">🌐 REST API</text>
   <rect x="524" y="108" width="90" height="22" rx="4" fill="#10203f"/>
@@ -130,11 +130,11 @@
   <text x="412" y="414" text-anchor="middle" font-size="8" fill="#6ee7b7">tool_invocations</text>
   <rect x="474" y="402" width="110" height="18" rx="4" fill="#0d2b21"/>
   <text x="529" y="414" text-anchor="middle" font-size="8" fill="#6ee7b7">long_term_memory</text>
-  <text x="600" y="414" font-size="8" fill="#7d8ca5">.oryxos/ 文件系统</text>
+  <text x="600" y="414" font-size="8" fill="#7d8ca5">.axion/ 文件系统</text>
 
   <!-- Bottom panel: Module map -->
   <rect x="215" y="432" width="530" height="42" rx="6" fill="#d7e2f2" opacity="0.85"/>
-  <text x="240" y="452" font-size="7" fill="#33435e">oryxos-core</text><text x="310" y="452" font-size="7" fill="#33435e">oryxos-provider</text><text x="395" y="452" font-size="7" fill="#33435e">oryxos-memory</text><text x="480" y="452" font-size="7" fill="#33435e">oryxos-tool</text><text x="555" y="452" font-size="7" fill="#33435e">oryxos-channel-cli</text><text x="660" y="452" font-size="7" fill="#33435e">oryxos-web</text>
+  <text x="240" y="452" font-size="7" fill="#33435e">axion-core</text><text x="310" y="452" font-size="7" fill="#33435e">axion-provider</text><text x="395" y="452" font-size="7" fill="#33435e">axion-memory</text><text x="480" y="452" font-size="7" fill="#33435e">axion-tool</text><text x="555" y="452" font-size="7" fill="#33435e">axion-channel-cli</text><text x="660" y="452" font-size="7" fill="#33435e">axion-web</text>
   <text x="240" y="467" font-size="6" fill="#9db0c9">核心抽象</text><text x="310" y="467" font-size="6" fill="#9db0c9">Provider 显式映射</text><text x="395" y="467" font-size="6" fill="#9db0c9">Memory 门面</text><text x="480" y="467" font-size="6" fill="#9db0c9">Tool + Sandbox</text><text x="555" y="467" font-size="6" fill="#9db0c9">CLI Channel</text><text x="660" y="467" font-size="6" fill="#9db0c9">REST API</text>
 
   <!-- LEGEND -->
@@ -157,6 +157,6 @@
   <text x="30" y="561" font-size="8" fill="#9db0c9">核心阶段 · 单机私有部署</text>
 
   <!-- Bottom text -->
-  <text x="480" y="510" text-anchor="middle" font-size="8" fill="#9db0c9">接口解耦：新增 Channel 或 Tool 只加新模块，不改 oryxos-core</text>
+  <text x="480" y="510" text-anchor="middle" font-size="8" fill="#9db0c9">接口解耦：新增 Channel 或 Tool 只加新模块，不改 axion-core</text>
   <text x="480" y="526" text-anchor="middle" font-size="8" fill="#9db0c9">阶段二引入 PostgreSQL · Redis · Nacos · 分布式的 Agent 互发现与互委托</text>
 </svg>

@@ -5,7 +5,7 @@
 ## 前置
 
 - 环境变量：`JAVA_HOME`（JDK 21）+ `PATH`（`export JAVA_HOME=... && export PATH=$JAVA_HOME/bin:$PATH`，本机 002 起惯例）
-- 项目根 `D:\myproject\OryxOS-one`；工作区未初始化先 `oryxos init`
+- 项目根 `D:\myproject\Axion`；工作区未初始化先 `axion init`
 - **gate 内无 key** 的自动化全跑（mock provider 路径）；**真 key** 的 IT 手动跑（`DEEPSEEK_API_KEY` 注入）
 
 ## 一、自动化（机器判卷）
@@ -22,17 +22,17 @@ mvn clean verify
 
 ```bash
 # 最值钱回归 + ⑦a 并发回归 + ⑦c id 缺失回归（008 测试类增补）
-mvn -pl oryxos-core test -Dtest=AgentSchedulerTest
+mvn -pl axion-core test -Dtest=AgentSchedulerTest
 
 # 存储层：两表真实存在（PRAGMA 核对列）、可存可读、约束生效
-mvn -pl oryxos-storage test -Dtest=ScheduledTaskRepositoryTest
+mvn -pl axion-storage test -Dtest=ScheduledTaskRepositoryTest
 
 # 四端点契约（standalone MockMvc：双信封 + 404 + 504 + 返回体形状）
-mvn -pl oryxos-web test -Dtest=ScheduleApiControllerTest
+mvn -pl axion-web test -Dtest=ScheduleApiControllerTest
 
 # E2E 五步（mock provider、无 key、临时 SQLite）：
 # 启动即登记 → GET /schedules → POST run 走真 ReAct → 落库断言 → PUT 停用 → 停用不记历史
-mvn -pl oryxos-boot test -Dtest=ScheduledTaskE2ETest
+mvn -pl axion-boot test -Dtest=ScheduledTaskE2ETest
 ```
 
 预期关键断言（对号）：
@@ -47,7 +47,7 @@ mvn -pl oryxos-boot test -Dtest=ScheduledTaskE2ETest
 
 ```bash
 # core 不得依赖 storage（契约在 core、实现在 storage）
-grep -r "com.oryxos.storage" oryxos-core/src/main --include="*.java" | wc -l   # 预期 0
+grep -r "com.axion.storage" axion-core/src/main --include="*.java" | wc -l   # 预期 0
 ```
 
 ## 二、人工项（真 key / 实机）
@@ -55,7 +55,7 @@ grep -r "com.oryxos.storage" oryxos-core/src/main --include="*.java" | wc -l   #
 ### 4. SchedulerFlowIT（@Tag integration，真 key 链路对账）
 
 ```bash
-DEEPSEEK_API_KEY=xxx mvn -pl oryxos-boot test -Dtest=SchedulerFlowIT
+DEEPSEEK_API_KEY=xxx mvn -pl axion-boot test -Dtest=SchedulerFlowIT
 ```
 
 对账点（需求文档场景二，不多不少）：scheduler 会话复用（连续触发两次仍一条）/ llm_calls 恰 2 条 / tool_invocations 恰 2 条（http_get + notify）全成功 / webhook 真收到消息体。
@@ -63,14 +63,14 @@ DEEPSEEK_API_KEY=xxx mvn -pl oryxos-boot test -Dtest=SchedulerFlowIT
 ### 5. RestartRecoveryIT（@Tag integration，重启四样恢复）
 
 ```bash
-DEEPSEEK_API_KEY=xxx mvn -pl oryxos-boot test -Dtest=RestartRecoveryIT
+DEEPSEEK_API_KEY=xxx mvn -pl axion-boot test -Dtest=RestartRecoveryIT
 ```
 
 对账点：kill 后重新 serve → GET /sessions/{id} 完整历史 / GET /memory 核心记忆 / GET /schedules 状态与历史（run_count/上次结果/下次触发）/ llm_calls 跨重启不断档。
 
 ### 6. 管理台「定时任务」页人工核对
 
-1. `mvn package`（含前端构建）→ `oryxos serve` → 打开 `http://localhost:8080/admin/schedules`
+1. `mvn package`（含前端构建）→ `axion serve` → 打开 `http://localhost:8080/admin/schedules`
 2. 列表渲染任务与状态（Profile/cron/下次触发/上次结果/次数/启用与否）
 3. 点「立即执行」→ 同步等待返回 → 显示成功/失败 + 耗时
 4. 点「停用」→ 列表刷新显示已停用；再点「启用」恢复
@@ -82,11 +82,11 @@ DEEPSEEK_API_KEY=xxx mvn -pl oryxos-boot test -Dtest=RestartRecoveryIT
 - [ ] notify_channels 配好：手动 notify 一次，群真收得到
   - H3 核实（T003）：本机无 sqlite3 CLI，人工写入通道 = Python sqlite3 模块：
     ```bash
-    python -c "import sqlite3; c = sqlite3.connect('.oryxos/oryxos.db');
+    python -c "import sqlite3; c = sqlite3.connect('.axion/axion.db');
     c.execute(\"INSERT INTO notify_channels (name, type, url, description) VALUES ('team-lark','webhook','https://open.feishu.cn/open-apis/bot/v2/hook/<真实地址>','团队群机器人')\");
     c.commit(); c.close()"
     ```
-- [ ] 测试 Profile schedules 含 id + cron + 显式时区（Asia/Shanghai）——`.oryxos/agents/weather-demo/AGENT.md`：
+- [ ] 测试 Profile schedules 含 id + cron + 显式时区（Asia/Shanghai）——`.axion/agents/weather-demo/AGENT.md`：
   ```markdown
   ---
   name: weather-demo
@@ -113,4 +113,4 @@ DEEPSEEK_API_KEY=xxx mvn -pl oryxos-boot test -Dtest=RestartRecoveryIT
 
 - 机器已判卷：第 1~3 节（全量 verify + 各模块测试 + 依赖方向）
 - 等人人工过：第 4~8 节（两个 IT 真 key + 管理台页 + Demo 六项 + 多 Agent 三边界）
-- 执行方法细则：`.claude/skills/oryx-spec/references/manual-acceptance.md`
+- 执行方法细则：`.claude/skills/axion-spec/references/manual-acceptance.md`

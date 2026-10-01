@@ -32,9 +32,9 @@
 - **Rationale**: 课件明示 MockWebServer"不算外网依赖，仍是单测层"；假 webhook 测协议、真 webhook 验配置，两者分离保证 `mvn test` 全绿不依赖外网
 - **Alternatives considered**: 直接打真 webhook（否决：测试依赖外网/密钥，违反全绿可重复性）
 
-## 裁决 6：oryxos-tool pom 结构性新增（超出需求文档 pom 白名单字面，G2 提交用户确认）
+## 裁决 6：axion-tool pom 结构性新增（超出需求文档 pom 白名单字面，G2 提交用户确认）
 
-- **Decision**: 需求文档交付清单写"pom 增加 spring-web + mockwebserver"，实测 oryxos-tool pom 现状（仅 core + spring-ai-model）后确认还需两项：① `oryxos-storage`（compile）——`NotifyChannelRegistry` 必须消费 `NotifyChannelRepository`，能力层依赖 storage 符合 CLAUDE.md 依赖方向；② `spring-boot-starter-test`（test）——模块无任何测试依赖，首个测试需 JUnit 5 + Mockito 栈（oryxos-core 同款先例）
+- **Decision**: 需求文档交付清单写"pom 增加 spring-web + mockwebserver"，实测 axion-tool pom 现状（仅 core + spring-ai-model）后确认还需两项：① `axion-storage`（compile）——`NotifyChannelRegistry` 必须消费 `NotifyChannelRepository`，能力层依赖 storage 符合 CLAUDE.md 依赖方向；② `spring-boot-starter-test`（test）——模块无任何测试依赖，首个测试需 JUnit 5 + Mockito 栈（axion-core 同款先例）
 - **Rationale**: 均为实现 FR-5/测试清单的机械必需结构件（类比 003 的 4 个父命令类先例——补列需求文档交付清单）；不构成新模块、不改依赖方向
 - **Alternatives considered**: Registry 不依赖 Repository 改注入数据接口（否决：多一层无收益抽象，违反"不建需求文档之外的抽象层"）；测试手写无框架（否决：违反全仓测试栈一致性）
 
@@ -46,6 +46,6 @@
 
 ## 裁决 8：包结构（需求文档实现级明确）
 
-- **Decision**: `com.oryxos.tool.notify`（接口 + NotifyTarget + WebhookNotifyAdapter + NotifyChannelRegistry）+ `com.oryxos.tool.builtin`（NotifyTools）；`com.oryxos.storage`（NotifyChannelEntity + NotifyChannelRepository，flat 包沿用 storage 现状）
-- **Rationale**: 需求文档实现级明确（课件 `io.oryxos` 机械翻译 `com.oryxos`）；builtin 子包为后续第 20 节 FileTools/ShellTools/HttpTools 落位预留同款结构
-- **Alternatives considered**: 全部 flat 到 `com.oryxos.tool`（否决：需求文档已定子包，且与后续内置 Tool 群混放不清）
+- **Decision**: `com.axion.tool.notify`（接口 + NotifyTarget + WebhookNotifyAdapter + NotifyChannelRegistry）+ `com.axion.tool.builtin`（NotifyTools）；`com.axion.storage`（NotifyChannelEntity + NotifyChannelRepository，flat 包沿用 storage 现状）
+- **Rationale**: 需求文档实现级明确（课件 `io.axion` 机械翻译 `com.axion`）；builtin 子包为后续第 20 节 FileTools/ShellTools/HttpTools 落位预留同款结构
+- **Alternatives considered**: 全部 flat 到 `com.axion.tool`（否决：需求文档已定子包，且与后续内置 Tool 群混放不清）

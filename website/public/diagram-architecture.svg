@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" fill="none" font-family="'Inter', 'Segoe UI', system-ui, sans-serif">
   <defs>
-    <linearGradient id="oryx-grad" x1="0" y1="0" x2="1" y2="0">
+    <linearGradient id="axion-grad" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#2dd4bf"/>
       <stop offset="100%" stop-color="#818cf8"/>
     </linearGradient>
@@ -11,21 +11,21 @@
 
   <!-- ── Top: Orchestration Layer ── -->
   <rect x="40" y="24" width="880" height="70" rx="10" fill="#0e1420" stroke="#1c2537" stroke-width="1.5"/>
-  <text x="480" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#6b7a93" letter-spacing="0.1em">编排层 · ORCHESTRATION（OryxOS 不做 · not our scope）</text>
+  <text x="480" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#6b7a93" letter-spacing="0.1em">编排层 · ORCHESTRATION（Axion 不做 · not our scope）</text>
   <text x="480" y="74" text-anchor="middle" font-size="11" fill="#7d8ca5">Dify · Coze · 扣子 — 可视化 Workflow / 拖拽编排</text>
 
-  <!-- Arrow: Orchestration → OryxOS -->
+  <!-- Arrow: Orchestration → Axion -->
   <line x1="480" y1="94" x2="480" y2="118" stroke="#263248" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
   <defs><marker id="arrow-gray" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#263248"/></marker></defs>
 
-  <!-- ── Middle: OryxOS Runtime ── -->
+  <!-- ── Middle: Axion Runtime ── -->
   <rect x="40" y="120" width="880" height="450" rx="12" fill="#0a211d" stroke="#2dd4bf" stroke-width="2"/>
-  <text x="480" y="148" text-anchor="middle" font-size="15" font-weight="700" fill="#e8edf6">OryxOS · Agent 运行时 · RUNTIME</text>
+  <text x="480" y="148" text-anchor="middle" font-size="15" font-weight="700" fill="#e8edf6">Axion · Agent 运行时 · RUNTIME</text>
 
   <!-- Trigger sources (left side) -->
   <rect x="64" y="168" width="180" height="50" rx="8" fill="#101623" stroke="#1c2537" stroke-width="1"/>
   <text x="154" y="190" text-anchor="middle" font-size="12" font-weight="600" fill="#e8edf6">💻 CLI（人推）</text>
-  <text x="154" y="207" text-anchor="middle" font-size="10" fill="#6b7a93">oryxos chat</text>
+  <text x="154" y="207" text-anchor="middle" font-size="10" fill="#6b7a93">axion chat</text>
 
   <rect x="64" y="230" width="180" height="50" rx="8" fill="#101623" stroke="#1c2537" stroke-width="1"/>
   <text x="154" y="252" text-anchor="middle" font-size="12" font-weight="600" fill="#e8edf6">🔗 REST API（人推）</text>
@@ -72,55 +72,55 @@
   <!-- Subsystems below ReActLoop -->
   <!-- Provider -->
   <rect x="520" y="370" width="130" height="70" rx="8" fill="#101623" stroke="#1c2537" stroke-width="1"/>
-  <text x="585" y="394" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">🔌 oryxos-provider</text>
+  <text x="585" y="394" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">🔌 axion-provider</text>
   <text x="585" y="412" text-anchor="middle" font-size="9" fill="#6b7a93">Map&lt;name, ChatModel&gt;</text>
   <text x="585" y="428" text-anchor="middle" font-size="9" fill="#6b7a93">DeepSeek · Qwen · Kimi</text>
 
   <!-- Memory -->
   <rect x="662" y="370" width="130" height="70" rx="8" fill="#101623" stroke="#1c2537" stroke-width="1"/>
-  <text x="727" y="394" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">📝 oryxos-memory</text>
+  <text x="727" y="394" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">📝 axion-memory</text>
   <text x="727" y="412" text-anchor="middle" font-size="9" fill="#6b7a93">MemoryService 门面</text>
   <text x="727" y="428" text-anchor="middle" font-size="9" fill="#6b7a93">Markdown · SQLite · Mem0</text>
 
   <!-- Tool -->
   <rect x="520" y="452" width="130" height="70" rx="8" fill="#101623" stroke="#1c2537" stroke-width="1"/>
-  <text x="585" y="476" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">🔧 oryxos-tool</text>
+  <text x="585" y="476" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">🔧 axion-tool</text>
   <text x="585" y="494" text-anchor="middle" font-size="9" fill="#6b7a93">9 内置 Tool · MCP Client</text>
   <text x="585" y="510" text-anchor="middle" font-size="9" fill="#6b7a93">Sandbox · NotifyTools</text>
 
   <!-- Storage -->
   <rect x="662" y="452" width="130" height="70" rx="8" fill="#101623" stroke="#1c2537" stroke-width="1"/>
-  <text x="727" y="476" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">💾 oryxos-storage</text>
+  <text x="727" y="476" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">💾 axion-storage</text>
   <text x="727" y="494" text-anchor="middle" font-size="9" fill="#6b7a93">SQLite · JPA</text>
   <text x="727" y="510" text-anchor="middle" font-size="9" fill="#6b7a93">tool_invocations · llm_calls</text>
 
   <!-- Modules list (right side) -->
   <rect x="64" y="400" width="200" height="28" rx="5" fill="#101623" stroke="#1c2537" stroke-width="1"/>
-  <text x="164" y="418" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">📦 oryxos-core</text>
+  <text x="164" y="418" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">📦 axion-core</text>
 
   <rect x="64" y="436" width="200" height="28" rx="5" fill="#101623" stroke="#1c2537" stroke-width="1"/>
-  <text x="164" y="454" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">🌐 oryxos-web</text>
+  <text x="164" y="454" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">🌐 axion-web</text>
 
   <rect x="64" y="472" width="200" height="28" rx="5" fill="#101623" stroke="#1c2537" stroke-width="1"/>
-  <text x="164" y="490" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">💬 oryxos-channel-cli</text>
+  <text x="164" y="490" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">💬 axion-channel-cli</text>
 
   <rect x="64" y="508" width="200" height="28" rx="5" fill="#101623" stroke="#1c2537" stroke-width="1"/>
-  <text x="164" y="526" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">⚡ oryxos-cli（Picocli）</text>
+  <text x="164" y="526" text-anchor="middle" font-size="11" font-weight="600" fill="#e8edf6">⚡ axion-cli（Picocli）</text>
 
   <rect x="64" y="544" width="200" height="28" rx="5" fill="#e8edf6" stroke="#e8edf6" stroke-width="1"/>
-  <text x="164" y="562" text-anchor="middle" font-size="11" font-weight="700" fill="#101623">🚀 oryxos-boot（启动）</text>
+  <text x="164" y="562" text-anchor="middle" font-size="11" font-weight="700" fill="#101623">🚀 axion-boot（启动）</text>
 
   <!-- ── Bottom: Framework Layer ── -->
   <rect x="40" y="600" width="880" height="70" rx="10" fill="#0e1420" stroke="#1c2537" stroke-width="1.5"/>
-  <text x="480" y="628" text-anchor="middle" font-size="13" font-weight="700" fill="#6b7a93" letter-spacing="0.1em">框架层 · FRAMEWORK（OryxOS 复用 · leverage）</text>
+  <text x="480" y="628" text-anchor="middle" font-size="13" font-weight="700" fill="#6b7a93" letter-spacing="0.1em">框架层 · FRAMEWORK（Axion 复用 · leverage）</text>
   <text x="480" y="650" text-anchor="middle" font-size="11" fill="#7d8ca5">Spring AI Alibaba（LLM 协议转换 + @Tool schema 生成）· Spring Boot 3.x · Spring Data JPA · Picocli</text>
 
-  <!-- Arrow: OryxOS → Framework -->
+  <!-- Arrow: Axion → Framework -->
   <line x1="480" y1="570" x2="480" y2="600" stroke="#263248" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
 
   <!-- Legend -->
   <rect x="680" y="640" width="12" height="12" rx="3" fill="#2dd4bf"/>
-  <text x="698" y="651" font-size="10" fill="#6b7a93">OryxOS 自实现</text>
+  <text x="698" y="651" font-size="10" fill="#6b7a93">Axion 自实现</text>
   <rect x="790" y="640" width="12" height="12" rx="3" fill="#0e1420" stroke="#1c2537"/>
   <text x="808" y="651" font-size="10" fill="#6b7a93">复用/外部</text>
 </svg>

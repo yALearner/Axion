@@ -6,7 +6,7 @@
 
 ## Summary
 
-在 001（Provider 对接 LLM）之上交付 ReAct 循环——OryxOS 最关键的一段代码：`ReActLoop` 手写主循环（想一步、做一步、看结果，直到无工具调用或转满最大轮数），`PromptBuilder` 组装每轮四段上下文，`ToolExecutor` 唯一执行点 + `tool_invocations` 审计 day one 落库，`AgentService` 三触发源共用编排入口 + `ProfileContext` 防 ThreadLocal 泄漏。同时交付两块拍板补位：`Session`/`SessionManager` 最小契约（内存版）与 `Sandbox` 纯接口（落 oryxos-tool）。宪法原则 I（自实现）、II（禁自动执行）、V（审计 day one）、VII（同步）、VIII（共用引擎）五条硬约束，坑一~坑八每个都有回归测试钉死。全部不碰网络，harness 全单测秒级跑完。
+在 001（Provider 对接 LLM）之上交付 ReAct 循环——Axion 最关键的一段代码：`ReActLoop` 手写主循环（想一步、做一步、看结果，直到无工具调用或转满最大轮数），`PromptBuilder` 组装每轮四段上下文，`ToolExecutor` 唯一执行点 + `tool_invocations` 审计 day one 落库，`AgentService` 三触发源共用编排入口 + `ProfileContext` 防 ThreadLocal 泄漏。同时交付两块拍板补位：`Session`/`SessionManager` 最小契约（内存版）与 `Sandbox` 纯接口（落 axion-tool）。宪法原则 I（自实现）、II（禁自动执行）、V（审计 day one）、VII（同步）、VIII（共用引擎）五条硬约束，坑一~坑八每个都有回归测试钉死。全部不碰网络，harness 全单测秒级跑完。
 
 ## Technical Context
 
@@ -14,17 +14,17 @@
 
 **Primary Dependencies**: Spring AI 数据模型（core 引入，拍板③：可用其纯数据模型 Prompt/ChatResponse/ToolCall/ToolDefinition，禁用 Agent 抽象与自动 tool 执行——确切 artifact 以 H3 实测核实为准）；Spring Data JPA + SQLite（沿用 001）；JUnit 5 + Mockito（001 测试栈）
 
-**Storage**: SQLite `.oryxos/oryxos.db`；`tool_invocations` 手工 schema.sql **增量追加**（与 001 `llm_calls` 同口径：手工建表、测试执行同一份脚本、created_at ISO-8601 TEXT），不依赖 `hibernate.ddl-auto=update`
+**Storage**: SQLite `.axion/axion.db`；`tool_invocations` 手工 schema.sql **增量追加**（与 001 `llm_calls` 同口径：手工建表、测试执行同一份脚本、created_at ISO-8601 TEXT），不依赖 `hibernate.ddl-auto=update`
 
 **Testing**: 7 个测试类全单测（模型/工具/文件系统全 mock 或临时目录），`mvn test` 秒级；无集成冒烟（本节不碰网络）；完成定义 = `mvn clean verify` 全绿（含静态门禁）
 
 **Target Platform**: 企业服务器 / 本地单节点（Windows/Linux），JDK 21
 
-**Project Type**: Maven 多模块 Agent 底座运行时（本 feature 为 oryxos-core 第二批核心代码 + oryxos-tool 首批内容 + oryxos-storage 审计表扩展）
+**Project Type**: Maven 多模块 Agent 底座运行时（本 feature 为 axion-core 第二批核心代码 + axion-tool 首批内容 + axion-storage 审计表扩展）
 
 **Performance Goals**: 节级无硬指标；同步阻塞 + 虚拟线程承载并发（宪法 VII）
 
-**Constraints**: 宪法 9 条（重点 I/II/V/VII/VIII）；模块结构 MUST 与技术方案第 10 章 9 模块一致（只触碰 oryxos-core / oryxos-tool / oryxos-storage）；依赖方向 MUST 保持 core ← 能力层（core 不反向依赖 provider/tool）；全程不自动 commit/push/package.sh
+**Constraints**: 宪法 9 条（重点 I/II/V/VII/VIII）；模块结构 MUST 与技术方案第 10 章 9 模块一致（只触碰 axion-core / axion-tool / axion-storage）；依赖方向 MUST 保持 core ← 能力层（core 不反向依赖 provider/tool）；全程不自动 commit/push/package.sh
 
 **Scale/Scope**: 单实例多 Agent 并存；本轮触发源接入从第 18 节（CLI）开始，本节交付编排者本体
 
@@ -42,7 +42,7 @@
 | VI 不使用 SecurityManager | ✅ PASS | 只交付 `Sandbox` 纯接口（enforce 单方法 + ActionType 四值 + 违规异常），零实现、无白名单配置 |
 | VII 同步执行模型 | ✅ PASS（硬约束） | 全程同步阻塞，无 Reactor/CompletableFuture |
 | VIII 三种触发源共用一个引擎 | ✅ PASS（硬约束） | `AgentService.process` 统一编排 + `ProfileContext` finally 清理；触发源接入第 18 节起，ReActLoop 不感知入口 |
-| IX Tool 模块三合一 | ✅ PASS | Sandbox 接口落 oryxos-tool（三合一）；不新建模块；Agent 目录加载归 core 的 ContextLoader |
+| IX Tool 模块三合一 | ✅ PASS | Sandbox 接口落 axion-tool（三合一）；不新建模块；Agent 目录加载归 core 的 ContextLoader |
 | 技术约束：建表/虚拟线程/日志 | ✅ PASS | 手工 schema.sql 增量；同步+虚拟线程；结构化 JSON 日志（地基已有） |
 | 质量门：每模块端到端测试 | ✅ PASS | 7 个测试类覆盖三个模块（坑↔测试对号表见需求文档验收标准） |
 
@@ -60,29 +60,29 @@ specs/002-react/
 ├── quickstart.md        # Phase 1 输出
 ├── contracts/           # Phase 1 输出（react-loop.md / session-manager.md / sandbox.md）
 ├── checklists/          # 质量清单
-├── flow-status.md       # oryx-spec 进度文件
+├── flow-status.md       # axion-spec 进度文件
 └── tasks.md             # Phase 2 输出（/speckit-tasks，本阶段不创建）
 ```
 
 ### Source Code (repository root)
 
 ```text
-oryxos-core/
-├── src/main/java/com/oryxos/core/        # 新增：ReActLoop、PromptBuilder、ToolExecutor、
+axion-core/
+├── src/main/java/com/axion/core/        # 新增：ReActLoop、PromptBuilder、ToolExecutor、
 │                                          #   AgentService、ProfileContext、ContextLoader、
 │                                          #   Session、SessionManager、LlmGateway（端口接口）
 │                                          # 迁入：ToolSchemaAdapter（自 provider，G2 拍板）
 ├── src/test/java/                        # ReActLoopTest、PromptBuilderTest、ToolExecutorTest、
 │                                          #   AgentServiceTest、ContextLoaderTest、SessionManagerTest
 └── pom.xml                               # + spring-ai 数据模型依赖（拍板③，artifact 以 H3 实测为准）
-oryxos-tool/
-└── src/main/java/com/oryxos/tool/        # 首批内容：Sandbox、SandboxAction、ActionType、
+axion-tool/
+└── src/main/java/com/axion/tool/        # 首批内容：Sandbox、SandboxAction、ActionType、
                                           #   SandboxViolationException（纯接口墙，零实现）
-oryxos-storage/
-├── src/main/java/com/oryxos/storage/     # 新增：ToolInvocation 实体、ToolInvocationRepository
+axion-storage/
+├── src/main/java/com/axion/storage/     # 新增：ToolInvocation 实体、ToolInvocationRepository
 ├── src/main/resources/schema.sql         # 增量追加 tool_invocations DDL（手工建表）
 └── src/test/java/                        # ToolInvocationRepositoryTest（执行同一份 schema.sql）
-oryxos-provider/                          # G2 拍板：ToolSchemaAdapter + 其测试迁往 core；
+axion-provider/                          # G2 拍板：ToolSchemaAdapter + 其测试迁往 core；
                                           #   ProviderService 加 implements LlmGateway（一行声明）
 ```
 

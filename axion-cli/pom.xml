@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.axion</groupId>
+        <artifactId>axion</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>axion-cli</artifactId>
+    <name>Axion :: CLI</name>
+    <description>命令行入口：Picocli 主入口、12 个子命令、ConfigLoader</description>
+
+    <dependencies>
+        <!-- Internal (assembles all modules) -->
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-memory</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-tool</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-channel-cli</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-storage</artifactId>
+        </dependency>
+
+        <!-- Picocli -->
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+        </dependency>
+
+        <!-- Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- 测试（006-memory 起：CliAgentConfigurationTest 装配断言） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- 003-cli：boot 是唯一打包入口（单二进制，mainClass 已迁至 boot pom）。
+                         cli 作为库必须出 plain jar——本模块 repackage 会产出嵌套 fat jar，
+                         嵌进 boot 后类加载失败（BOOT-INF 套 BOOT-INF）。mainClass 保留供将来独立打包时启用。 -->
+                    <skip>true</skip>
+                    <mainClass>com.axion.cli.AxionCli</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

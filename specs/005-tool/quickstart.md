@@ -10,14 +10,14 @@
 mvn clean verify
 
 # 只跑本 feature 模块（日常迭代）
-mvn test -pl oryxos-tool,oryxos-cli -am
+mvn test -pl axion-tool,axion-cli -am
 ```
 
-预期结果：oryxos-tool 新增 8 个测试类 + 004 的 4 个测试类全量回归绿。
+预期结果：axion-tool 新增 8 个测试类 + 004 的 4 个测试类全量回归绿。
 
 | 测试类 | 验证点 |
 |--------|--------|
-| `OryxToolContractTest` | **坑十二参数化**：遍历 Registry 每个工具 name/description/inputSchema 非空——漏 getInputSchema 立刻红 |
+| `AxionToolContractTest` | **坑十二参数化**：遍历 Registry 每个工具 name/description/inputSchema 非空——漏 getInputSchema 立刻红 |
 | `ToolRegistryTest` | 三来源注册；**坑十四**过滤不多不少；**重名拒绝 + WARN**；**未知名工具启动报错**（FR-1） |
 | `FileToolsTest`/`ShellToolsTest`/`HttpToolsTest` | 各"正常跑通 + 越界被拦"两条（mock Sandbox：InOrder 断言 **坑十 enforce 先于 IO**、违规 IO 零发生）；shell 超时销毁；http 1MB 上限 |
 | `McpClientServiceTest`/`McpToolAdapterTest` | mock client：listTools 包装注册；execute 转发原样、结果包 ToolResult（失败 retryable）；**坑十三失联只 WARN 不炸** |
@@ -25,9 +25,9 @@ mvn test -pl oryxos-tool,oryxos-cli -am
 
 ## 人工验证（机器判不了的部分；方法论见 `references/manual-acceptance.md`）
 
-1. **方式三真跑一次**：写一个 `@Tool` 示例 Bean（临时演示类，验收后删除）→ 启动后 `oryxos tool list` 可见、被包装进 Registry（依赖真启动 + 装配，不依赖真模型）
-2. **004 遗留补验**：`oryxos chat` 里让 Agent 调 `notify` 把消息推到企业微信群——"LLM 在对话里自动调 notify"端到端版（004 flow-status 待办到期；依赖真模型 key + 真实 webhook，无 key 如实记待办）
-3. **Demo 一对话版补跑**：`oryxos chat` 问天气——Agent 调 `http_get` 真查天气 + 穿搭建议（依赖真模型 key + 真网络；无 key 如实记待办，按 001 先例）
+1. **方式三真跑一次**：写一个 `@Tool` 示例 Bean（临时演示类，验收后删除）→ 启动后 `axion tool list` 可见、被包装进 Registry（依赖真启动 + 装配，不依赖真模型）
+2. **004 遗留补验**：`axion chat` 里让 Agent 调 `notify` 把消息推到企业微信群——"LLM 在对话里自动调 notify"端到端版（004 flow-status 待办到期；依赖真模型 key + 真实 webhook，无 key 如实记待办）
+3. **Demo 一对话版补跑**：`axion chat` 问天气——Agent 调 `http_get` 真查天气 + 穿搭建议（依赖真模型 key + 真网络；无 key 如实记待办，按 001 先例）
 4. **MCP 失联实机核验**：`mcp_servers.yaml` 配一个不可达 server → 启动日志 WARN 带 server 名、`tool list` 不受影响
 5. **落库核对**：工具调用后 `tool_invocations` 里 tool_name/success/duration_ms 正确（跑真链路时目检一眼）
 6. **安全窗口人工留意（FR-7 纪律）**：20~23 节 PermissiveSandbox 全放行期间，人工演示 Agent 声明保守 tools（不进 shell/http_post）；24 节替换后重验白名单拦截（白名单拦截人工验证归 24 节，本节如实记录不伪装通过）

@@ -37,7 +37,7 @@
   <rect x="320" y="280" width="250" height="66" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="1.2" filter="url(#sh)"/>
   <text x="445.0" y="297" text-anchor="middle" font-size="10" font-weight="bold" fill="#334155">/admin 只读管理台（五页）</text>
   <text x="445.0" y="311" text-anchor="middle" font-size="8" fill="#475569">Vue3 + Vite · 与官网同风格</text>
-  <text x="445.0" y="325" text-anchor="middle" font-size="8" fill="#475569">oryxos-admin-ui skill · 无写按钮</text>
+  <text x="445.0" y="325" text-anchor="middle" font-size="8" fill="#475569">axion-admin-ui skill · 无写按钮</text>
   <rect x="610" y="280" width="220" height="66" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="1.2" filter="url(#sh)"/>
   <text x="720.0" y="297" text-anchor="middle" font-size="10" font-weight="bold" fill="#334155">前端构建（拍板 B）</text>
   <text x="720.0" y="311" text-anchor="middle" font-size="8" fill="#475569">frontend-maven-plugin 绑进 mvn</text>

@@ -7,11 +7,11 @@
   <rect width="820" height="310" fill="#0e1420" rx="6"/>
   <rect x="0" y="0" width="820" height="32" fill="#d7e2f2" rx="6"/>
   <rect x="0" y="16" width="820" height="16" fill="#d7e2f2"/>
-  <text x="410" y="21" text-anchor="middle" fill="#141b2c" font-size="12" font-weight="bold">Tool 调用流程 — LLM → OryxOS → 外部世界</text>
+  <text x="410" y="21" text-anchor="middle" fill="#141b2c" font-size="12" font-weight="bold">Tool 调用流程 — LLM → Axion → 外部世界</text>
 
   <!-- ToolRegistry -->
   <rect x="40" y="50" width="280" height="28" rx="5" fill="#141b2c" stroke="#33435e" stroke-width="0.8"/>
-  <text x="180" y="69" text-anchor="middle" font-size="9" fill="#7d8ca5">ToolRegistry — 统一注册所有 OryxTool</text>
+  <text x="180" y="69" text-anchor="middle" font-size="9" fill="#7d8ca5">ToolRegistry — 统一注册所有 AxionTool</text>
   <line x1="180" y1="78" x2="180" y2="88" stroke="#9db0c9" stroke-width="1" marker-end="url(#aGray)"/>
 
   <!-- LLM -->

@@ -9,15 +9,15 @@
 ## 阶段一 — 核心运行时（当前）
 
 **第一周**：Provider 抽象 + ReAct Loop
-- `oryxos-core`、`oryxos-provider`、`oryxos-channel-cli`、`oryxos-cli`
-- Demo：`oryxos chat` 多轮对话，Agent 调 HTTP Tool
+- `axion-core`、`axion-provider`、`axion-channel-cli`、`axion-cli`
+- Demo：`axion chat` 多轮对话，Agent 调 HTTP Tool
 
 **第二周**：Memory + Tool 体系
-- `oryxos-memory`、`oryxos-tool`
+- `axion-memory`、`axion-tool`
 - Demo：Agent 跨对话记偏好；调本地文件和外部 MCP server
 
 **第三周**：Web Service
-- `oryxos-web`、`oryxos-storage`
+- `axion-web`、`axion-storage`
 - Demo：10 个 REST 端点完整调用
 
 **第四周**：多 Agent 演示 + 工程化收尾

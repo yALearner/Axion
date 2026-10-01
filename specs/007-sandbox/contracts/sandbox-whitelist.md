@@ -29,7 +29,7 @@ public class SandboxViolationException extends RuntimeException {}   // message 
 ```yaml
 file:
   allowed_paths:        # 空 = 什么都不允许（fail-closed）；相对根按启动目录解析
-    - .oryxos/workspace
+    - .axion/workspace
     - /data/reports
 shell:
   allowed_commands:     # 首 token 白名单；精确匹配、大小写敏感

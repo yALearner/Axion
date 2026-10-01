@@ -48,7 +48,7 @@
   <rect x="20" y="218" width="234" height="30" rx="4" fill="#fdf2f8"/>
   <text x="28" y="234" font-size="9" font-weight="bold" fill="#be123c">⑤ 可用 Tool 列表</text>
   <text x="130" y="234" font-size="8" fill="#f43f5e">← ToolRegistry</text>
-  <text x="28" y="246" font-size="7" fill="#64748b">Function Calling 格式 · OryxTool → JSON Schema</text>
+  <text x="28" y="246" font-size="7" fill="#64748b">Function Calling 格式 · AxionTool → JSON Schema</text>
 
   <!-- Arrow to center flow -->
   <line x1="262" y1="150" x2="295" y2="150" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#aBlue)"/>

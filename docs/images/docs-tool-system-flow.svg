@@ -23,7 +23,7 @@
   <line x1="325" y1="130" x2="325" y2="148" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
   <rect x="230" y="150" width="190" height="70" rx="6" fill="#dcfce7" stroke="#10b981" stroke-width="1.2" filter="url(#sh)"/>
   <text x="325.0" y="167" text-anchor="middle" font-size="10" font-weight="bold" fill="#15803d">ToolRegistry 统一注册</text>
-  <text x="325.0" y="182" text-anchor="middle" font-size="8" fill="#166534">三来源全包装成 OryxTool</text>
+  <text x="325.0" y="182" text-anchor="middle" font-size="8" fill="#166534">三来源全包装成 AxionTool</text>
   <text x="325.0" y="196" text-anchor="middle" font-size="8" fill="#166534">坑十四：按 Profile.tools 过滤——不多不少</text>
   <rect x="470" y="145" width="130" height="42" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2" filter="url(#sh)"/>
   <text x="535.0" y="162" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e40af">Profile.tools</text>
@@ -49,7 +49,7 @@
   <text x="740.0" y="101" text-anchor="middle" font-size="8" fill="#475569">Map.of("webhook", webhookAdapter)</text>
   <text x="740.0" y="115" text-anchor="middle" font-size="8" fill="#475569">NotifyChannelRegistry + NotifyTools 显式 @Bean</text>
   <rect x="650" y="150" width="180" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2" filter="url(#sh)"/>
-  <text x="740.0" y="167" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e40af">.oryxos/mcp_servers.yaml</text>
+  <text x="740.0" y="167" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e40af">.axion/mcp_servers.yaml</text>
   <text x="740.0" y="182" text-anchor="middle" font-size="8" fill="#1d4ed8">name/transport/command/env（stdio）</text>
   <rect x="650" y="205" width="180" height="40" rx="6" fill="#fecdd3" stroke="#be123c" stroke-width="1.2" filter="url(#sh)"/>
   <text x="740.0" y="222" text-anchor="middle" font-size="10" font-weight="bold" fill="#9f1239">坑十三：MCP 失联只 WARN 跳过</text>

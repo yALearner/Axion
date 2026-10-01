@@ -16,7 +16,7 @@
 
 **Primary Dependencies**: 零新增——Spring Scheduling（ThreadPoolTaskScheduler + CronTrigger，008 已用）、Spring Data JPA + SQLite（既有栈）、Spring MVC、Vue 3 + Vite（既有前端）
 
-**Storage**: SQLite（`jdbc:sqlite:.oryxos/oryxos.db`，`ddl-auto: none` + `spring.sql.init.mode: always` 手工建表脚本管线，既有）；新增两表进 schema.sql 增量
+**Storage**: SQLite（`jdbc:sqlite:.axion/axion.db`，`ddl-auto: none` + `spring.sql.init.mode: always` 手工建表脚本管线，既有）；新增两表进 schema.sql 增量
 
 **Testing**: JUnit 5 + Mockito + AssertJ（既有）；standalone MockMvc（009 模式）；@SpringBootTest + 临时 SQLite + mock provider（E2E 进 gate）；@Tag("integration") 真 key IT（既有先例）
 
@@ -66,12 +66,12 @@ specs/010-scheduler-mgmt/
 ### Source Code (repository root)
 
 ```text
-oryxos-core/src/main/java/com/oryxos/core/
+axion-core/src/main/java/com/axion/core/
 ├── Profile.java                   # 改造：Schedule record 补 id（首位字段，拍板 A）
 ├── ProfileLoader.java             # 改造：schedules 解析读 id + ⑦c 缺失报错（003 交付物）
 └── AgentScheduler.java            # 改造：登记/启用检查/executeInternal/runNow/同锁（008 交付物）
 
-oryxos-storage/src/main/java/com/oryxos/storage/
+axion-storage/src/main/java/com/axion/storage/
 ├── ScheduledTaskStore.java        # 新增接口（落位拍板 2026-09-09：契约与实现同落 storage，R1）
 ├── ScheduledTaskView.java         # 新增值对象
 ├── TaskExecutionView.java         # 新增值对象
@@ -81,34 +81,34 @@ oryxos-storage/src/main/java/com/oryxos/storage/
 ├── TaskExecutionRepository.java   # 新增仓库
 └── JpaScheduledTaskStore.java     # 新增实现（R1）
 
-oryxos-storage/src/main/resources/schema.sql   # 改造：增量两表（003 交付物）
+axion-storage/src/main/resources/schema.sql   # 改造：增量两表（003 交付物）
 
-oryxos-web/src/main/java/com/oryxos/web/api/
+axion-web/src/main/java/com/axion/web/api/
 └── ScheduleApiController.java     # 新增：四端点 + DTO（双信封，009 模式）
 
-oryxos-web/src/main/frontend/src/
+axion-web/src/main/frontend/src/
 ├── api.js                         # 改造：增 apiPost / apiPut（双信封同款）
 ├── main.js                        # 改造：/schedules 路由
 ├── App.vue                        # 改造：navItems 增「定时任务」
 └── views/SchedulesView.vue        # 新增：列表 + 立即执行/启用停用
 
-oryxos-cli/src/main/java/com/oryxos/cli/
+axion-cli/src/main/java/com/axion/cli/
 └── CliAgentConfiguration.java     # 改造：JpaScheduledTaskStore Bean + AgentScheduler 装配增参
 
-oryxos-boot/src/main/resources/application.yaml   # 改造：http.allowed_domains 三域名（FR-7）
+axion-boot/src/main/resources/application.yaml   # 改造：http.allowed_domains 三域名（FR-7）
 
-.claude/skills/oryxos-admin-ui/SKILL.md          # 改造：⑦d 只读纪律例外条款
+.claude/skills/axion-admin-ui/SKILL.md          # 改造：⑦d 只读纪律例外条款
 
 CLAUDE.md                                        # 改造：AGENT.md schedules 示例补 id（FR-4）
 
 # 测试（随模块）
-oryxos-core/src/test/.../AgentSchedulerTest.java        # 增补：登记/停用跳过/runNow/⑦a 并发/⑦c
-oryxos-core/src/test/.../ProfileLoaderTest.java         # 增补：id 解析 + 缺失报错
-oryxos-storage/src/test/.../ScheduledTaskRepositoryTest.java  # 新增：两表 PRAGMA + 存取
-oryxos-web/src/test/.../ScheduleApiControllerTest.java  # 新增：四端点契约
-oryxos-boot/src/test/.../ScheduledTaskE2ETest.java      # 新增：gate 内无 key 五步（mock provider）
-oryxos-boot/src/test/.../SchedulerFlowIT.java           # 新增：@Tag integration 真 key 对账
-oryxos-boot/src/test/.../RestartRecoveryIT.java         # 新增：@Tag integration 重启四样恢复
+axion-core/src/test/.../AgentSchedulerTest.java        # 增补：登记/停用跳过/runNow/⑦a 并发/⑦c
+axion-core/src/test/.../ProfileLoaderTest.java         # 增补：id 解析 + 缺失报错
+axion-storage/src/test/.../ScheduledTaskRepositoryTest.java  # 新增：两表 PRAGMA + 存取
+axion-web/src/test/.../ScheduleApiControllerTest.java  # 新增：四端点契约
+axion-boot/src/test/.../ScheduledTaskE2ETest.java      # 新增：gate 内无 key 五步（mock provider）
+axion-boot/src/test/.../SchedulerFlowIT.java           # 新增：@Tag integration 真 key 对账
+axion-boot/src/test/.../RestartRecoveryIT.java         # 新增：@Tag integration 重启四样恢复
 ```
 
 ## 关键设计点（详见 research.md / data-model.md / contracts/）

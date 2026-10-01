@@ -10,7 +10,7 @@
 
 ## 裁决 2：MemoryService 接口落 core（依赖倒置）
 
-- **Decision**: `MemoryService`/`LongTermMemoryStore`/`MemoryScope` 三个接口/枚举落 oryxos-core；实现/三档后端/两 Tool 落 oryxos-memory
+- **Decision**: `MemoryService`/`LongTermMemoryStore`/`MemoryScope` 三个接口/枚举落 axion-core；实现/三档后端/两 Tool 落 axion-memory
 - **Rationale**: PromptBuilder 在 core 调 MemoryService——若接口在 memory 则 core←memory 反向依赖（违反 CLAUDE.md 依赖方向）；001 `LlmGateway` 依赖倒置先例
 - **Alternatives considered**: 接口落 memory + PromptBuilder 经 ContextLoader 间接触达（否决：绕路且门面失去意义）；PromptBuilder 移到 memory（否决：动 002 结构）
 
@@ -40,9 +40,9 @@
 
 ## 裁决 7：两 Tool 形态（005 机械适配延续）
 
-- **Decision**: `SaveMemoryTool`/`RecallMemoryTool` 两顶层类 implements OryxTool（一个类只能实现一个 getName）；scope 参数 core/archival 缺省 archival、非法值明确报错；recall 未命中返回"没有找到相关记忆"不抛异常；content 必填校验（005 S1 口径）
+- **Decision**: `SaveMemoryTool`/`RecallMemoryTool` 两顶层类 implements AxionTool（一个类只能实现一个 getName）；scope 参数 core/archival 缺省 archival、非法值明确报错；recall 未命中返回"没有找到相关记忆"不抛异常；content 必填校验（005 S1 口径）
 - **Rationale**: G4-C1 全树扫描纪律 + 005 内置工具同款形态；坑十七（Agent 显式声明不猜）
-- **Alternatives considered**: 单个 MemoryTools 类两 @Tool 方法（否决：OryxTool 单 getName 形态）；@Tool 注解直用（否决：005 拍板机械适配）
+- **Alternatives considered**: 单个 MemoryTools 类两 @Tool 方法（否决：AxionTool 单 getName 形态）；@Tool 注解直用（否决：005 拍板机械适配）
 
 ## 裁决 8：坑编号全局递增（坑十五~十八）
 

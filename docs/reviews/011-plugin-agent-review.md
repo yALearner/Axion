@@ -5,7 +5,7 @@
 ## 一、全景调用链（本节交付后）
 
 ```
-启动：CliAgentConfiguration.profileRegistry → AgentLoader.loadAll(.oryxos/agents) → deriveProfile × N
+启动：CliAgentConfiguration.profileRegistry → AgentLoader.loadAll(.axion/agents) → deriveProfile × N
       → ProfileRegistry.register × N → AgentScheduler.registerAll → registerProfile × N
       → store.register + taskScheduler.schedule → scheduledTasks/registrations 句柄
 触发：runOnce/runNow → agentService.process（宪法 VIII，与 CLI/Web 同一入口）
@@ -30,7 +30,7 @@
 | `tool/WhitelistSandbox.java` | 007 演进（FR-5/FR-6） | enforce 四值路由不变（宪法 VI 接口零改动）；解释器分支在首 token 白名单**之后**（非解释器 007 语义原样）；元字符全命令扫描；FILE_WRITE 未动；子集 WARN 只含配置键名 |
 | `tool/ShellTools.java` | 005 演进（坑六） | bindAgentWorkingDir 仅解释器 + 有上下文时设 cwd；非解释器零回归 |
 | `tool/ShellSandboxProperties.java` | ③ 拍板 | 双字段归一空列表；@ConfigurationProperties 前缀不变 |
-| `cli/CliAgentConfiguration.java` | 装配 | WhitelistSandbox/ShellTools 新参数接线（Path.of(".oryxos")）；AgentLoader 引用 |
+| `cli/CliAgentConfiguration.java` | 装配 | WhitelistSandbox/ShellTools 新参数接线（Path.of(".axion")）；AgentLoader 引用 |
 | `boot/application.yaml` | 配置（⑨/③） | allowed_commands + python/bash；allowed_interpreters 新键注释 |
 | `web/api/AgentApiController.java`、`ProfileApiController.java`、`core/AgentService.java` | EI_EXPOSE_REP2 抑制 | 装配注入单例只读使用，AgentScheduler 同款先例；无行为变化 |
 
@@ -38,7 +38,7 @@
 
 1. **WhitelistSandbox.enforceInterpreterCommand**（tool，安全边界本体）：元字符集合是否覆盖 `$()`/反引号/引号/重定向/glob；`agentDir.resolve(scriptToken).normalize()` 是否吞掉 `../` 穿越（坑九回归 ProgressiveDisclosureTest 钉死）；`tokens[1].startsWith("-")` 与脚本参数透传的边界（`--date` 在 token[2..] 放行、在 token[1] 拒绝——S2 澄清口径）
 2. **ContextLoader.loadBody 每轮现读**：无任何缓存字段（坑三）；`agents/<name>` 由 profile.name 派生与坑八校验的闭环（name≠目录名在派生期已拦）
-3. **绑定路径注入 vs 逃逸校验**：skillMetadataOf 注入 binding 路径但仍调 resolveRealSkillDir 校验目标位于 `.oryxos/skills/`（002 逻辑保留）——两者缺一不可
+3. **绑定路径注入 vs 逃逸校验**：skillMetadataOf 注入 binding 路径但仍调 resolveRealSkillDir 校验目标位于 `.axion/skills/`（002 逻辑保留）——两者缺一不可
 4. **registerProfile 与 registerAll 一致性**：id 冲突改查 registrations 后，报错文案与 010 逐字一致（停止清单第 2 条）；registrations.put 仍在 schedule 之后（与 010 顺序一致，部分失败语义不变）
 5. **FILE_READ 动态根**：无上下文静态兜底（不扩大放行面）；FILE_WRITE 确未触碰（最小权限）
 6. **改造点波及**：PromptBuilderTest/ReActLoopTest/CliAgentConfigurationTest 补 agent 目录 fixture 是否最小侵入（未改断言语义）

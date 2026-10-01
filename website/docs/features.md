@@ -1,6 +1,6 @@
 # Features
 
-## Core Phase (Current) — OryxOS 1.0 Runtime Kernel
+## Core Phase (Current) — Axion 1.0 Runtime Kernel
 
 ### 🤖 Agent as Configuration
 One directory = one Agent. `AGENT.md` = frontmatter config + task instructions. No Agent backend code to write.
@@ -9,7 +9,7 @@ One directory = one Agent. `AGENT.md` = frontmatter config + task instructions. 
 Based on Spring AI, supports DeepSeek, Tongyi, Kimi, Zhipu, Hunyuan, Doubao and more. Explicit provider mapping ensures correct routing at runtime — switch by changing one line of config.
 
 ### 🧠 Self-implemented ReAct Loop
-OryxOS implements the Agent brain loop itself (not Spring AI's automatic tool execution). Complete control over the think→act→observe cycle, with full flexibility for custom loop behavior.
+Axion implements the Agent brain loop itself (not Spring AI's automatic tool execution). Complete control over the think→act→observe cycle, with full flexibility for custom loop behavior.
 
 ### 📝 Three-tier Memory
 - **Session memory**: Last `max_history_turns` of conversation
@@ -33,7 +33,7 @@ Interface-first design (`Sandbox.enforce(SandboxAction)`). Core phase: `Whitelis
 Agents auto-run on cron schedules — daily reports, scheduled inspections, data sync. No human initiation required.
 
 ### 📋 Audit Day One
-`tool_invocations` and `llm_calls` tables written from day one. Every tool call and LLM request is recorded — auditability is OryxOS's core differentiator.
+`tool_invocations` and `llm_calls` tables written from day one. Every tool call and LLM request is recorded — auditability is Axion's core differentiator.
 
 ## Extension Phase (Community) — Enterprise Governance
 

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.axion</groupId>
+        <artifactId>axion</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>axion-boot</artifactId>
+    <name>Axion :: Boot</name>
+    <description>Spring Boot 启动模块：主类、自动配置、依赖聚合</description>
+
+    <dependencies>
+        <!-- Internal (aggregates all modules for classpath scanning) -->
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-cli</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-channel-cli</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-memory</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-tool</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-storage</artifactId>
+        </dependency>
+
+        <!-- Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- 监控：Actuator + Prometheus -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- 结构化 JSON 日志（Logback LogstashEncoder） -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Test (for testing support) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- 单二进制：整个程序的 main 是 CLI 入口（技术方案 §8.7「AxionCli 是整个程序的 main」）；
+                         重命令经 Class.forName 加载本模块的 AxionApplication（坑九防线所在），
+                         application.yaml（axion.providers 全局层）随 boot 打进 fat jar 供轻命令读取 -->
+                    <mainClass>com.axion.cli.AxionCli</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

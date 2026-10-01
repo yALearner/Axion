@@ -6,7 +6,7 @@
 
 ## Summary
 
-第一周交付 OryxOS 最小运行时内核：Provider 抽象（显式映射）+ 自实现 ReAct Loop + `http_get` 内置 Tool（带 Sandbox HTTP 域名白名单）+ `oryxos chat` CLI 多轮对话，并 day-one 落库 `llm_calls` / `tool_invocations` 两张审计表（SQLite）。
+第一周交付 Axion 最小运行时内核：Provider 抽象（显式映射）+ 自实现 ReAct Loop + `http_get` 内置 Tool（带 Sandbox HTTP 域名白名单）+ `axion chat` CLI 多轮对话，并 day-one 落库 `llm_calls` / `tool_invocations` 两张审计表（SQLite）。
 
 技术路径：复用 Spring AI 仅做协议转换与 `@Tool` JSON Schema 生成（禁自动 tool 执行）；`ReActLoop` 自实现同步循环（Java 21 Virtual Thread 承载并发）；CLI 通过非 Web 的 Spring 上下文组装 6 个模块（storage/core/provider/tool/channel-cli/cli），`CliChannel` 汇入 `AgentService.process()`，与未来 Web/Scheduler 入口共用引擎。
 
@@ -26,7 +26,7 @@
 
 **Target Platform**: Linux 服务器（JDK 21+，主流发行版优先），桌面系统可用（Windows/macOS 开发）
 
-**Project Type**: Maven 多模块 Java CLI（9 模块骨架已存在，本里程碑填充其中 6 个：oryxos-storage / oryxos-core / oryxos-provider / oryxos-tool / oryxos-channel-cli / oryxos-cli）
+**Project Type**: Maven 多模块 Java CLI（9 模块骨架已存在，本里程碑填充其中 6 个：axion-storage / axion-core / axion-provider / axion-tool / axion-channel-cli / axion-cli）
 
 **Performance Goals**: SC-005：除 LLM 调用外的单次消息处理内部开销 ≤ 50ms
 
@@ -46,7 +46,7 @@
 4. 依赖管理新增 `logstash-logback-encoder:8.0`
 5. `sqlite-jdbc` 删除显式 3.45.3.0，跟随 BOM（3.49.1.0）
 6. 依赖管理新增 `hibernate-community-dialects`（BOM 管理，无版本）
-7. oryxos-provider 引入 `spring-ai-starter-model-openai`；oryxos-storage 引入 `spring-boot-starter-data-jpa` + `hibernate-community-dialects` + `sqlite-jdbc`
+7. axion-provider 引入 `spring-ai-starter-model-openai`；axion-storage 引入 `spring-boot-starter-data-jpa` + `hibernate-community-dialects` + `sqlite-jdbc`
 
 ## Constitution Check
 
@@ -54,15 +54,15 @@
 
 | # | 原则 | 本计划遵守方式 | 状态 |
 |---|------|---------------|------|
-| I | 自实现 ReAct Loop | `ReActLoop` 在 oryxos-core 手写（循环算法 FR-009），不使用 Spring AI Agent 抽象 / `ChatClient` 自动 tool 执行 | ✅ PASS |
+| I | 自实现 ReAct Loop | `ReActLoop` 在 axion-core 手写（循环算法 FR-009），不使用 Spring AI Agent 抽象 / `ChatClient` 自动 tool 执行 | ✅ PASS |
 | II | Spring AI 只用两件事 | 仅 ① LLM 协议转换 ② `@Tool` schema 生成；`ToolCallingChatOptions.internalToolExecutionEnabled(false)` 关闭 Spring AI 内部 tool 执行，调度与执行完全由 ReActLoop + ToolExecutor 控制 | ✅ PASS |
 | III | Provider 显式映射 | `ProviderService` 维护 `Map<String, ChatModel>` 显式映射，不扫描容器 Bean 类型 | ✅ PASS |
 | IV | 一个目录 = 一个 Agent | `AgentLoader.deriveProfile(agentDir)` 派生 Profile；本里程碑不含 Skill（frontmatter 不声明 `skills:`，不违反渐进披露约束） | ✅ PASS |
-| V | 审计表 Day One | oryxos-storage 提供 `LlmCallRepository`/`ToolInvocationRepository`，ReAct 循环内同步写入（FR-022） | ✅ PASS |
-| VI | 无 SecurityManager；接口先行 | oryxos-tool：`Sandbox` 接口（`enforce(SandboxAction)`，`ActionType` 四枚举）+ `WhitelistSandbox` 仅实现 HTTP 域名白名单 | ✅ PASS |
+| V | 审计表 Day One | axion-storage 提供 `LlmCallRepository`/`ToolInvocationRepository`，ReAct 循环内同步写入（FR-022） | ✅ PASS |
+| VI | 无 SecurityManager；接口先行 | axion-tool：`Sandbox` 接口（`enforce(SandboxAction)`，`ActionType` 四枚举）+ `WhitelistSandbox` 仅实现 HTTP 域名白名单 | ✅ PASS |
 | VII | 同步执行模型 | 全程同步阻塞；并发由 Java 21 Virtual Thread 承载（CLI 单线程交互，Web 阶段启用 spring.threads.virtual） | ✅ PASS |
 | VIII | 三种触发源共用一个引擎 | `CliChannel` 是 Channel 实现，消息统一进 `AgentService.process()`；`ReActLoop` 不感知入口 | ✅ PASS |
-| IX | Tool 模块三合一 | `HttpTools`（http_get）+ `Sandbox`/`WhitelistSandbox` + `ToolRegistry` 均归 oryxos-tool；`AGENT.md` 正文加载归 oryxos-core `ContextLoader` | ✅ PASS |
+| IX | Tool 模块三合一 | `HttpTools`（http_get）+ `Sandbox`/`WhitelistSandbox` + `ToolRegistry` 均归 axion-tool；`AGENT.md` 正文加载归 axion-core `ContextLoader` | ✅ PASS |
 
 **Gate 结论**: 9/9 通过，无违规，无需 Complexity Tracking 豁免。
 
@@ -83,51 +83,51 @@ specs/001-react-runtime/
 
 ### Source Code (repository root)
 
-9 模块 Maven 骨架已存在（父 POM `com.oryxos:oryxos:0.1.0-SNAPSHOT`），本里程碑填充 6 个模块：
+9 模块 Maven 骨架已存在（父 POM `com.axion:axion:0.1.0-SNAPSHOT`），本里程碑填充 6 个模块：
 
 ```text
-oryxos-core/                       # 核心抽象与循环
-└── src/main/java/com/oryxos/core/
+axion-core/                       # 核心抽象与循环
+└── src/main/java/com/axion/core/
     ├── profile/Profile.java       # AGENT.md frontmatter 派生对象
     ├── session/Session.java, SessionManager.java
     ├── context/ContextLoader.java # AGENT.md 正文注入 system prompt
-    ├── loader/AgentLoader.java    # 扫描 .oryxos/agents/ → deriveProfile
+    ├── loader/AgentLoader.java    # 扫描 .axion/agents/ → deriveProfile
     ├── react/ReActLoop.java, PromptBuilder.java
-    ├── tool/OryxTool.java, ToolResult.java, ToolExecutor.java, ToolRegistry.java（统一 Tool 抽象与调度契约）
+    ├── tool/AxionTool.java, ToolResult.java, ToolExecutor.java, ToolRegistry.java（统一 Tool 抽象与调度契约）
     ├── agent/AgentService.java    # 三入口共用引擎（CLI/Web/Scheduler 未来汇入）
-    └── config/WorkspacePaths.java # .oryxos/ 路径约定
+    └── config/WorkspacePaths.java # .axion/ 路径约定
 
-oryxos-provider/                   # 能力一：Provider 抽象
-└── src/main/java/com/oryxos/provider/
+axion-provider/                   # 能力一：Provider 抽象
+└── src/main/java/com/axion/provider/
     ├── ProviderService.java       # Map<String, ChatModel> 显式映射
     └── config/ProviderConfig.java # 构建 ChatModel 的 @Configuration
 
-oryxos-tool/                       # 能力四（本里程碑仅 http_get + Sandbox）
-└── src/main/java/com/oryxos/tool/
+axion-tool/                       # 能力四（本里程碑仅 http_get + Sandbox）
+└── src/main/java/com/axion/tool/
     ├── http/HttpTools.java        # http_get（2xx/4xx/5xx 语义 + 内部重试）；
     │                              #   方法标 @Tool（schema 由 Spring AI 生成，符合宪法 II）
     ├── sandbox/Sandbox.java, SandboxAction.java, ActionType.java
     ├── sandbox/WhitelistSandbox.java  # HTTP 域名白名单（全局+Agent 覆盖语义）
     └── registry/ToolRegistryImpl.java # 用 ToolCallbacks.from(@Tool Beans) 注册 name→ToolCallback
 
-oryxos-storage/                    # 审计两表（day one）
+axion-storage/                    # 审计两表（day one）
 └── src/main/
-    ├── java/com/oryxos/storage/
+    ├── java/com/axion/storage/
     │   ├── entity/LlmCallEntity.java, ToolInvocationEntity.java
     │   └── repo/LlmCallRepository.java, ToolInvocationRepository.java
     └── resources/schema.sql       # 手动建表脚本（IF NOT EXISTS，幂等）
 
-oryxos-channel-cli/                # CLI Channel
-└── src/main/java/com/oryxos/channel/cli/CliChannel.java
+axion-channel-cli/                # CLI Channel
+└── src/main/java/com/axion/channel/cli/CliChannel.java
 
-oryxos-cli/                        # Picocli 入口
-└── src/main/java/com/oryxos/cli/
-    ├── OryxOsCli.java             # 主入口（已存在占位）
+axion-cli/                        # Picocli 入口
+└── src/main/java/com/axion/cli/
+    ├── AxionCli.java             # 主入口（已存在占位）
     ├── commands/                  # init/status/chat/profile×4/provider list/tool list
     └── config/ConfigLoader.java   # config.yaml + env 占位校验
 ```
 
-**Structure Decision**: 沿用 CLAUDE.md 定义的 9 模块结构，依赖方向不变：storage ← core ← (provider/tool) ← channel-cli ← cli。CLI 以非 Web Spring 上下文（`SpringApplicationBuilder`）启动，JPA 自动配置负责 storage，`ProviderConfig` 负责 provider Bean；`oryxos-boot`/`oryxos-web`/`oryxos-memory` 本里程碑不动。
+**Structure Decision**: 沿用 CLAUDE.md 定义的 9 模块结构，依赖方向不变：storage ← core ← (provider/tool) ← channel-cli ← cli。CLI 以非 Web Spring 上下文（`SpringApplicationBuilder`）启动，JPA 自动配置负责 storage，`ProviderConfig` 负责 provider Bean；`axion-boot`/`axion-web`/`axion-memory` 本里程碑不动。
 
 ## Complexity Tracking
 

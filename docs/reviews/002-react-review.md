@@ -21,16 +21,16 @@ AgentService.process(session, userMessage)          ← 三触发源唯一入口
        │    └─ ProviderService（001）：路由 + 关自动执行 + llm_calls 落库
        ├─ 无工具调用 → 返回最终答复
        ├─ 有 → ToolExecutor.execute(session.id, call)    ← 执行权唯一（宪法 II）
-       │        └─ OryxTool 执行 → tool_invocations 落库（成败都写，宪法 V）
+       │        └─ AxionTool 执行 → tool_invocations 落库（成败都写，宪法 V）
        └─ 转满 maxIterations(10) → "达到最大轮数，已停止"（坑一）
   └─ finally: ProfileContext.clear()                ← 坑四：异常也清
 ```
 
-依赖方向：`core`（引擎+抽象）← `provider`（能力）→ `storage`（持久化）；`LlmGateway` 是 core 唯一对 provider 的倒置接缝；`ToolExecutor` 不持 Sandbox 引用（core 不反向依赖 oryxos-tool）。
+依赖方向：`core`（引擎+抽象）← `provider`（能力）→ `storage`（持久化）；`LlmGateway` 是 core 唯一对 provider 的倒置接缝；`ToolExecutor` 不持 Sandbox 引用（core 不反向依赖 axion-tool）。
 
 ## 二、逐文件梳理
 
-### oryxos-core（引擎本体，9 个新类 + 1 个迁入）
+### axion-core（引擎本体，9 个新类 + 1 个迁入）
 
 | 文件 | 干什么 | 值得注意的点 |
 |------|--------|-------------|
@@ -46,7 +46,7 @@ AgentService.process(session, userMessage)          ← 三触发源唯一入口
 | `ToolExecutor.java:87-115` | 审计落账 + 结构化日志 | 审计本身失败只记日志（`:95-98`）；**日志参数不含 sessionId/toolName**（防 CRLF 注入，001 先例） |
 | `ContextLoader.java:37-42` | load = bootstrap + skill 元数据 | 每次现读、无任何缓存字段（坑五①） |
 | `ContextLoader.java:44-63` | Bootstrap 读取 | 显式引用缺失 `IllegalStateException`（`:53`）；bootstrap 列表为空 WARN（`:47`）——两条铁律（坑五②） |
-| `ContextLoader.java:66-84, 113-131` | Skill 绑定解析 | 绑定真实性经 `toRealPath` 后必须位于 `.oryxos/skills/` 根内，逃逸即报错（`:127-129`）；只注入 name/description/读取路径，正文不预载（宪法 IV） |
+| `ContextLoader.java:66-84, 113-131` | Skill 绑定解析 | 绑定真实性经 `toRealPath` 后必须位于 `.axion/skills/` 根内，逃逸即报错（`:127-129`）；只注入 name/description/读取路径，正文不预载（宪法 IV） |
 | `ContextLoader.java:138-148` | 绑定判定 | symlink 或 Windows junction（`isOther()`）——本机无符号链接特权时 junction 是等价落法 |
 | `AgentService.java:25-37` | 编排者（宪法 VIII） | 顺序：set → run → save → **finally clear**（`:36`）；Profile 未注册清晰报错（`:28-29`） |
 | `ProfileContext.java:14` | ThreadLocal\<Profile> | 只存不删的设计在并发复用下串号——清理责任全在 AgentService 的 finally |
@@ -57,11 +57,11 @@ AgentService.process(session, userMessage)          ← 三触发源唯一入口
 
 | 文件 | 改动 | 注意 |
 |------|------|------|
-| `oryxos-provider/ProviderService.java` | +`implements LlmGateway` +`@Override`（各 1 行） | 方法体零改动；001 全部测试原样绿 |
-| `ToolSchemaAdapter`（provider → core） | 类 + 测试随迁，包名改 `com.oryxos.core` | 逻辑零改动（grep 对比过）；provider 侧生产代码无引用 |
-| `OryxOsApplication.java:26-28`（fix `bb80bf2`） | +`@EnableJpaRepositories`/`@EntityScan` | `scanBasePackages` 不作用于 JPA 扫描——人工验收实机暴露的启动缺口 |
+| `axion-provider/ProviderService.java` | +`implements LlmGateway` +`@Override`（各 1 行） | 方法体零改动；001 全部测试原样绿 |
+| `ToolSchemaAdapter`（provider → core） | 类 + 测试随迁，包名改 `com.axion.core` | 逻辑零改动（grep 对比过）；provider 侧生产代码无引用 |
+| `AxionApplication.java:26-28`（fix `bb80bf2`） | +`@EnableJpaRepositories`/`@EntityScan` | `scanBasePackages` 不作用于 JPA 扫描——人工验收实机暴露的启动缺口 |
 
-### oryxos-tool（首份内容，纯接口墙）
+### axion-tool（首份内容，纯接口墙）
 
 | 文件 | 干什么 | 值得注意的点 |
 |------|--------|-------------|
@@ -69,7 +69,7 @@ AgentService.process(session, userMessage)          ← 三触发源唯一入口
 | `SandboxAction.java` / `ActionType.java` | record + 四值枚举 | 字面量照技术方案 §6.7：FILE_READ/FILE_WRITE/SHELL_COMMAND/HTTP_REQUEST |
 | `SandboxViolationException.java` | RuntimeException | 信息说明被拒动作 |
 
-### oryxos-storage（审计扩展）
+### axion-storage（审计扩展）
 
 | 文件 | 干什么 | 值得注意的点 |
 |------|--------|-------------|
@@ -94,12 +94,12 @@ AgentService.process(session, userMessage)          ← 三触发源唯一入口
 ## 三、重点 review 清单（按风险排序）
 
 1. **`PromptBuilder.java:81-95`（宪法 II 第二道防线）**——ToolCallback 回调体必须永远不可达。问自己：有没有任何路径会让 `neverCalled` 这个 lambda 被 Spring AI 调用到？（答案：没有——自动执行在 001 已强制关闭，执行只经 ToolExecutor；即便框架误调，抛出的异常会立即暴露）
-2. **`ReActLoop.java:37-59`（宪法 I 命根子）**——停止条件只有两个、工具执行只有一条路。grep 全 repo 确认没有第二处 `OryxTool.execute` 调用方，没有 `ChatClient`/`ToolCallingManager` 出现。
+2. **`ReActLoop.java:37-59`（宪法 I 命根子）**——停止条件只有两个、工具执行只有一条路。grep 全 repo 确认没有第二处 `AxionTool.execute` 调用方，没有 `ChatClient`/`ToolCallingManager` 出现。
 3. **`ToolExecutor.java:39-73`（宪法 V）**——三个出口（未知工具/工具失败/工具抛异常）是否都写了审计？失败路径是否"先落账再返回"？日志参数是否真的不含 sessionId/toolName（CRLF 注入）？
 4. **`PromptBuilder.java:124-135`（坑二语义）**——截断边界：一轮 = USER 起；TOOL 消息绝不能脱离所属轮单独保留。构造一个"第 N+1 轮的 tool 消息出现在第 N 轮尾部"的刁钻历史验证。
 5. **`AgentService.java:25-37`（坑四）**——finally 是否覆盖所有 return/throw 路径？`ProfileContext.clear()` 用的是 `remove()` 还是 `set(null)`（应为 remove，防内存泄漏）？
 6. **`ContextLoader.java:113-131`（宪法 IV 安全边界）**——`toRealPath` + `startsWith(公共 Skill 根)` 是否真的防住了 `..` 逃逸？（junction/symlink 都先解析再比对；注意 startsWith 用的是解析后的真实路径）
-7. **`OryxOsApplication.java:26-28`（fix 提交）**——`@EnableJpaRepositories`/`@EntityScan` 显式声明后，是否还有重复扫描或遗漏 `com.oryxos.storage` 之外未来仓储的风险（后续模块的 Repository 也要进这两个注解的 basePackages）。
+7. **`AxionApplication.java:26-28`（fix 提交）**——`@EnableJpaRepositories`/`@EntityScan` 显式声明后，是否还有重复扫描或遗漏 `com.axion.storage` 之外未来仓储的风险（后续模块的 Repository 也要进这两个注解的 basePackages）。
 
 ## 四、刻意留白（review 时不要当成缺陷报）
 
@@ -107,7 +107,7 @@ AgentService.process(session, userMessage)          ← 三触发源唯一入口
 - PromptBuilder 长期记忆段是注释不是代码——Memory 模块归第 21/22 节，"没开就跳过"
 - TOOL 消息回填 name 为空串——core 契约（001 已定）只存 toolCallId+内容
 - Sandbox 无人调用、无实现——接口墙先行（FR-7），接线归第 20 节、白名单归第 23/24 节
-- ToolExecutor 工具集是 `Map<String, OryxTool>` 注入——第 20 节换成 ToolRegistry 不改本类
+- ToolExecutor 工具集是 `Map<String, AxionTool>` 注入——第 20 节换成 ToolRegistry 不改本类
 - 无工具并行、无自动重试、无流式、无 fallback——需求文档"明确不做"清单
 - 本节无 CLI/Web 装配——触发源接入从第 18 节开始，编排者本体已就位
 - Windows junction 与 symlink 并列作为绑定形态——本机无符号链接特权下的等价落法（测试注释有说明）

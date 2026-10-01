@@ -16,14 +16,14 @@
 
 ## 裁决 3：形态机械适配（修订说明 ③）
 
-- **Decision**: 课件 `@Component`/`@Tool` 形态 → 无组件注解纯类 + 装配处显式 `@Bean`（G4-C1）；包名 `io.oryxos` → `com.oryxos`；`ToolResult` 返回 → `OryxTool.execute(JsonNode)` 纯实现形态
+- **Decision**: 课件 `@Component`/`@Tool` 形态 → 无组件注解纯类 + 装配处显式 `@Bean`（G4-C1）；包名 `io.axion` → `com.axion`；`ToolResult` 返回 → `AxionTool.execute(JsonNode)` 纯实现形态
 - **Rationale**: 005 拍板延续（G4-C1：无组件注解，装配处显式 @Bean）；本 feature 与 Spring AI 无关（纯校验类）
 - **Alternatives considered**: 课件原样 @Component 组件扫描（否决：005 拍板口径）
 
 ## 裁决 4：白名单根构造期 toAbsolutePath（⑦a，P0 修复）
 
 - **Decision**: `allowedRoots` 构造期 `Path.of(...).normalize().toAbsolutePath()`（课件骨架只有 normalize）——相对根按启动目录解析
-- **Rationale**: 目标侧 `normalize().toAbsolutePath()` 恒为绝对路径，相对根与绝对 target 的 `startsWith` 永不匹配 → 文件类三工具全拒（确定性缺陷，课件骨架原样带入）；示例配置第一条 `.oryxos/workspace` 即相对根，照抄必踩
+- **Rationale**: 目标侧 `normalize().toAbsolutePath()` 恒为绝对路径，相对根与绝对 target 的 `startsWith` 永不匹配 → 文件类三工具全拒（确定性缺陷，课件骨架原样带入）；示例配置第一条 `.axion/workspace` 即相对根，照抄必踩
 - **Alternatives considered**: 目标不绝对化（否决：相对 target 依赖调用时 cwd，语义漂移）；根与目标都保持相对（否决：工具传入路径形态不可控）
 
 ## 裁决 5：Windows 大小写归一（⑦b）

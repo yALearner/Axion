@@ -17,27 +17,27 @@
       400 InvalidRequest / 404 Session·Resource / 503 仅 Provider+ServiceUnavailable（⑨a 收紧）/
       504 AgentTimeout / 500 兜底「服务器内部错误」不泄漏内幕（最值钱回归兼 ⑨a 一测双钉）
   → serve 真启动（8080 + virtual thread + 排除 7 个 Spring AI eager 装配类——单 key 可启动，⑩d H3 类名）
-  → /admin 只读管理台（Vue3+Vite 五页，frontend-maven-plugin 构建拍板 B + SPA 回落 + oryxos-admin-ui skill）
+  → /admin 只读管理台（Vue3+Vite 五页，frontend-maven-plugin 构建拍板 B + SPA 回落 + axion-admin-ui skill）
 ```
 
 ⑨d 并发面：`AgentService` per-session ReentrantLock——三触发源（CLI/Web/钟推）第一次同场，同会话串行化（排队语义，Web 60s 超时兜底）。
 
 ## 二、逐文件梳理
 
-### oryxos-web/com/oryxos/web/api（6 Controller + 5 异常 + 2 扩展 + 1 配置）
+### axion-web/com/axion/web/api（6 Controller + 5 异常 + 2 扩展 + 1 配置）
 
 | 文件 | 关键点 |
 |------|--------|
 | `SessionApiController` | 4 端点；32KB/100 条防呆；`runWithTimeout`（⑨c：超时后任务体继续跑完、业务异常 unwrap 按原类型上抛——THROWS 抑制 justified）；DTO record 同文件 |
 | `AgentApiController` | invoke 一次性 Session 三元组 `("web","invoke",name)` 跑完不缓存（⑨）；Agent 不存在 404 |
-| `ProfileApiController` / `ToolApiController` / `MemoryApiController` / `SystemApiController` | 4 查询 Controller；GET /memory 直连 store（实现级明确不扩门面）；GET /info **脱敏**（Binder 重读 oryxos.providers 只输出 name/baseUrl/model，不含 apiKey）；EI_EXPOSE_REP2 抑制（004 先例，注入单例只读） |
+| `ProfileApiController` / `ToolApiController` / `MemoryApiController` / `SystemApiController` | 4 查询 Controller；GET /memory 直连 store（实现级明确不扩门面）；GET /info **脱敏**（Binder 重读 axion.providers 只输出 name/baseUrl/model，不含 apiKey）；EI_EXPOSE_REP2 抑制（004 先例，注入单例只读） |
 | `GlobalExceptionHandler`（地基扩展） | 保留地基全部既有映射 + 新增 400/404/503/504 + 500 兜底；**⑨a：503 仅 Provider 语义类**（IllegalStateException 归 500——001/006/008 业务校验异常不被报成 Provider 故障）；地基文案「服务器内部错误」保真 |
 | `ErrorCode`（地基补值） | +GATEWAY_TIMEOUT(504)，4 值扩 5 值 |
 | 5 异常类 | RuntimeException 子类，javadoc 注明映射状态码与语义 |
 | `AdminSpaConfig` | /admin/** 静态资源 + 未命中回落 index.html（/api/v1/** 不受影响） |
 | `ApiResponse`/`ErrorResponse`/`ServiceUnavailableException` | **地基零删除**（拍板 B，git diff 空） |
 
-### 前端工程 oryxos-web/src/main/frontend/
+### 前端工程 axion-web/src/main/frontend/
 
 | 文件 | 关键点 |
 |------|--------|
@@ -72,7 +72,7 @@
 2. **⑨a 503 收紧**（`GlobalExceptionHandler`）：课件骨架 `{IllegalStateException, ProviderUnavailableException}`→503 全域映射与 001/006/008 业务校验冲突——语义污染修复；一测双钉回归
 3. **runWithTimeout unwrap**（两 Controller）：ExecutionException 展开按原类型重抛是 GlobalExceptionHandler 正确映射的前提；InterruptedException 恢复中断标志
 4. **双信封边界**（拍板 B）：错误只经 Handler 单出口产出 ErrorResponse；信封边界测试（无 code 字段断言）是新端点选错信封的机器防线
-5. **GET /info 脱敏**：Binder 重读 oryxos.providers——只输出 name/baseUrl/model，apiKey 绝不出接口
+5. **GET /info 脱敏**：Binder 重读 axion.providers——只输出 name/baseUrl/model，apiKey 绝不出接口
 6. **eager 装配排除**（application.yaml）：7 个类全排除（⑩d H3 实测 1.1.8 类名）；少排一个 chat 类 serve 就索要 key
 7. **frontend-maven-plugin**：npm ci 锁版（package-lock.json 已入库）+ `-Dskip.npm` 后端迭代开关 + node 版本 pom/.nvmrc 同步
 8. **archive 链路**（拍板 A）：SessionManager.archive → SessionEntity.archive 状态流转 + 缓存移除——DELETE 归档语义完整
@@ -94,7 +94,7 @@
 2. `SessionApiController`（32KB 防呆 + runWithTimeout ⑨c）→ `AgentApiController`（invoke 三元组）
 3. `AgentService` per-session 锁（⑨d 并发面）+ `AgentServiceTest` 并发回归
 4. 四个查询 Controller（GET /memory 直连 + GET /info 脱敏）+ `AdminSpaConfig`（SPA 回落）
-5. 前端工程（api.js 双信封封装 + 五视图三态）+ `oryxos-admin-ui` skill
+5. 前端工程（api.js 双信封封装 + 五视图三态）+ `axion-admin-ui` skill
 6. `ServeCommand` + `application.yaml`（eager 排除）→ `WebSmokeIT`（真上下文红线）
 
 ## 六、当前验收状态

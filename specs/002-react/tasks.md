@@ -12,7 +12,7 @@
 
 - `[P]`：可并行（不同文件、无依赖）
 - `[USx]`：归属 user story；Setup/Foundational/Polish 不标
-- 所有文件路径为仓库根目录相对路径，包名 `com.oryxos.*`
+- 所有文件路径为仓库根目录相对路径，包名 `com.axion.*`
 
 ---
 
@@ -20,8 +20,8 @@
 
 **Purpose**: 依赖核实与环境准备
 
-- [X] T001 依赖核实（写前 H3 门禁）：对 oryxos-core 跑 `mvn dependency:tree`，核实锁定 BOM 中承载 `Prompt`/`ChatResponse`/`ToolCall`/`ToolCallingChatOptions`/`ToolDefinition` 的确切 artifact（`spring-ai-model` 或同级数据模型构件）；结论记录到 `specs/002-react/research.md` 的 R1 决策备注，核实不到 → 停下报告
-- [X] T002 [P] 在 `oryxos-core/pom.xml` 增加 Spring AI 数据模型依赖（T001 核实的 artifact；**不含 starter/自动配置/Agent 抽象**——拍板③边界）
+- [X] T001 依赖核实（写前 H3 门禁）：对 axion-core 跑 `mvn dependency:tree`，核实锁定 BOM 中承载 `Prompt`/`ChatResponse`/`ToolCall`/`ToolCallingChatOptions`/`ToolDefinition` 的确切 artifact（`spring-ai-model` 或同级数据模型构件）；结论记录到 `specs/002-react/research.md` 的 R1 决策备注，核实不到 → 停下报告
+- [X] T002 [P] 在 `axion-core/pom.xml` 增加 Spring AI 数据模型依赖（T001 核实的 artifact；**不含 starter/自动配置/Agent 抽象**——拍板③边界）
 
 ---
 
@@ -29,14 +29,14 @@
 
 **Purpose**: 所有 user story 共享的底座类型与改造点落地，完成前不得开始任何 story
 
-- [X] T003 [P] 创建 `Session` 在 `oryxos-core/src/main/java/com/oryxos/core/Session.java`——id/profileName/channel/userId/messages 累积容器，`append(Message)` 追加（历史以 001 的 `Message` 承载，框架无关可序列化；字段见 data-model.md）
-- [X] T004 [P] **harness 先行**：编写 `SessionManagerTest` 在 `oryxos-core/src/test/java/com/oryxos/core/SessionManagerTest.java`——① 同一 (channel,user,profileName) 三元组两次 getOrCreate 返回同一实例（幂等）② 三元组任一不同则不同 Session ③ **session_id 拼接只发生在 SessionManager 一处**（H4 不变量四架构断言）（先写、先跑、确认失败）
-- [X] T005 实现 `SessionManager` 在 `oryxos-core/src/main/java/com/oryxos/core/SessionManager.java`——`getOrCreate`/`get`/`save`（内存版 save 为 no-op 占位，第 18 节 JPA 化）；`ConcurrentHashMap` 承载；session_id 拼接只此一处
-- [X] T006 [P] 创建 `LlmGateway` 端口接口在 `oryxos-core/src/main/java/com/oryxos/core/LlmGateway.java`——签名逐字 = `ChatResponse chat(String sessionId, Profile profile, Prompt prompt)`（G2 拍板；契约见 contracts/react-loop.md）
-- [X] T007 [P] 迁移 `ToolSchemaAdapter`（G2 拍板改造点一）：`oryxos-provider/src/main/java/com/oryxos/provider/ToolSchemaAdapter.java` → `oryxos-core/src/main/java/com/oryxos/core/ToolSchemaAdapter.java`（包名改 `com.oryxos.core`，**逻辑零改动**）；`ToolSchemaAdapterTest` 随迁到 `oryxos-core/src/test/java/com/oryxos/core/ToolSchemaAdapterTest.java`；删除 provider 侧两个旧文件
-- [X] T008 [P] 改造点二：在 `oryxos-provider/src/main/java/com/oryxos/provider/ProviderService.java` 类声明加 `implements LlmGateway`（一行声明，方法零改动；001 既有调用方不受影响）
-- [X] T009 [P] 创建 `ToolInvocation` 实体 + `ToolInvocationRepository` 在 `oryxos-storage/src/main/java/com/oryxos/storage/`；`oryxos-storage/src/main/resources/schema.sql` **增量追加** `tool_invocations` DDL（含 `success`/`error_message` 两列，`created_at` ISO-8601 TEXT 复用 `InstantTextConverter`；字段见 data-model.md）
-- [X] T010 [P] 创建 `PromptBuilder` 骨架在 `oryxos-core/src/main/java/com/oryxos/core/PromptBuilder.java`——`build(Session, Profile)` 返回最小可运行 Prompt（system 段 = `Profile.identity.prompt` + 末尾当前日期时间；历史/长期记忆/工具列表三段留拼接位，US4 填全）
+- [X] T003 [P] 创建 `Session` 在 `axion-core/src/main/java/com/axion/core/Session.java`——id/profileName/channel/userId/messages 累积容器，`append(Message)` 追加（历史以 001 的 `Message` 承载，框架无关可序列化；字段见 data-model.md）
+- [X] T004 [P] **harness 先行**：编写 `SessionManagerTest` 在 `axion-core/src/test/java/com/axion/core/SessionManagerTest.java`——① 同一 (channel,user,profileName) 三元组两次 getOrCreate 返回同一实例（幂等）② 三元组任一不同则不同 Session ③ **session_id 拼接只发生在 SessionManager 一处**（H4 不变量四架构断言）（先写、先跑、确认失败）
+- [X] T005 实现 `SessionManager` 在 `axion-core/src/main/java/com/axion/core/SessionManager.java`——`getOrCreate`/`get`/`save`（内存版 save 为 no-op 占位，第 18 节 JPA 化）；`ConcurrentHashMap` 承载；session_id 拼接只此一处
+- [X] T006 [P] 创建 `LlmGateway` 端口接口在 `axion-core/src/main/java/com/axion/core/LlmGateway.java`——签名逐字 = `ChatResponse chat(String sessionId, Profile profile, Prompt prompt)`（G2 拍板；契约见 contracts/react-loop.md）
+- [X] T007 [P] 迁移 `ToolSchemaAdapter`（G2 拍板改造点一）：`axion-provider/src/main/java/com/axion/provider/ToolSchemaAdapter.java` → `axion-core/src/main/java/com/axion/core/ToolSchemaAdapter.java`（包名改 `com.axion.core`，**逻辑零改动**）；`ToolSchemaAdapterTest` 随迁到 `axion-core/src/test/java/com/axion/core/ToolSchemaAdapterTest.java`；删除 provider 侧两个旧文件
+- [X] T008 [P] 改造点二：在 `axion-provider/src/main/java/com/axion/provider/ProviderService.java` 类声明加 `implements LlmGateway`（一行声明，方法零改动；001 既有调用方不受影响）
+- [X] T009 [P] 创建 `ToolInvocation` 实体 + `ToolInvocationRepository` 在 `axion-storage/src/main/java/com/axion/storage/`；`axion-storage/src/main/resources/schema.sql` **增量追加** `tool_invocations` DDL（含 `success`/`error_message` 两列，`created_at` ISO-8601 TEXT 复用 `InstantTextConverter`；字段见 data-model.md）
+- [X] T010 [P] 创建 `PromptBuilder` 骨架在 `axion-core/src/main/java/com/axion/core/PromptBuilder.java`——`build(Session, Profile)` 返回最小可运行 Prompt（system 段 = `Profile.identity.prompt` + 末尾当前日期时间；历史/长期记忆/工具列表三段留拼接位，US4 填全）
 
 **Checkpoint**: 底座就绪——Session/SessionManager/LlmGateway/PromptBuilder 骨架/审计表 + 两个改造点落地，六个 story 可开始
 
@@ -50,13 +50,13 @@
 
 ### Tests for US1（harness 先行，先写先红）
 
-- [X] T011 [P] [US1] 编写 `ReActLoopTest` 在 `oryxos-core/src/test/java/com/oryxos/core/ReActLoopTest.java`——① 无 tool 调用一轮收尾返回文本 ② 有 tool 调用 → 执行并回填进下一轮 ③ **坑一回归**：模型一直要调工具 → 恰好 10 轮（`verify(gateway, times(10)).chat(...)`）、返回含"达到最大轮数" ④ **坑三回归**：每轮响应与工具结果按序累积进 Session ⑤ **坑六回归**：工具经 ToolExecutor 恰好执行一次，无框架自动执行路径
-- [X] T012 [P] [US1] 编写 `ToolExecutorTest` 在 `oryxos-core/src/test/java/com/oryxos/core/ToolExecutorTest.java`——按名找工具执行、未知工具名返回失败结果、成功写审计 `success=true`、**坑七回归**：失败也写 `success=false` + 原因、`retryable` 回传、异常不吞、无内部自动重试（mock `ToolInvocationRepository`）
+- [X] T011 [P] [US1] 编写 `ReActLoopTest` 在 `axion-core/src/test/java/com/axion/core/ReActLoopTest.java`——① 无 tool 调用一轮收尾返回文本 ② 有 tool 调用 → 执行并回填进下一轮 ③ **坑一回归**：模型一直要调工具 → 恰好 10 轮（`verify(gateway, times(10)).chat(...)`）、返回含"达到最大轮数" ④ **坑三回归**：每轮响应与工具结果按序累积进 Session ⑤ **坑六回归**：工具经 ToolExecutor 恰好执行一次，无框架自动执行路径
+- [X] T012 [P] [US1] 编写 `ToolExecutorTest` 在 `axion-core/src/test/java/com/axion/core/ToolExecutorTest.java`——按名找工具执行、未知工具名返回失败结果、成功写审计 `success=true`、**坑七回归**：失败也写 `success=false` + 原因、`retryable` 回传、异常不吞、无内部自动重试（mock `ToolInvocationRepository`）
 
 ### Implementation for US1
 
-- [X] T013 [P] [US1] 实现 `ToolExecutor` 在 `oryxos-core/src/main/java/com/oryxos/core/ToolExecutor.java`——`execute(String sessionId, ToolCall)` → ToolResult；注入 `Map<String, OryxTool>` 工具集（第 20 节换成 ToolRegistry 不改本类）；按名找工具→执行→结果包装；**成败都写 `tool_invocations`**（宪法 V，接线 T009 的 Repository）；**每次执行记录结构化日志**（sessionId/toolName/耗时/成败，敏感参数不入日志）；**不持 Sandbox 引用**（涉外 enforce 由各工具 execute 首行自执行，contracts/sandbox.md）
-- [X] T014 [US1] 实现 `ReActLoop` 在 `oryxos-core/src/main/java/com/oryxos/core/ReActLoop.java`——`run(Session, String userMessage, Profile)` 七步循环（需求文档核心骨架）；注入 `LlmGateway`/`PromptBuilder`/`ToolExecutor`；`ChatResponse` → core `Message` 私有转换（assistant 含 toolCalls；TOOL 消息含 ToolCallResult）；`maxIterations` 默认 10（`Profile.Settings` 常量，001 已建全）；**每轮循环记录结构化日志**（session.id/轮次/LLM 调用耗时与成败——补足 NFR-2 的 LLM 调用侧日志）；不触发 Spring AI Agent 抽象
+- [X] T013 [P] [US1] 实现 `ToolExecutor` 在 `axion-core/src/main/java/com/axion/core/ToolExecutor.java`——`execute(String sessionId, ToolCall)` → ToolResult；注入 `Map<String, AxionTool>` 工具集（第 20 节换成 ToolRegistry 不改本类）；按名找工具→执行→结果包装；**成败都写 `tool_invocations`**（宪法 V，接线 T009 的 Repository）；**每次执行记录结构化日志**（sessionId/toolName/耗时/成败，敏感参数不入日志）；**不持 Sandbox 引用**（涉外 enforce 由各工具 execute 首行自执行，contracts/sandbox.md）
+- [X] T014 [US1] 实现 `ReActLoop` 在 `axion-core/src/main/java/com/axion/core/ReActLoop.java`——`run(Session, String userMessage, Profile)` 七步循环（需求文档核心骨架）；注入 `LlmGateway`/`PromptBuilder`/`ToolExecutor`；`ChatResponse` → core `Message` 私有转换（assistant 含 toolCalls；TOOL 消息含 ToolCallResult）；`maxIterations` 默认 10（`Profile.Settings` 常量，001 已建全）；**每轮循环记录结构化日志**（session.id/轮次/LLM 调用耗时与成败——补足 NFR-2 的 LLM 调用侧日志）；不触发 Spring AI Agent 抽象
 
 **Checkpoint**: US1 独立可测——主循环全链路 mock 跑通（MVP）
 
@@ -70,7 +70,7 @@
 
 ### Tests for US2（harness 先行）
 
-- [X] T015 [P] [US2] 编写 `ToolInvocationRepositoryTest` 在 `oryxos-storage/src/test/java/com/oryxos/storage/ToolInvocationRepositoryTest.java`——**坑八回归**：测试中执行手工 `schema.sql` 建表（不让 Hibernate 自动建——沿用 001 `LlmCallRepositoryTest` 同款讲究）；`tool_invocations` 可存可读、`success`/`error_message` 两列真实存在、ISO-8601 `created_at` 往返一致
+- [X] T015 [P] [US2] 编写 `ToolInvocationRepositoryTest` 在 `axion-storage/src/test/java/com/axion/storage/ToolInvocationRepositoryTest.java`——**坑八回归**：测试中执行手工 `schema.sql` 建表（不让 Hibernate 自动建——沿用 001 `LlmCallRepositoryTest` 同款讲究）；`tool_invocations` 可存可读、`success`/`error_message` 两列真实存在、ISO-8601 `created_at` 往返一致
 
 ### Implementation for US2
 
@@ -106,13 +106,13 @@
 
 ### Tests for US4（harness 先行）
 
-- [X] T019 [US4] 编写 `PromptBuilderTest` 在 `oryxos-core/src/test/java/com/oryxos/core/PromptBuilderTest.java`——① 四部分顺序正确 ② **坑二回归**：历史超 N 轮（默认 20）被截断、不切断一轮内的 tool 调用链（TOOL 消息跟随所属 ASSISTANT 响应成组保留）③ system 段末尾含当前日期时间 ④ 长期记忆段未启用时跳过 ⑤ 工具列表为 Function Calling 格式（复用 ToolSchemaAdapter 契约）⑥ 工具列表为空 → prompt 正常组装（无工具段不报错）
-- [X] T020 [P] [US4] 编写 `ContextLoaderTest` 在 `oryxos-core/src/test/java/com/oryxos/core/ContextLoaderTest.java`——**坑五回归**：改文件后下一次 build 立即读到新内容（无缓存）；显式引用缺失报错；Bootstrap 缺失至少 WARN；skills 软连接元数据（name/description）注入、目录不存在跳过（@TempDir 搭临时工作区）
+- [X] T019 [US4] 编写 `PromptBuilderTest` 在 `axion-core/src/test/java/com/axion/core/PromptBuilderTest.java`——① 四部分顺序正确 ② **坑二回归**：历史超 N 轮（默认 20）被截断、不切断一轮内的 tool 调用链（TOOL 消息跟随所属 ASSISTANT 响应成组保留）③ system 段末尾含当前日期时间 ④ 长期记忆段未启用时跳过 ⑤ 工具列表为 Function Calling 格式（复用 ToolSchemaAdapter 契约）⑥ 工具列表为空 → prompt 正常组装（无工具段不报错）
+- [X] T020 [P] [US4] 编写 `ContextLoaderTest` 在 `axion-core/src/test/java/com/axion/core/ContextLoaderTest.java`——**坑五回归**：改文件后下一次 build 立即读到新内容（无缓存）；显式引用缺失报错；Bootstrap 缺失至少 WARN；skills 软连接元数据（name/description）注入、目录不存在跳过（@TempDir 搭临时工作区）
 
 ### Implementation for US4
 
-- [X] T021 [P] [US4] 实现 `ContextLoader` 在 `oryxos-core/src/main/java/com/oryxos/core/ContextLoader.java`——构造注入工作区根路径；`load(Profile)` 每轮现读：① `Profile.bootstrap` 引用文件（显式缺失报错、Bootstrap 缺失 WARN）② `.oryxos/agents/<name>/skills/<name>` 软连接 → 公共 `SKILL.md` frontmatter 的 name/description（宪法 IV：只注入元数据不预载正文，frontmatter 不声明 skills）；无缓存
-- [X] T022 [US4] 完善 `PromptBuilder` 在 `oryxos-core/src/main/java/com/oryxos/core/PromptBuilder.java`——四段全量组装（骨架 T010 填全）：① system = `identity.prompt` + ContextLoader 产物 + 当前日期时间 ② 长期记忆留拼接位跳过 ③ 最近 N 轮历史（坑二截断语义）④ 工具列表（注入的工具集 → ToolSchemaAdapter 翻译 → Function Calling 格式）
+- [X] T021 [P] [US4] 实现 `ContextLoader` 在 `axion-core/src/main/java/com/axion/core/ContextLoader.java`——构造注入工作区根路径；`load(Profile)` 每轮现读：① `Profile.bootstrap` 引用文件（显式缺失报错、Bootstrap 缺失 WARN）② `.axion/agents/<name>/skills/<name>` 软连接 → 公共 `SKILL.md` frontmatter 的 name/description（宪法 IV：只注入元数据不预载正文，frontmatter 不声明 skills）；无缓存
+- [X] T022 [US4] 完善 `PromptBuilder` 在 `axion-core/src/main/java/com/axion/core/PromptBuilder.java`——四段全量组装（骨架 T010 填全）：① system = `identity.prompt` + ContextLoader 产物 + 当前日期时间 ② 长期记忆留拼接位跳过 ③ 最近 N 轮历史（坑二截断语义）④ 工具列表（注入的工具集 → ToolSchemaAdapter 翻译 → Function Calling 格式）
 
 **Checkpoint**: US1~US4 独立可测——上下文组装全链路钉死
 
@@ -126,12 +126,12 @@
 
 ### Tests for US5（harness 先行）
 
-- [X] T023 [US5] 编写 `AgentServiceTest` 在 `oryxos-core/src/test/java/com/oryxos/core/AgentServiceTest.java`——① 处理期间 ProfileContext 可取到当前 Profile ② **坑四回归**：处理抛异常时 finally 也把它清掉（`assertNull(ProfileContext.current())`）③ 正常结束 `sessionManager.save(session)` 被调用 ④ Profile 从 `ProfileRegistry.findByName(session.profileName())` 获取
+- [X] T023 [US5] 编写 `AgentServiceTest` 在 `axion-core/src/test/java/com/axion/core/AgentServiceTest.java`——① 处理期间 ProfileContext 可取到当前 Profile ② **坑四回归**：处理抛异常时 finally 也把它清掉（`assertNull(ProfileContext.current())`）③ 正常结束 `sessionManager.save(session)` 被调用 ④ Profile 从 `ProfileRegistry.findByName(session.profileName())` 获取
 
 ### Implementation for US5
 
-- [X] T024 [P] [US5] 创建 `ProfileContext` 在 `oryxos-core/src/main/java/com/oryxos/core/ProfileContext.java`——ThreadLocal\<Profile>（虚拟线程每请求独立）；set/get/clear
-- [X] T025 [US5] 实现 `AgentService` 在 `oryxos-core/src/main/java/com/oryxos/core/AgentService.java`——`process(Session, String)`：registry 取 Profile → `ProfileContext.set` → `ReActLoop.run` → `sessionManager.save(session)` → **finally `ProfileContext.clear()`**（异常也清）；注入 ProfileRegistry/ReActLoop/SessionManager（宪法 VIII：ReActLoop 不感知消息入口）
+- [X] T024 [P] [US5] 创建 `ProfileContext` 在 `axion-core/src/main/java/com/axion/core/ProfileContext.java`——ThreadLocal\<Profile>（虚拟线程每请求独立）；set/get/clear
+- [X] T025 [US5] 实现 `AgentService` 在 `axion-core/src/main/java/com/axion/core/AgentService.java`——`process(Session, String)`：registry 取 Profile → `ProfileContext.set` → `ReActLoop.run` → `sessionManager.save(session)` → **finally `ProfileContext.clear()`**（异常也清）；注入 ProfileRegistry/ReActLoop/SessionManager（宪法 VIII：ReActLoop 不感知消息入口）
 
 **Checkpoint**: US1~US5 独立可测——统一入口 + ThreadLocal 泄漏钉死
 
@@ -139,13 +139,13 @@
 
 ## Phase 8: User Story 6 - 沙箱接口墙先行（Priority: P3）
 
-**Goal**: Sandbox 纯接口四类型落 oryxos-tool（宪法 IX 三合一），零实现、无人调用
+**Goal**: Sandbox 纯接口四类型落 axion-tool（宪法 IX 三合一），零实现、无人调用
 
 **Independent Test**: 编译 + 静态检查门禁通过（接口契约本身无行为；接线测试归第 20 节各工具，需求文档已明确）
 
 ### Implementation for US6
 
-- [X] T026 [US6] 创建 `Sandbox` 接口、`SandboxAction`、`ActionType`（FILE_READ | FILE_WRITE | SHELL_COMMAND | HTTP_REQUEST）、`SandboxViolationException` 在 `oryxos-tool/src/main/java/com/oryxos/tool/`——`enforce(SandboxAction)` 单方法；接口中立（不出现白名单/容器/VM 字样）；字面量照 contracts/sandbox.md 与技术方案 §6.7
+- [X] T026 [US6] 创建 `Sandbox` 接口、`SandboxAction`、`ActionType`（FILE_READ | FILE_WRITE | SHELL_COMMAND | HTTP_REQUEST）、`SandboxViolationException` 在 `axion-tool/src/main/java/com/axion/tool/`——`enforce(SandboxAction)` 单方法；接口中立（不出现白名单/容器/VM 字样）；字面量照 contracts/sandbox.md 与技术方案 §6.7
 
 **Checkpoint**: 接口墙就位——第 20 节起各工具 execute 首行接入，第 23/24 节 WhitelistSandbox 实现
 
@@ -155,7 +155,7 @@
 
 **Purpose**: 全量门禁与收尾证据
 
-- [X] T027 全量验证：`mvn clean verify` 全绿（含静态检查门禁）+ 执行 quickstart.md 的人工核对项（Demo 一对话版真模型跑通记录、人工 review 循环自实现、oryxos.db 审计核对）；反作弊红线：不删断言、不加 `@Disabled`、不放宽阈值
+- [X] T027 全量验证：`mvn clean verify` 全绿（含静态检查门禁）+ 执行 quickstart.md 的人工核对项（Demo 一对话版真模型跑通记录、人工 review 循环自实现、axion.db 审计核对）；反作弊红线：不删断言、不加 `@Disabled`、不放宽阈值
 - [X] T028 [P] 六条全局不变量自查并记录证据：① 涉外 IO 过 `Sandbox.enforce`（本节状态：接口已立，接线位 = 各工具 execute 首行，第 20 节起落地——tasks 已注明）② LLM 成败落 `llm_calls` / 工具成败落 `tool_invocations` ③ grep 无明文 key ④ `session_id` 只在 SessionManager 内拼接 ⑤ 无 Reactor/CompletableFuture/自建线程池 ⑥ 无 Spring AI 自动工具执行路径（`grep -r "executeToolCalls"` 无命中）
 
 ---
@@ -211,7 +211,7 @@
 
 ## Notes
 
-- **执行纪律（oryx-spec）**：每个 task 开始前跑宪法 9 条速查 + 停止清单预检；任务级 DoD 后**不自动 commit / push / 运行 package.sh**——同步时机由用户决定（本模板原"Commit after each task"条款被本纪律覆盖）
+- **执行纪律（axion-spec）**：每个 task 开始前跑宪法 9 条速查 + 停止清单预检；任务级 DoD 后**不自动 commit / push / 运行 package.sh**——同步时机由用户决定（本模板原"Commit after each task"条款被本纪律覆盖）
 - 测试方法名英文（中文语义用 `@DisplayName` 保留）
 - 反作弊红线：测试未全绿不得宣称完成
 - 停止清单第 1/2 条判断基准 = 需求文档「交付清单」白名单：ReActLoop、PromptBuilder、ToolExecutor、AgentService、ProfileContext、ContextLoader、Session、SessionManager、LlmGateway、Sandbox/SandboxAction/ActionType/SandboxViolationException、ToolInvocation/ToolInvocationRepository、schema.sql 增量、7 个测试类、ToolSchemaAdapter 迁移（改造点）——清单之外的对外概念一律停下报告

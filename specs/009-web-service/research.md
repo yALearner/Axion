@@ -41,7 +41,7 @@
 ## 裁决 7：排除 eager 装配（课件坑，H3 核实）
 
 - **Decision**: application.yaml `spring.autoconfigure.exclude` 排除 `OpenAiAutoConfiguration` + `DashScopeAutoConfiguration`（全限定名以 mvn dependency:tree 锁定的 spring-ai 版本为准）
-- **Rationale**: deepseek 走 spring-ai-openai starter 的 OpenAiAutoConfiguration 急切实例化索要 spring.ai.openai.api-key，OryxOS 不用该自动 Bean（Provider 由 ProviderChatModelFactory 显式构造，宪法 III）——不排除则 serve 逼运营方配两个 key、卡死 31 节干净部署
+- **Rationale**: deepseek 走 spring-ai-openai starter 的 OpenAiAutoConfiguration 急切实例化索要 spring.ai.openai.api-key，Axion 不用该自动 Bean（Provider 由 ProviderChatModelFactory 显式构造，宪法 III）——不排除则 serve 逼运营方配两个 key、卡死 31 节干净部署
 - **Alternatives considered**: 配 dummy spring.ai.openai.api-key（否决：掩盖问题、多一个 key 心智）
 
 ## 裁决 8：前序改造点四处（经拍板）

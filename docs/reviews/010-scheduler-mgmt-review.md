@@ -27,7 +27,7 @@ AGENT.md frontmatter schedules（id + cron + zone + message，⑦d 拍板 A 补 
 
 ## 二、逐文件梳理
 
-### oryxos-storage/com/oryxos/storage（8 新 + schema.sql 增量）
+### axion-storage/com/axion/storage（8 新 + schema.sql 增量）
 
 | 文件 | 关键点 |
 |------|--------|
@@ -38,7 +38,7 @@ AGENT.md frontmatter schedules（id + cron + zone + message，⑦d 拍板 A 补 
 | `JpaScheduledTaskStore` | **重注册保留状态列**（register 找已有行 mergeDefinition——重启不失忆的前提）；recordExecution 内部 next_run 重算（CronExpression **双 @Nullable 判空**，SpotBugs NP 门禁）；list 按 taskId 升序（F3）、executions 最新在前 |
 | `schema.sql` | 两表增量（DDL 骨架逐字，BOOLEAN 列 SQLite affinity 可存 0/1）；`CREATE TABLE IF NOT EXISTS` 幂等走既有 spring.sql.init 管线 |
 
-### oryxos-core/com/oryxos/core（3 改）
+### axion-core/com/axion/core（3 改）
 
 | 文件 | 关键点 |
 |------|--------|
@@ -46,7 +46,7 @@ AGENT.md frontmatter schedules（id + cron + zone + message，⑦d 拍板 A 补 
 | `ProfileLoader` | schedules 解析读 id；⑦c：缺 id 抛 IllegalArgumentException（消息含 Agent 名——与 007 zone 校验同款不静默纪律） |
 | `AgentScheduler` | 构造器 +store；registerAll 冲突检测（owners Map）+ 登记 + 注册信息映射 `taskId→(Profile,Schedule)`；runOnce 拆启用检查；executeInternal 锁策略区分（waitForLock 参数：tryLock 跳过 vs lock() 排队——F1 修正）；成败都 recordExecution；runNow 未注册明确报错 |
 
-### oryxos-web（1 新 + 前端 4 文件）
+### axion-web（1 新 + 前端 4 文件）
 
 | 文件 | 关键点 |
 |------|--------|
@@ -102,7 +102,7 @@ AGENT.md frontmatter schedules（id + cron + zone + message，⑦d 拍板 A 补 
 3. `Profile.Schedule` + `ProfileLoader`（id 补入与 ⑦c 校验，改动面最小的前序改造）
 4. `ScheduleApiController` + `ScheduleApiControllerTest`（四端点契约与双信封边界）
 5. 测试底座：`ScheduledTaskE2ETest`（五步 + @MockitoBean + 工作区隔离模式）→ `MultiAgentIsolationTest`
-6. 前端 `SchedulesView.vue`（写操作页 + 提示文案）+ `oryxos-admin-ui` skill ⑦d 条款
+6. 前端 `SchedulesView.vue`（写操作页 + 提示文案）+ `axion-admin-ui` skill ⑦d 条款
 7. `schema.sql` + `application.yaml`（DDL 骨架逐字 + 白名单「加」语义）
 
 ## 六、当前验收状态

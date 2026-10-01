@@ -2,7 +2,7 @@
 
 ## R1: core 引入 Spring AI 数据模型的确切 artifact（拍板③落地）
 
-- **Decision**: `oryxos-core` 增加 Spring AI 数据模型依赖，边界 = "可用其纯数据模型（Prompt / ChatResponse / ToolCall / ToolDefinition），禁用 Agent 抽象与自动 tool 执行"。实施第一步先 `mvn dependency:tree` 核实：锁定 BOM 中承载 `org.springframework.ai.chat.prompt.Prompt`、`org.springframework.ai.chat.model.ChatResponse`、`org.springframework.ai.model.tool.ToolCallingChatOptions`、`org.springframework.ai.tool.definition.ToolDefinition` 的确切 artifact（`spring-ai-model` 或同级数据模型构件），再决定 core pom 的依赖写法。
+- **Decision**: `axion-core` 增加 Spring AI 数据模型依赖，边界 = "可用其纯数据模型（Prompt / ChatResponse / ToolCall / ToolDefinition），禁用 Agent 抽象与自动 tool 执行"。实施第一步先 `mvn dependency:tree` 核实：锁定 BOM 中承载 `org.springframework.ai.chat.prompt.Prompt`、`org.springframework.ai.chat.model.ChatResponse`、`org.springframework.ai.model.tool.ToolCallingChatOptions`、`org.springframework.ai.tool.definition.ToolDefinition` 的确切 artifact（`spring-ai-model` 或同级数据模型构件），再决定 core pom 的依赖写法。
 - **T001 核实结论（2026-09-01，本地仓库 jar 反查实测）**: `spring-ai-model:1.1.8`（锁定 spring-ai-bom 管理）同时承载全部四个类型（`chat/prompt/Prompt`、`chat/model/ChatResponse`、`model/tool/ToolCallingChatOptions`、`tool/definition/ToolDefinition`）——core pom 只需这一个数据模型构件，不引入 starter/自动配置。
 - **Rationale**: 需求文档修订说明二拍板③；001 已实测这些类型在 1.1.8 中可解析（见 001 research.md R1）。core 不引入 starter（starter 会带自动配置与连接器，违反边界）。
 - **Alternatives considered**: 在 core 手写平行数据模型再在 provider 转换 → 被否决（重复造轮子 + 转换层爆炸）；ReActLoop 挪到 provider 模块 → 被否决（技术方案 §10 模块表：ReActLoop 属 core，G2-5）。
@@ -15,23 +15,23 @@
 |------|------|------|
 | A（推荐） | core 定义端口接口 `LlmGateway`（签名 = `ChatResponse chat(String sessionId, Profile profile, Prompt prompt)`，与 ProviderService.chat 完全一致）；ReActLoop 依赖端口；ProviderService 加一行 `implements LlmGateway`（方法体零改动）；boot/测试装配时以 ProviderService 实例注入 | 新增 core 公共类型 LlmGateway（交付清单之外 → 停止清单第 1 条）+ 触碰 001 ProviderService 类声明（停止清单第 4 条）——需用户确认 |
 | B | ReActLoop 保持持有 ProviderService 具体类型 → core pom 依赖 provider | 模块循环依赖，Maven 构建直接失败 —— 不可行 |
-| C | ReActLoop 挪到 oryxos-provider | 违反技术方案 §10 模块表（ReActLoop 属 core）→ G2-5 不过 —— 不可行 |
+| C | ReActLoop 挪到 axion-provider | 违反技术方案 §10 模块表（ReActLoop 属 core）→ G2-5 不过 —— 不可行 |
 
 - **Rationale（推荐 A）**: 依赖倒置是既有架构（技术方案 §8.5 ScheduledTaskStore「契约在 core、实现在 storage」同款先例）；签名逐字一致，001 契约零破坏；后续换 Provider 实现/测试替身都从端口走。
 - **拍板结果（2026-09-01 G2，用户确认）**: **方案 A**——core 定义 `LlmGateway` 端口接口，ProviderService 加一行 `implements`。需求文档 002 交付清单已补列 `LlmGateway`，改造点已记录 ProviderService 声明变更；001 需求文档补修订说明。
 
 ## R3: PromptBuilder（core）复用 ToolSchemaAdapter（provider）—— 已拍板（方案 A，2026-09-01 G2）
 
-**摩擦点**：需求文档 FR-2 要求"复用 001 的 ToolSchemaAdapter"做工具列表翻译；但 ToolSchemaAdapter 在 oryxos-provider，PromptBuilder 在 core——同 R2 的依赖方向问题。实测（2026-09-01 grep）：ToolSchemaAdapter 的生产消费方当前为**零**（只有自身 ToolSchemaAdapterTest 引用；ProviderService 不调它）——它从 001 起就是为 PromptBuilder 预留的翻译器。
+**摩擦点**：需求文档 FR-2 要求"复用 001 的 ToolSchemaAdapter"做工具列表翻译；但 ToolSchemaAdapter 在 axion-provider，PromptBuilder 在 core——同 R2 的依赖方向问题。实测（2026-09-01 grep）：ToolSchemaAdapter 的生产消费方当前为**零**（只有自身 ToolSchemaAdapterTest 引用；ProviderService 不调它）——它从 001 起就是为 PromptBuilder 预留的翻译器。
 
 | 方案 | 形态 | 代价 |
 |------|------|------|
-| A（推荐） | ToolSchemaAdapter 从 oryxos-provider **迁到 oryxos-core**（类 + ToolSchemaAdapterTest 随迁，逻辑零改动；provider 无生产代码引用它，只删文件） | 移动 001 已交付类 = 触碰前序交付物（停止清单第 4 条，002 需求文档未列改造点）——需用户确认；CLAUDE.md 模块表 oryxos-provider 描述去掉"Function Calling 适配"字样（文档同步） |
+| A（推荐） | ToolSchemaAdapter 从 axion-provider **迁到 axion-core**（类 + ToolSchemaAdapterTest 随迁，逻辑零改动；provider 无生产代码引用它，只删文件） | 移动 001 已交付类 = 触碰前序交付物（停止清单第 4 条，002 需求文档未列改造点）——需用户确认；CLAUDE.md 模块表 axion-provider 描述去掉"Function Calling 适配"字样（文档同步） |
 | B | core 定义翻译端口接口，provider 的 ToolSchemaAdapter 加 `implements` | 又一个新端口 + 001 触碰，类仍留在 provider —— 比 A 多一层间接，无收益 |
 | C | PromptBuilder 内嵌同源翻译逻辑（私有方法，001 不动） | 两份同源逻辑漂移；001 的 ToolSchemaAdapter 沦为无生产消费方的死代码；"复用"名不副实 |
 
-- **Rationale（推荐 A）**: 单一真相源、零死代码；ToolSchemaAdapter 只依赖 OryxTool + ObjectMapper + ToolDefinition（纯数据模型）——拍板③后 core 已具备承载条件；改动半径 = 2 个文件搬家 + 模块描述同步。
-- **拍板结果（2026-09-01 G2，用户确认）**: **方案 A**——ToolSchemaAdapter + ToolSchemaAdapterTest 迁往 oryxos-core（逻辑零改动）。需求文档 002「改造点」已补列；CLAUDE.md 与 TechnicalSolution §10 模块表已同步（core 增 ToolSchemaAdapter/LlmGateway，provider 去 Function Calling 适配）；001 需求文档补修订说明。
+- **Rationale（推荐 A）**: 单一真相源、零死代码；ToolSchemaAdapter 只依赖 AxionTool + ObjectMapper + ToolDefinition（纯数据模型）——拍板③后 core 已具备承载条件；改动半径 = 2 个文件搬家 + 模块描述同步。
+- **拍板结果（2026-09-01 G2，用户确认）**: **方案 A**——ToolSchemaAdapter + ToolSchemaAdapterTest 迁往 axion-core（逻辑零改动）。需求文档 002「改造点」已补列；CLAUDE.md 与 TechnicalSolution §10 模块表已同步（core 增 ToolSchemaAdapter/LlmGateway，provider 去 Function Calling 适配）；001 需求文档补修订说明。
 
 ## R4: ChatResponse → Message 转换落位（Session 保持框架无关）
 
@@ -59,7 +59,7 @@
 
 ## R8: ContextLoader 读取边界（坑五）
 
-- **Decision**: `ContextLoader`（core）构造时注入工作区根路径；`load(Profile)` 每轮现读：① `Profile.bootstrap` 引用的文件（如 AGENTS.md/SOUL.md/USER.md）——显式引用缺失**报错**、bootstrap 文件缺失至少 **WARN**；② 当前 Agent `skills/` 软连接集合（`.oryxos/agents/<name>/skills/<name>` → `.oryxos/skills/<name>/SKILL.md` frontmatter 的 name/description），只注入元数据不预载正文（宪法 IV 渐进披露）。无任何缓存。skills 目录不存在 = 跳过（不报错）。测试用 JUnit `@TempDir` 搭临时工作区。
+- **Decision**: `ContextLoader`（core）构造时注入工作区根路径；`load(Profile)` 每轮现读：① `Profile.bootstrap` 引用的文件（如 AGENTS.md/SOUL.md/USER.md）——显式引用缺失**报错**、bootstrap 文件缺失至少 **WARN**；② 当前 Agent `skills/` 软连接集合（`.axion/agents/<name>/skills/<name>` → `.axion/skills/<name>/SKILL.md` frontmatter 的 name/description），只注入元数据不预载正文（宪法 IV 渐进披露）。无任何缓存。skills 目录不存在 = 跳过（不报错）。测试用 JUnit `@TempDir` 搭临时工作区。
 - **Rationale**: 需求文档 FR-3（两条铁律）+ 宪法 IV + 技术方案 §8.3。
 - **Alternatives considered**: 缓存文件内容 → 被否决（坑五：用户改完不生效）；AGENT.md 正文注入 → 被否决（归第 29 节，本节不交付）。
 

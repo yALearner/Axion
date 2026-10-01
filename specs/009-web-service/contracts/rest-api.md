@@ -1,4 +1,4 @@
-# Contract: OryxOS Web Service REST API（10 端点 + 双信封）
+# Contract: Axion Web Service REST API（10 端点 + 双信封）
 
 > 本节对外契约 = 10 端点 + 双信封格式（拍板 B）+ 错误码映射。契约测试承载：`SessionApiControllerTest` + `GlobalExceptionHandlerTest`（信封边界/映射/500 不泄漏）+ `WebSmokeIT`（真实可达）。
 > 契约期：10 端点与信封格式自本节起为**跨节契约**——28 节调度管理端点、30 节 Agent 管理页、31 节 Demo 四/五 均消费本契约，此后不改。

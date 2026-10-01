@@ -22,7 +22,7 @@ LLM tool call（channel=team-lark, content=...）
 
 ## 二、逐文件梳理
 
-### oryxos-tool/com/oryxos/tool/notify（接口层 + 解析，4 个文件）
+### axion-tool/com/axion/tool/notify（接口层 + 解析，4 个文件）
 
 | 文件 | 职责与关键点 |
 |------|-------------|
@@ -31,13 +31,13 @@ LLM tool call（channel=team-lark, content=...）
 | `WebhookNotifyAdapter` | 构造注入 `RestClient`（EI_EXPOSE_REP2 抑制注解，001 先例）；send：URL 经 `target.url()` 取 → POST JSON → **body 通用 text 格式**（40008 修复点，见清单 2）→ `toBodilessEntity()` 异常原样上抛（坑十一） |
 | `NotifyChannelRegistry` | **纯数据**：findById / findAll；未命中明确报错；**缺省三态**（恰好一条取它 / 多条报错 / 空报错，拍板口径）；adapter 选择不在此类 |
 
-### oryxos-tool/com/oryxos/tool/builtin（工具本体）
+### axion-tool/com/axion/tool/builtin（工具本体）
 
 | 文件 | 职责与关键点 |
 |------|-------------|
-| `NotifyTools` | implements OryxTool：getName="notify"；schema content 必填/channel 可选；execute 开头 **content 必填校验**（缺失/JSON null/空串 → `ToolResult.failure`，S1 修复：不 NPE、不推字面 "null"）→ 四步钉死 → 未知 type 明确报错 → `ToolResult.success("已推送到 " + name)` |
+| `NotifyTools` | implements AxionTool：getName="notify"；schema content 必填/channel 可选；execute 开头 **content 必填校验**（缺失/JSON null/空串 → `ToolResult.failure`，S1 修复：不 NPE、不推字面 "null"）→ 四步钉死 → 未知 type 明确报错 → `ToolResult.success("已推送到 " + name)` |
 
-### oryxos-storage（数据层）
+### axion-storage（数据层）
 
 | 文件 | 关键点 |
 |------|--------|
@@ -47,7 +47,7 @@ LLM tool call（channel=team-lark, content=...）
 
 ### pom（5 项依赖，全部经拍板/补列）
 
-oryxos-storage（compile，Registry 所需）+ spring-web（RestClient）+ spring-boot-starter-test + mockwebserver **4.12.0 显式版本**（Boot BOM 不管 okhttp3，H3 实测修正）+ spotbugs-annotations（provided，EI_EXPOSE_REP2 抑制）。
+axion-storage（compile，Registry 所需）+ spring-web（RestClient）+ spring-boot-starter-test + mockwebserver **4.12.0 显式版本**（Boot BOM 不管 okhttp3，H3 实测修正）+ spotbugs-annotations（provided，EI_EXPOSE_REP2 抑制）。
 
 ### 测试（4 类 21 用例，坑 ↔ 测试对号）
 
@@ -66,7 +66,7 @@ oryxos-storage（compile，Registry 所需）+ spring-web（RestClient）+ sprin
 1. **execute 四步顺序（坑十）**——`NotifyTools.java:81` enforce 必须先于 `:83` send；这是本课最该盯的一段，顺序反了 = 白名单被"往外推"绕过
 2. **body 通用 text 格式（40008）**——`WebhookNotifyAdapter.java` send 的 `Map.of("msgtype","text","text",Map.of("content",content))`；**最易被"回退到课件骨架 `{"content":...}`"的改动点**——骨架格式企业微信判 invalid message type，已有真机实锤
 3. **异常不吞（坑十一）**——WebhookNotifyAdapter `toBodilessEntity()` 无 catch；吞掉 = Agent 以为发出去了
-4. **无 @Component（G4-C1）**——NotifyTools/WebhookNotifyAdapter/Registry 均无组件注解；**最易被"顺手加回"的改动点**——boot 扫描 com.oryxos 全树，误加启动即崩（D3 深析见 review-analysis.md §三，含"Spring Map 注入按 bean name 键控 vs channelType 拍板"的决定性论证）
+4. **无 @Component（G4-C1）**——NotifyTools/WebhookNotifyAdapter/Registry 均无组件注解；**最易被"顺手加回"的改动点**——boot 扫描 com.axion 全树，误加启动即崩（D3 深析见 review-analysis.md §三，含"Spring Map 注入按 bean name 键控 vs channelType 拍板"的决定性论证）
 5. **content 必填校验（S1）**——NotifyTools.execute 首段三条件；防 NPE 与字面 "null" 入群
 6. **缺省口径三态（拍板）**——Registry.resolve(null) 恰好一条才取；推错群是不可见的错误
 7. **依赖方向与建表**——tool→storage 单向（宪法依赖方向）；schema.sql 增量不依赖 ddl-auto（坑八）

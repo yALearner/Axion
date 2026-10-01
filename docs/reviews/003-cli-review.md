@@ -6,11 +6,11 @@
 ## 一、全景：一条命令从敲下到回复
 
 ```
-oryxos <cmd>（boot fat jar，main = OryxOsCli，单二进制）
+axion <cmd>（boot fat jar，main = AxionCli，单二进制）
   ├─ 轻命令（init/profile×4/status/provider list/tool list/session list）
-  │     └─ 零 Spring：文件操作 / JDBC 直读 .oryxos/oryxos.db（秒回）
+  │     └─ 零 Spring：文件操作 / JDBC 直读 .axion/axion.db（秒回）
   └─ 重命令（chat/serve/gateway）
-        └─ Class.forName("com.oryxos.boot.OryxOsApplication")   ← 坑九防线所在
+        └─ Class.forName("com.axion.boot.AxionApplication")   ← 坑九防线所在
            + web(NONE)（不起 Tomcat）
            └─ CliAgentConfiguration 装配：
                 ProfileRegistry（ProfileLoader.loadAll 扫 agents/）
@@ -24,15 +24,15 @@ oryxos <cmd>（boot fat jar，main = OryxOsCli，单二进制）
 
 ## 二、逐文件梳理
 
-### oryxos-cli（本课主角，17 个新类 + 1 个挂接改造）
+### axion-cli（本课主角，17 个新类 + 1 个挂接改造）
 
 | 文件 | 干什么 | 值得注意的点 |
 |------|--------|-------------|
-| `OryxOsCli.java:20-27` | 主入口挂 9 命令组（12 叶命令） | subcommands 数组是 12 命令齐全的唯一核对点（T027） |
+| `AxionCli.java:20-27` | 主入口挂 9 命令组（12 叶命令） | subcommands 数组是 12 命令齐全的唯一核对点（T027） |
 | `ChatCommand.java:29-40` | 重命令：`Class.forName` 加载 boot 主类 + `web(NONE)` | 打破 cli↔boot 编译期循环的反射接缝（运行时 fat jar 内 boot 必在）；`--profile` 默认 default、`--message` 单条退出 |
 | `ServeCommand/GatewayCommand.java` | 占位：启动 Spring 后打印"归第 26 节"退出 0 | 同样 `web(NONE)`——占位阶段不抢 8080 |
 | `CliAgentConfiguration.java:46-101` | 重命令装配（本课粘合 002 的胶水） | 工作区缺失 → WARN + 空 ProfileRegistry（chat 时报"Profile 未注册"清晰错）；工具集空 Map 留第 20 节替换位；ProviderService 由 001 装配自动就位 |
-| `InitCommand.java` | 幂等建 `.oryxos/` 目录树 + default Agent 模板 | **实跑抓过 bug**：agents/default 父目录必须先建（`:62-64`）；模板 api_key 占位 `${DEEPSEEK_API_KEY}` 不明文 |
+| `InitCommand.java` | 幂等建 `.axion/` 目录树 + default Agent 模板 | **实跑抓过 bug**：agents/default 父目录必须先建（`:62-64`）；模板 api_key 占位 `${DEEPSEEK_API_KEY}` 不明文 |
 | `ProfileCreateCommand.java` | 生成 agents/\<name>/AGENT.md 模板 | 与 InitCommand 模板同口径（name 替换）；已存在不覆盖 |
 | `ProfileShowCommand.java` | SnakeYAML 解析 frontmatter 打印概要 | **api-key 只显示占位**（不解析环境变量）——凭证零泄漏 |
 | `ProfileDeleteCommand.java` | 递归删除目录 | 不存在清晰报错非零退出 |
@@ -43,13 +43,13 @@ oryxos <cmd>（boot fat jar，main = OryxOsCli，单二进制）
 | `ToolListCommand.java` | 占位提示"工具归第 20 节" | 如实说明，不伪装 |
 | 4 个分组父命令（Profile/Session/Provider/ToolCommand） | Picocli 嵌套结构件 | 子命令名重复（三个 list）迫使分组；已补列交付清单 |
 
-### oryxos-channel-cli（首份内容）
+### axion-channel-cli（首份内容）
 
 | 文件 | 干什么 | 值得注意的点 |
 |------|--------|-------------|
 | `CliChannel.java:32-50` | 读—转交—打印交互循环 | **编码跟随终端**（`terminalCharset()`：console charset 优先、defaultCharset 兜底——003 实跑踩过 GBK 乱码）；`/quit` 是唯一自判断逻辑；channel 常量 `"cli"`、user 取本机用户名；EOF 退出（管道输入友好） |
 
-### oryxos-storage / oryxos-core（会话持久化）
+### axion-storage / axion-core（会话持久化）
 
 | 文件 | 干什么 | 值得注意的点 |
 |------|--------|-------------|
@@ -62,10 +62,10 @@ oryxos <cmd>（boot fat jar，main = OryxOsCli，单二进制）
 
 | 文件 | 改动 | 为什么 |
 |------|------|--------|
-| `oryxos-boot/pom.xml` | spring-boot-maven-plugin 加 `mainClass=com.oryxos.cli.OryxOsCli` | 单二进制：整个程序的 main 是 CLI（技术方案 §8.7）；boot 聚合一切资源（application.yaml 供轻命令读） |
-| `oryxos-cli/pom.xml` | repackage 加 `<skip>true</skip>` | 实跑踩坑：cli 嵌套 fat jar 进 boot 后 BOOT-INF 套 BOOT-INF，类加载失败 |
-| `oryxos-boot/application.yaml` | 加 `spring.sql.init.mode=always + schema-locations` | 001 review 留白"建表脚本无人执行"到期；SQLite 不被视为 embedded 必须显式 always；DDL 全幂等 |
-| `.gitignore` | 加 `.oryxos/` | 运行时工作区不入库 |
+| `axion-boot/pom.xml` | spring-boot-maven-plugin 加 `mainClass=com.axion.cli.AxionCli` | 单二进制：整个程序的 main 是 CLI（技术方案 §8.7）；boot 聚合一切资源（application.yaml 供轻命令读） |
+| `axion-cli/pom.xml` | repackage 加 `<skip>true</skip>` | 实跑踩坑：cli 嵌套 fat jar 进 boot 后 BOOT-INF 套 BOOT-INF，类加载失败 |
+| `axion-boot/application.yaml` | 加 `spring.sql.init.mode=always + schema-locations` | 001 review 留白"建表脚本无人执行"到期；SQLite 不被视为 embedded 必须显式 always；DDL 全幂等 |
+| `.gitignore` | 加 `.axion/` | 运行时工作区不入库 |
 
 ### 测试（3 个类，坑↔测试对号）
 
@@ -73,7 +73,7 @@ oryxos <cmd>（boot fat jar，main = OryxOsCli，单二进制）
 |--------|---------|
 | `SessionManagerTest`（改造，9 用例） | 幂等同实例+同 id；三元组隔离；id 公式；**get 反序列化重建（跨重启语义）**；恢复路径不重复落库；save 保留 created_at；H4 架构断言；不可变视图 |
 | `SessionRepositoryTest`（2 用例） | 坑八：手工 schema.sql 建表九列真实存在；messages_json 含 toolCall 嵌套回读完整；**模拟重启**新建连接重查历史还在 |
-| `JpaScanConfigurationTest`（boot，1 用例） | **坑九回归**：启动类必须带 `@EnableJpaRepositories`/`@EntityScan` 且 basePackages 含 com.oryxos.storage |
+| `JpaScanConfigurationTest`（boot，1 用例） | **坑九回归**：启动类必须带 `@EnableJpaRepositories`/`@EntityScan` 且 basePackages 含 com.axion.storage |
 
 ## 三、重点 review 清单（按风险排序）
 

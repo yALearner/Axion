@@ -1,16 +1,16 @@
 # FAQ
 
-## What makes OryxOS different from Dify or Coze?
+## What makes Axion different from Dify or Coze?
 
-OryxOS is a **runtime**, not an orchestration platform. Dify and Coze are workflow orchestration tools — they let you visually design Agent workflows. OryxOS sits one layer below: it provides the runtime environment (Provider, ReAct, Memory, Tool, Audit, Sandbox) that Agents run on. In fact, Dify could run ON OryxOS as the orchestration layer.
+Axion is a **runtime**, not an orchestration platform. Dify and Coze are workflow orchestration tools — they let you visually design Agent workflows. Axion sits one layer below: it provides the runtime environment (Provider, ReAct, Memory, Tool, Audit, Sandbox) that Agents run on. In fact, Dify could run ON Axion as the orchestration layer.
 
-## What makes OryxOS different from OpenClaw or Hermes Agent?
+## What makes Axion different from OpenClaw or Hermes Agent?
 
 Same category, different positioning. All three use markdown + frontmatter directory structures to define Agents. The key differences:
 
-- **Language ecosystem**: OryxOS is Java/Spring Boot — OpenClaw is Node.js, Hermes Agent is Python
-- **Target audience**: OryxOS targets regulated enterprises (banking, government, healthcare). OpenClaw and Hermes Agent target individual developers to small teams.
-- **Governance**: OryxOS bakes in audit, sandbox, and multi-tenancy from day one. These are afterthoughts in the other projects.
+- **Language ecosystem**: Axion is Java/Spring Boot — OpenClaw is Node.js, Hermes Agent is Python
+- **Target audience**: Axion targets regulated enterprises (banking, government, healthcare). OpenClaw and Hermes Agent target individual developers to small teams.
+- **Governance**: Axion bakes in audit, sandbox, and multi-tenancy from day one. These are afterthoughts in the other projects.
 
 ## Why Java? Why not Python or Node.js?
 
@@ -18,9 +18,9 @@ Because the target enterprises already run Java. Banks, governments, and telecom
 
 ## Do I need PostgreSQL? Redis? Docker?
 
-**No.** Core phase OryxOS needs only Java 21 + Maven. Data is stored in local SQLite. No external services, no containers, no cloud dependency. One fat JAR and you're running.
+**No.** Core phase Axion needs only Java 21 + Maven. Data is stored in local SQLite. No external services, no containers, no cloud dependency. One fat JAR and you're running.
 
-## How does OryxOS handle security?
+## How does Axion handle security?
 
 Three layers:
 
@@ -42,11 +42,11 @@ DeepSeek, Tongyi (Qwen), Kimi, Zhipu (GLM), Hunyuan, Doubao, and more via Spring
 
 ## Is it production-ready?
 
-No. OryxOS is currently in **pre-alpha** (core phase). APIs may change. It is not recommended for production use yet.
+No. Axion is currently in **pre-alpha** (core phase). APIs may change. It is not recommended for production use yet.
 
 ## How do I contribute?
 
-OryxOS welcomes all forms of contribution: code, docs, issues, discussions.
+Axion welcomes all forms of contribution: code, docs, issues, discussions.
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feat/amazing-feature`)
@@ -54,4 +54,4 @@ OryxOS welcomes all forms of contribution: code, docs, issues, discussions.
 4. Push (`git push origin feat/amazing-feature`)
 5. Create a Pull Request
 
-Read [CLAUDE.md](https://github.com/yALearner/OryxOS-one/blob/main/CLAUDE.md) for the project constitution and coding principles.
+Read [CLAUDE.md](https://github.com/yALearner/Axion/blob/main/CLAUDE.md) for the project constitution and coding principles.

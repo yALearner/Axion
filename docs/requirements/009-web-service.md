@@ -3,13 +3,13 @@
 > 需求编号：009-web-service | 对应课件第 26 节《Web Service 与第一版管理平台 实现与代码讲解》、US-5（核心能力五，五大能力的最后一块拼图）
 > 文档依据：`docs/TechnicalSolution.md` §7（权威设计源）、`docs/DemandAnalysis.md` §5.8/§13（Demo 四/五）、`docs/AiProgrammingGuide.md` §4.5（US-5 依赖前四）；CLAUDE.md「Web Service API」端点表
 >
-> 修订说明（2026-09-08）：① **课件口径（用户拍板）**：**整体方案参考 `D:\项目\` 第 26 节课件**（新版 PDF 已 PyMuPDF 提取，9 页全文复核）；与四文档冲突处以课件为准（002 先例延续）。② **信封拍板（B，用户拍板 2026-09-08）**：保留地基双信封形态——成功响应 `ApiResponse`（code/message/data/timestamp）、错误响应 `ErrorResponse`（errorCode/message/timestamp），**错误一律经 GlobalExceptionHandler 单出口产出**；技术方案 §7.1/课件「成功与错误共用一个信封」口径经用户拍板改为双信封（冲突记录：权威口径单一信封 vs 地基双信封——拍板按地基，零删除、零改造地基类）；**双信封的契约漂移防线（落地细节一）**：`GlobalExceptionHandlerTest` 断言「每个错误响应均为 ErrorResponse 信封、每个成功响应均为 ApiResponse 信封」——机器钉死两套信封各自的使用边界，新端点选错信封测试即红。③ **前端构建拍板（B，用户拍板）**：`frontend-maven-plugin` 把 `npm ci && npm run build` 绑进 `mvn package`（一条命令出 fat JAR；课件二选一之 B）；**skip 开关（落地细节二）**：pom 配好 `-Dskip.npm` 跳过参数，后端迭代跑 `mvn -Dskip.npm package` 不背前端构建——把 B 的唯一痛点（构建变慢）解掉。④ **形态错位适配**：课件叙述「ApiResponse 第 24 节随白名单端点已建于 oryxos-web」与 OryxOS 实际交付顺序错位——24 节（007-sandbox）无 Web 端点，ApiResponse/ErrorResponse/ErrorCode/GlobalExceptionHandler/ServiceUnavailableException 实为 java-spring-init 工程地基产物（javadoc 已注明）；按现状落位，叙述不照搬课件节号。⑤ **图名处置**：技术方案 §7 无既有图，本节设计文档图命名 `docs-web-service-flow.svg`。⑥ **实施前优化（2026-09-08 四维修正分析：扩展性/可靠性/延展性/稳定性）**：a. **503 映射收紧**——课件骨架 `{IllegalStateException, ProviderUnavailableException}`→503 全域映射与项目现状冲突（001 ConfigLoader 校验/006 mem0 缺凭证/008 非法 zone 均抛 IllegalStateException 作业务校验）——语义污染：配置错误被报成「Provider 故障」，业务系统按 503 做重试/降级方向全错；收紧为 503 只映射 `ProviderUnavailableException` + 地基 `ServiceUnavailableException`，IllegalStateException 归 500 兜底（内幕照旧不泄漏）；b. **`SessionManager.findById` 的缓存/库一致性**——改造点 a 依赖「库里恢复历史」语义，缓存内实例与库的同步时机须实施前 H3 核实（002 持久化时机），补回归「重启后 findById 恢复历史」「发消息后 findById 可见最新」；c. **504 超时后任务体语义**——`FutureTask.get(60s)` 超时后 ReAct 任务体继续跑完（LLM 调用不可强制中断）：审计照常落账、历史继续追加、费用继续产生；客户端重试会叠加第二次完整 ReAct——文档明示「超时后任务体不可杀」，幂等/限流归扩展阶段；d. **三触发源第一次同场 → Session 并发面**——serve 常驻后 Web 并发请求 + 008 钟推可能同时 `process` 同一 Session（scheduler 三元组会话长期复用），002 的 `Session.append`/ReActLoop 并发语义在 CLI 单线程时代从未被考验——实施前核实，无保护则本节补 per-session 最小互斥（008 per-task 锁同款），不得默认「应该没事」；P2 落位——invoke 会话三元组钉死（FR-1）、admin-ui 内置双信封请求封装（FR-7）、node 版本锁定（FR-6）。
+> 修订说明（2026-09-08）：① **课件口径（用户拍板）**：**整体方案参考 `D:\项目\` 第 26 节课件**（新版 PDF 已 PyMuPDF 提取，9 页全文复核）；与四文档冲突处以课件为准（002 先例延续）。② **信封拍板（B，用户拍板 2026-09-08）**：保留地基双信封形态——成功响应 `ApiResponse`（code/message/data/timestamp）、错误响应 `ErrorResponse`（errorCode/message/timestamp），**错误一律经 GlobalExceptionHandler 单出口产出**；技术方案 §7.1/课件「成功与错误共用一个信封」口径经用户拍板改为双信封（冲突记录：权威口径单一信封 vs 地基双信封——拍板按地基，零删除、零改造地基类）；**双信封的契约漂移防线（落地细节一）**：`GlobalExceptionHandlerTest` 断言「每个错误响应均为 ErrorResponse 信封、每个成功响应均为 ApiResponse 信封」——机器钉死两套信封各自的使用边界，新端点选错信封测试即红。③ **前端构建拍板（B，用户拍板）**：`frontend-maven-plugin` 把 `npm ci && npm run build` 绑进 `mvn package`（一条命令出 fat JAR；课件二选一之 B）；**skip 开关（落地细节二）**：pom 配好 `-Dskip.npm` 跳过参数，后端迭代跑 `mvn -Dskip.npm package` 不背前端构建——把 B 的唯一痛点（构建变慢）解掉。④ **形态错位适配**：课件叙述「ApiResponse 第 24 节随白名单端点已建于 axion-web」与 Axion 实际交付顺序错位——24 节（007-sandbox）无 Web 端点，ApiResponse/ErrorResponse/ErrorCode/GlobalExceptionHandler/ServiceUnavailableException 实为 java-spring-init 工程地基产物（javadoc 已注明）；按现状落位，叙述不照搬课件节号。⑤ **图名处置**：技术方案 §7 无既有图，本节设计文档图命名 `docs-web-service-flow.svg`。⑥ **实施前优化（2026-09-08 四维修正分析：扩展性/可靠性/延展性/稳定性）**：a. **503 映射收紧**——课件骨架 `{IllegalStateException, ProviderUnavailableException}`→503 全域映射与项目现状冲突（001 ConfigLoader 校验/006 mem0 缺凭证/008 非法 zone 均抛 IllegalStateException 作业务校验）——语义污染：配置错误被报成「Provider 故障」，业务系统按 503 做重试/降级方向全错；收紧为 503 只映射 `ProviderUnavailableException` + 地基 `ServiceUnavailableException`，IllegalStateException 归 500 兜底（内幕照旧不泄漏）；b. **`SessionManager.findById` 的缓存/库一致性**——改造点 a 依赖「库里恢复历史」语义，缓存内实例与库的同步时机须实施前 H3 核实（002 持久化时机），补回归「重启后 findById 恢复历史」「发消息后 findById 可见最新」；c. **504 超时后任务体语义**——`FutureTask.get(60s)` 超时后 ReAct 任务体继续跑完（LLM 调用不可强制中断）：审计照常落账、历史继续追加、费用继续产生；客户端重试会叠加第二次完整 ReAct——文档明示「超时后任务体不可杀」，幂等/限流归扩展阶段；d. **三触发源第一次同场 → Session 并发面**——serve 常驻后 Web 并发请求 + 008 钟推可能同时 `process` 同一 Session（scheduler 三元组会话长期复用），002 的 `Session.append`/ReActLoop 并发语义在 CLI 单线程时代从未被考验——实施前核实，无保护则本节补 per-session 最小互斥（008 per-task 锁同款），不得默认「应该没事」；P2 落位——invoke 会话三元组钉死（FR-1）、admin-ui 内置双信封请求封装（FR-7）、node 版本锁定（FR-6）。
 
 ## 背景与价值
 
 到上一节为止，底座的能力全部就位：会调模型、会思考、有入口、能推送、能干活、记得住、有安全边界、还能到点自动跑——但这些能力目前**只有 CLI 一个对外出口**，业务系统没法用（课件 §一）。
 
-本节补上能力五：**Web Service 把内部能力包装成 REST API**，顺带做出第一版管理平台。没有它，OryxOS 只是一个 CLI 工具；有了它，任何能发 HTTP 请求的业务系统都能把 Agent 接进自己的流程（课件 §一、技术方案 §7）。这是 OryxOS 区别于偏个人定位产品的关键能力（需求文档 §5.8），也是 US-5 排在最后的原因——依赖前四个能力全部就绪，不是不重要，恰恰相反（编程指南 §4.5）。
+本节补上能力五：**Web Service 把内部能力包装成 REST API**，顺带做出第一版管理平台。没有它，Axion 只是一个 CLI 工具；有了它，任何能发 HTTP 请求的业务系统都能把 Agent 接进自己的流程（课件 §一、技术方案 §7）。这是 Axion 区别于偏个人定位产品的关键能力（需求文档 §5.8），也是 US-5 排在最后的原因——依赖前四个能力全部就绪，不是不重要，恰恰相反（编程指南 §4.5）。
 
 管理平台是这节的第二个交付物：一个跑在 `/admin` 的静态前端，调这 10 个端点，把会话、Profile、Tool、记忆、状态渲染成能看的页面。它**没有自己的后端**——所有数据都来自这 10 个端点，这也顺带验证了「API 是完备的对外通道」这件事本身（课件 §一）。
 
@@ -23,7 +23,7 @@
 
 **场景四（本节验收场景）：错误统一可预期**——发消息时消息超 32KB → 400；Session 不存在 → 404；Provider 故障 → 503；Agent 调用超 60 秒 → 504；一切其他异常 → 500 且**响应体不含内部异常细节**（连接串、堆栈一个字不漏给外部——门面的分寸，课件 §四最值钱回归）。
 
-**场景五：serve 只靠一个 key 就起得来**——干净机器上只配 `DEEPSEEK_API_KEY` 一个环境变量，`oryxos serve` 正常起在 8080：不因 Spring AI eager 装配索要 `spring.ai.openai.api-key` 而启动失败（课件 §二坑、autoconfigure.exclude 解法）。
+**场景五：serve 只靠一个 key 就起得来**——干净机器上只配 `DEEPSEEK_API_KEY` 一个环境变量，`axion serve` 正常起在 8080：不因 Spring AI eager 装配索要 `spring.ai.openai.api-key` 而启动失败（课件 §二坑、autoconfigure.exclude 解法）。
 
 ## 功能需求
 
@@ -31,13 +31,13 @@
 
 | 编号 | 需求 | 交付物（落位模块） | 来源 |
 |------|------|-------------------|------|
-| FR-1 | **六个 Controller + 10 端点**（统一前缀 `/api/v1`）：`SessionApiController`（POST /sessions 创建、POST /sessions/{id}/messages 发消息、GET /sessions/{id} 查历史、DELETE /sessions/{id} 归档）、`AgentApiController`（POST /agents/{name}/invoke 无状态调用——临时建一次性 Session 跑完返回；**⑨ 实现级明确**：invoke 的一次性 Session 三元组固定 `("web", "invoke", agentName)`、跑完不缓存——审计表 session_id 可追溯且不污染长会话）、`ProfileApiController`（GET /profiles 列 ProfileRegistry）、`MemoryApiController`（GET /memory 返回 MEMORY.md 内容——**注入 core 的 `LongTermMemoryStore.load()`**，实现级明确：不扩 MemoryService 门面，门面只管 ReAct 上下文三件事，运维查询直连 store）、`ToolApiController`（GET /tools 列 ToolRegistry）、`SystemApiController`（GET /health 回 ok、GET /info 含各 Provider 连通状态）。**Controller 必须薄**：参数校验、响应包装、错误处理三件事之外一概不碰；发消息走 `agentService.process`——与 CLI 完全同一入口（宪法 VIII，课件 §二） | 六 Controller（oryxos-web，com.oryxos.web.api） | 课件 §一/§二/§四；技术方案 §7.2；CLAUDE.md 端点表 |
-| FR-2 | **异常单出口（双信封，拍板 B）**：`GlobalExceptionHandler`（扩展地基既有类，保留其 ErrorResponse 信封形态）——404（`SessionNotFoundException`/`ResourceNotFoundException`）、503（**仅** `ProviderUnavailableException` + 地基 `ServiceUnavailableException`——⑨a 收紧：IllegalStateException 归 500 兜底，课件骨架全域映射与 001/006/008 业务性 IllegalStateException 冲突）、504（`AgentTimeoutException`，Agent 调用 60s 上限）、400（`InvalidRequestException`，消息空/超 32KB）、500 兜底**统一话术「内部错误」不泄漏异常 message**（内部细节进日志）；保留既有 `IllegalArgumentException`→400、`NoResourceFoundException`→404 映射；**`ErrorCode` 枚举补 `GATEWAY_TIMEOUT(504)`**（地基 4 值扩 5 值）；**信封契约**：成功端点响应 = `ApiResponse.ok(data)`、错误响应 = `ErrorResponse.of(errorCode, message)` 且只经 GlobalExceptionHandler 产出（Controller 不得自行 try-catch 拼错误体） | `GlobalExceptionHandler` 扩展 + `ErrorCode` 补值 + 新增 5 异常类（oryxos-web/api）；地基类零删除 | 课件 §二/§三；技术方案 §7.1/§7.4；拍板 B；⑨a |
-| FR-3 | **`serve` 命令落地**（003 交付物改造点）：`ServeCommand` 从占位改为真启动——`web(WebApplicationType.SERVLET)` + `headless(true)`；`application.yaml` 增 `server.port: 8080`（`spring.threads.virtual.enabled: true` 已就位）与 **`spring.autoconfigure.exclude` 排除 `OpenAiAutoConfiguration` + `DashScopeAutoConfiguration`**（课件坑：eager 装配急切实例化索要 `spring.ai.openai.api-key` 卡死 serve；16 节 DashScope 同招、宪法 II 禁用 Spring AI eager 自动装配；排除类全限定名以 mvn dependency:tree 锁定的 spring-ai 版本为准——H3 核实）；**超时实现（实现级明确）**：60s 上限用 `FutureTask.get(60, TimeUnit.SECONDS)` + virtual thread 承载（JDK 原生、无自建线程池——宪法 VII 不变量 ⑤；超时抛 `AgentTimeoutException`）；**⑨c 超时后任务体语义（明示）**：超时后 ReAct 任务体继续跑完、不可强制中断——审计照常落账、历史继续追加、费用继续产生；客户端收到 504 后重试会叠加第二次完整 ReAct——幂等/限流归扩展阶段 | `ServeCommand` 改造（oryxos-cli）；`application.yaml`（oryxos-boot） | 课件 §二坑/§三；18 节 serve 埋点；⑨c |
+| FR-1 | **六个 Controller + 10 端点**（统一前缀 `/api/v1`）：`SessionApiController`（POST /sessions 创建、POST /sessions/{id}/messages 发消息、GET /sessions/{id} 查历史、DELETE /sessions/{id} 归档）、`AgentApiController`（POST /agents/{name}/invoke 无状态调用——临时建一次性 Session 跑完返回；**⑨ 实现级明确**：invoke 的一次性 Session 三元组固定 `("web", "invoke", agentName)`、跑完不缓存——审计表 session_id 可追溯且不污染长会话）、`ProfileApiController`（GET /profiles 列 ProfileRegistry）、`MemoryApiController`（GET /memory 返回 MEMORY.md 内容——**注入 core 的 `LongTermMemoryStore.load()`**，实现级明确：不扩 MemoryService 门面，门面只管 ReAct 上下文三件事，运维查询直连 store）、`ToolApiController`（GET /tools 列 ToolRegistry）、`SystemApiController`（GET /health 回 ok、GET /info 含各 Provider 连通状态）。**Controller 必须薄**：参数校验、响应包装、错误处理三件事之外一概不碰；发消息走 `agentService.process`——与 CLI 完全同一入口（宪法 VIII，课件 §二） | 六 Controller（axion-web，com.axion.web.api） | 课件 §一/§二/§四；技术方案 §7.2；CLAUDE.md 端点表 |
+| FR-2 | **异常单出口（双信封，拍板 B）**：`GlobalExceptionHandler`（扩展地基既有类，保留其 ErrorResponse 信封形态）——404（`SessionNotFoundException`/`ResourceNotFoundException`）、503（**仅** `ProviderUnavailableException` + 地基 `ServiceUnavailableException`——⑨a 收紧：IllegalStateException 归 500 兜底，课件骨架全域映射与 001/006/008 业务性 IllegalStateException 冲突）、504（`AgentTimeoutException`，Agent 调用 60s 上限）、400（`InvalidRequestException`，消息空/超 32KB）、500 兜底**统一话术「内部错误」不泄漏异常 message**（内部细节进日志）；保留既有 `IllegalArgumentException`→400、`NoResourceFoundException`→404 映射；**`ErrorCode` 枚举补 `GATEWAY_TIMEOUT(504)`**（地基 4 值扩 5 值）；**信封契约**：成功端点响应 = `ApiResponse.ok(data)`、错误响应 = `ErrorResponse.of(errorCode, message)` 且只经 GlobalExceptionHandler 产出（Controller 不得自行 try-catch 拼错误体） | `GlobalExceptionHandler` 扩展 + `ErrorCode` 补值 + 新增 5 异常类（axion-web/api）；地基类零删除 | 课件 §二/§三；技术方案 §7.1/§7.4；拍板 B；⑨a |
+| FR-3 | **`serve` 命令落地**（003 交付物改造点）：`ServeCommand` 从占位改为真启动——`web(WebApplicationType.SERVLET)` + `headless(true)`；`application.yaml` 增 `server.port: 8080`（`spring.threads.virtual.enabled: true` 已就位）与 **`spring.autoconfigure.exclude` 排除 `OpenAiAutoConfiguration` + `DashScopeAutoConfiguration`**（课件坑：eager 装配急切实例化索要 `spring.ai.openai.api-key` 卡死 serve；16 节 DashScope 同招、宪法 II 禁用 Spring AI eager 自动装配；排除类全限定名以 mvn dependency:tree 锁定的 spring-ai 版本为准——H3 核实）；**超时实现（实现级明确）**：60s 上限用 `FutureTask.get(60, TimeUnit.SECONDS)` + virtual thread 承载（JDK 原生、无自建线程池——宪法 VII 不变量 ⑤；超时抛 `AgentTimeoutException`）；**⑨c 超时后任务体语义（明示）**：超时后 ReAct 任务体继续跑完、不可强制中断——审计照常落账、历史继续追加、费用继续产生；客户端收到 504 后重试会叠加第二次完整 ReAct——幂等/限流归扩展阶段 | `ServeCommand` 改造（axion-cli）；`application.yaml`（axion-boot） | 课件 §二坑/§三；18 节 serve 埋点；⑨c |
 | FR-4 | **防呆限制**：单条消息最大 **32KB**（超 → 400）；Session 历史返回最多最近 **100 条**——防呆不是治理（治理级限流归扩展） | 两常量（Controller 内） | 课件 §二 |
 | FR-5 | **springdoc-openapi**：自动生成 OpenAPI 3.0 文档，暴露 `/swagger-ui`——不手写接口文档（web 模块 pom 新增 `springdoc-openapi-starter-webmvc-ui` 依赖） | pom 依赖 + 零代码 | 课件 §四；技术方案 §7.1 |
-| FR-6 | **管理平台 v1（只读）**：`oryxos-web/src/main/frontend/` 下 Vue 3 + Vite 单页应用（与官网同栈同风格）——左侧导航五页（会话/Profile/Tool/长期记忆/运行状态）调五个 GET 端点渲染；**无任何写按钮**；错误时展示错误信封的 message；**构建拍板 B**：`frontend-maven-plugin` 把 `npm ci && npm run build` 绑进 `mvn package`，vite `base: '/admin/'` 产出到 `oryxos-web/src/main/resources/static/admin/`，Spring 托管在 `/admin`；**`-Dskip.npm` 跳过参数**（落地细节二：后端迭代跑 `mvn -Dskip.npm package` 不背前端构建）；**node 版本锁定（⑨ P2 落地）**：插件 node 版本锁进 pom 并与 `.nvmrc` 同步，企业内网离线构建注记；**SPA 回落**：`/admin/**` 未命中路径回落 `admin/index.html`（`GET /api/v1/**` 不受影响），否则刷新子路由 404 | 前端工程（oryxos-web/src/main/frontend/）+ pom frontend-maven-plugin（含 skip/node 版本配置）+ SPA 回落配置 | 课件 §五；拍板 B；⑨ |
-| FR-7 | **风格 skill `.claude/skills/oryxos-admin-ui/SKILL.md`**（课件点名交付物）：固化首页设计 token（深色 #000000/#111111/#1a1a1a、分隔 #222222；主色橙 #f97316/hover #ea6a00/#c2550a 仅强调不铺面；文字 #f5f5f5/#a3a3a3/#666666；字体 Inter + JetBrains Mono）+ 工程约定（base '/admin/'、产物落 static/admin、SPA 回落、只调 /api/v1）+ 三态规范（空数据/加载中/错误占位）+ 响应式（窄屏导航收起）+ 验收清单——30 节 Agent 管理页复用同一套；**内置双信封统一请求封装（⑨ P2 落地）**：fetch 成功解析 `ApiResponse.data`、错误解析 `ErrorResponse.errorCode/message` 的公共工具函数——页面不手写两套解析，前端侧的信封边界防线；**不引外部 skill**（课件已核过 mattpocock/skills 是工程师流程技能、与本项目审美无关） | `.claude/skills/oryxos-admin-ui/SKILL.md` | 课件 §五；⑨ |
+| FR-6 | **管理平台 v1（只读）**：`axion-web/src/main/frontend/` 下 Vue 3 + Vite 单页应用（与官网同栈同风格）——左侧导航五页（会话/Profile/Tool/长期记忆/运行状态）调五个 GET 端点渲染；**无任何写按钮**；错误时展示错误信封的 message；**构建拍板 B**：`frontend-maven-plugin` 把 `npm ci && npm run build` 绑进 `mvn package`，vite `base: '/admin/'` 产出到 `axion-web/src/main/resources/static/admin/`，Spring 托管在 `/admin`；**`-Dskip.npm` 跳过参数**（落地细节二：后端迭代跑 `mvn -Dskip.npm package` 不背前端构建）；**node 版本锁定（⑨ P2 落地）**：插件 node 版本锁进 pom 并与 `.nvmrc` 同步，企业内网离线构建注记；**SPA 回落**：`/admin/**` 未命中路径回落 `admin/index.html`（`GET /api/v1/**` 不受影响），否则刷新子路由 404 | 前端工程（axion-web/src/main/frontend/）+ pom frontend-maven-plugin（含 skip/node 版本配置）+ SPA 回落配置 | 课件 §五；拍板 B；⑨ |
+| FR-7 | **风格 skill `.claude/skills/axion-admin-ui/SKILL.md`**（课件点名交付物）：固化首页设计 token（深色 #000000/#111111/#1a1a1a、分隔 #222222；主色橙 #f97316/hover #ea6a00/#c2550a 仅强调不铺面；文字 #f5f5f5/#a3a3a3/#666666；字体 Inter + JetBrains Mono）+ 工程约定（base '/admin/'、产物落 static/admin、SPA 回落、只调 /api/v1）+ 三态规范（空数据/加载中/错误占位）+ 响应式（窄屏导航收起）+ 验收清单——30 节 Agent 管理页复用同一套；**内置双信封统一请求封装（⑨ P2 落地）**：fetch 成功解析 `ApiResponse.data`、错误解析 `ErrorResponse.errorCode/message` 的公共工具函数——页面不手写两套解析，前端侧的信封边界防线；**不引外部 skill**（课件已核过 mattpocock/skills 是工程师流程技能、与本项目审美无关） | `.claude/skills/axion-admin-ui/SKILL.md` | 课件 §五；⑨ |
 | NFR-1 | 全程同步阻塞：请求在 virtual thread 上直进直出（`spring.threads.virtual.enabled`），LLM 等待自动让出——不引入 WebFlux/响应式代码（宪法 VII，课件 §三） | — | 宪法 VII；课件 §三 |
 | NFR-2 | 核心阶段不做清单：认证（假设内网）、SSE 流式、WebSocket、限流、RBAC——全部不做（课件 §二；扩展阶段补） | — | 课件 §二；技术方案 §7.3 |
 | NFR-3 | **门面分寸**：500 兜底响应不含内部异常 message（连接串/堆栈不泄漏），内部细节只进日志——最值钱回归钉死 | — | 课件 §三/§四 |
@@ -45,7 +45,7 @@
 ### 核心代码骨架（课件 26 节骨架一致，形态机械适配：双信封拍板 B——成功 ApiResponse / 错误 ErrorResponse）
 
 ```java
-// oryxos-web：com.oryxos.web.api —— 最典型的 Controller：承载 ReAct 循环的端点（薄：三件事之外不碰业务）
+// axion-web：com.axion.web.api —— 最典型的 Controller：承载 ReAct 循环的端点（薄：三件事之外不碰业务）
 @RestController
 @RequestMapping("/api/v1/sessions")
 public class SessionApiController {
@@ -67,7 +67,7 @@ public class SessionApiController {
 ```
 
 ```java
-// oryxos-web：com.oryxos.web.api —— 统一异常出口（拍板 B：保留地基 ErrorResponse 双信封形态，本节扩展映射）
+// axion-web：com.axion.web.api —— 统一异常出口（拍板 B：保留地基 ErrorResponse 双信封形态，本节扩展映射）
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -105,7 +105,7 @@ public class GlobalExceptionHandler {
 ```
 
 ```yaml
-# application.yaml 增补（oryxos-boot）——serve 只认 DEEPSEEK_API_KEY 一个 key（课件坑）
+# application.yaml 增补（axion-boot）——serve 只认 DEEPSEEK_API_KEY 一个 key（课件坑）
 spring:
   autoconfigure:
     exclude:
@@ -115,17 +115,17 @@ server:
   port: 8080
 ```
 
-### 本节交付物清单（Spec-Kit 拆解锚点 / oryx-spec 交付清单比对基准）
+### 本节交付物清单（Spec-Kit 拆解锚点 / axion-spec 交付清单比对基准）
 
 - **代码**：六 Controller（Session/Agent/Profile/Memory/Tool/System）；新增 5 异常类（InvalidRequestException/SessionNotFoundException/ResourceNotFoundException/ProviderUnavailableException/AgentTimeoutException）；`GlobalExceptionHandler` 扩展（保留 ErrorResponse 信封 + 504 + 500 不泄漏）；`ErrorCode` 补 `GATEWAY_TIMEOUT(504)`；`ServeCommand` 改造（web(SERVLET) 真启动）
 - **测试**：`SessionApiControllerTest`（@WebMvcTest 切片：32KB→400 / Session 不存在→404 / process 恰调一次——Controller 没夹带私货）、`GlobalExceptionHandlerTest`（每类异常映射到约定状态码 / **信封边界：错误响应均为 ErrorResponse、成功响应均为 ApiResponse** / **500 不含内部异常 message——最值钱回归**）、`WebSmokeIT`（@SpringBootTest 真上下文：/health /info /profiles /tools 真实可达——JPA repository 扫描红线，18 节「Found 0 repositories」坑复发第一时间红）
 - **表**：无新增（会话归档复用 002 的 sessions 表）
 - **配置**：`spring.threads.virtual.enabled`（已就位）+ `server.port: 8080` + `autoconfigure.exclude` 两排除 + 32KB/100 条常量 + frontend-maven-plugin 的 `-Dskip.npm` 跳过参数
 - **改造点**：`ServeCommand`（003 交付物）占位改真启动；`GlobalExceptionHandler`（地基类）扩展 + `ErrorCode` 补值——**地基类零删除**（拍板 B）
-- **前端**：`oryxos-web/src/main/frontend/` Vue3+Vite 只读管理台（五页）+ `frontend-maven-plugin` 构建串联（拍板 B，含 skip 参数）+ 产物 `static/admin/` + SPA 回落 `/admin/**` → index.html
-- **skill**：`.claude/skills/oryxos-admin-ui/SKILL.md`（设计 token/工程约定/三态/验收清单——30 节复用）
+- **前端**：`axion-web/src/main/frontend/` Vue3+Vite 只读管理台（五页）+ `frontend-maven-plugin` 构建串联（拍板 B，含 skip 参数）+ 产物 `static/admin/` + SPA 回落 `/admin/**` → index.html
+- **skill**：`.claude/skills/axion-admin-ui/SKILL.md`（设计 token/工程约定/三态/验收清单——30 节复用）
 
-![Web Service 全链路：业务系统 REST 接入 → 六个薄 Controller（校验/包装/错误三件事，逻辑全委托核心层）→ AgentService.process 与 CLI 完全同一入口（宪法 VIII）→ 10 端点统一前缀 /api/v1；异常单出口 GlobalExceptionHandler 统一 ErrorResponse 信封（400/404/503/504/500 兜底不泄漏内幕——最值钱回归，拍板 B 双信封：成功 ApiResponse/错误 ErrorResponse）；serve 8080 virtual thread + 排除 Spring AI eager 装配（单 key 可启动）；/admin 只读管理台五页调五 GET（Vue3+Vite 同官网风格 + oryxos-admin-ui skill，frontend-maven-plugin 构建含 skip 开关，SPA 回落）；认证/SSE/WebSocket/限流/RBAC 与 Agent 管理端点归扩展](../../website/public/images/docs-web-service-flow.svg)
+![Web Service 全链路：业务系统 REST 接入 → 六个薄 Controller（校验/包装/错误三件事，逻辑全委托核心层）→ AgentService.process 与 CLI 完全同一入口（宪法 VIII）→ 10 端点统一前缀 /api/v1；异常单出口 GlobalExceptionHandler 统一 ErrorResponse 信封（400/404/503/504/500 兜底不泄漏内幕——最值钱回归，拍板 B 双信封：成功 ApiResponse/错误 ErrorResponse）；serve 8080 virtual thread + 排除 Spring AI eager 装配（单 key 可启动）；/admin 只读管理台五页调五 GET（Vue3+Vite 同官网风格 + axion-admin-ui skill，frontend-maven-plugin 构建含 skip 开关，SPA 回落）；认证/SSE/WebSocket/限流/RBAC 与 Agent 管理端点归扩展](../../website/public/images/docs-web-service-flow.svg)
 
 ## 明确不做
 
@@ -158,7 +158,7 @@ Web 层 harness 用 `@WebMvcTest` 切片——只起 MVC 层、mock 掉 AgentSer
 @Test
 void 内部异常细节_绝不能出现在500响应里() {
     when(agentService.process(any(), any()))
-        .thenThrow(new IllegalStateException("jdbc:sqlite:/data/oryxos.db connect failed"));
+        .thenThrow(new IllegalStateException("jdbc:sqlite:/data/axion.db connect failed"));
     mockMvc.perform(post("/api/v1/sessions/s-1/messages").contentType(JSON).content(body))
         .andExpect(status().isInternalServerError())
         .andExpect(jsonPath("$.errorCode").value(500))                          // 拍板 B：错误走 ErrorResponse 信封
@@ -172,7 +172,7 @@ void 内部异常细节_绝不能出现在500响应里() {
 ### 人工部分（做完怎么验）
 
 ```bash
-oryxos serve                                          # 启动，默认 8080（只配 DEEPSEEK_API_KEY 一个 key 就起得来）
+axion serve                                          # 启动，默认 8080（只配 DEEPSEEK_API_KEY 一个 key 就起得来）
 curl -X POST localhost:8080/api/v1/sessions           # 建会话
 curl -X POST localhost:8080/api/v1/sessions/{id}/messages \
      -H 'Content-Type: application/json' -d '{"content":"今天北京天气怎么样"}'   # 完整 ReAct 返回答复
@@ -182,7 +182,7 @@ open http://localhost:8080/swagger-ui                 # 接口文档（自动生
 ```
 
 - **端到端验收（Demo 四/五 地基）**：Web 同步调用跑通（真模型：POST messages 拿到完整 ReAct 答复）+ 多端点联动（先 GET /profiles 拿 Agent 名 → POST /agents/{name}/invoke 无状态调用）——需求文档 §13 的 Web Service 验收点
-- **干净机器单 key 启动**：环境只配 `DEEPSEEK_API_KEY`，`oryxos serve` 正常起在 8080（课件坑的实机验证——autoconfigure.exclude 是否真挡住 eager 装配）
+- **干净机器单 key 启动**：环境只配 `DEEPSEEK_API_KEY`，`axion serve` 正常起在 8080（课件坑的实机验证——autoconfigure.exclude 是否真挡住 eager 装配）
 - **管理台只读核对**：/admin 五页渲染正常、无任何写按钮、错误时展示统一信封 message
 
 ## 依赖与假设
@@ -196,7 +196,7 @@ open http://localhost:8080/swagger-ui                 # 接口文档（自动生
 - **007-sandbox**：`ApiResponse` 信封现状（地基产物）+ WhitelistSandbox（不影响本节）
 - **008-scheduler**：`ProfileRegistry.list()`（GET /profiles 数据源）+ `AgentScheduler`（serve 常驻时钟推并行运转——serve/gateway 常驻模式下定时任务随进程跑，CLAUDE.md「定时任务随 serve/gateway 常驻」契约兑现）
 
-**现状确认（2026-09-08 实测）**：oryxos-web 有地基 5 件（ApiResponse/ErrorResponse/ErrorCode/GlobalExceptionHandler/ServiceUnavailableException，java-spring-init 产物）；`ServeCommand` 占位（web(NONE) + 占位输出）；`spring.threads.virtual.enabled: true` 已在 application.yaml；`server.port`/`autoconfigure.exclude` 无；`SessionManager` 公开方法为 `getOrCreate`（**无 findById**——实施时补 `findById` 或按 session_id 直查 Repository，改造点）；web 模块 pom 的 web starter/springdoc/test 依赖待核实补缺。
+**现状确认（2026-09-08 实测）**：axion-web 有地基 5 件（ApiResponse/ErrorResponse/ErrorCode/GlobalExceptionHandler/ServiceUnavailableException，java-spring-init 产物）；`ServeCommand` 占位（web(NONE) + 占位输出）；`spring.threads.virtual.enabled: true` 已在 application.yaml；`server.port`/`autoconfigure.exclude` 无；`SessionManager` 公开方法为 `getOrCreate`（**无 findById**——实施时补 `findById` 或按 session_id 直查 Repository，改造点）；web 模块 pom 的 web starter/springdoc/test 依赖待核实补缺。
 
 ### 前序缺口（H0 依赖检查）
 

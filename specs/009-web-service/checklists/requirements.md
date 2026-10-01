@@ -31,5 +31,5 @@
 
 ## Notes
 
-- 项目口径说明：spec 中点名的类/端点（六 Controller/10 端点/ApiResponse/ErrorResponse/ErrorCode/5 异常类/GlobalExceptionHandler/ServeCommand/SessionManager.findById/oryxos-admin-ui skill）是需求文档「交付清单」锁定的对外概念白名单（拍板结论落位），属于验收锚点而非实现细节泄漏——与 003~008 同款口径。
+- 项目口径说明：spec 中点名的类/端点（六 Controller/10 端点/ApiResponse/ErrorResponse/ErrorCode/5 异常类/GlobalExceptionHandler/ServeCommand/SessionManager.findById/axion-admin-ui skill）是需求文档「交付清单」锁定的对外概念白名单（拍板结论落位），属于验收锚点而非实现细节泄漏——与 003~008 同款口径。
 - 16 项全部通过，无 NEEDS CLARIFICATION：需求文档修订说明 ①~⑥ 已钉死全部口径（课件口径拍板、信封 B/构建 B 拍板、四维修正 ⑨ 落位）。

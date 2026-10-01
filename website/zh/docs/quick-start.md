@@ -1,6 +1,6 @@
 # 快速开始
 
-> ⚠️ OryxOS 当前处于 **pre-alpha** 阶段（核心阶段，单机私有部署），API 可能变动。
+> ⚠️ Axion 当前处于 **pre-alpha** 阶段（核心阶段，单机私有部署），API 可能变动。
 
 ## 环境要求
 
@@ -13,14 +13,14 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yALearner/OryxOS-one.git
-cd oryxos
+git clone https://github.com/yALearner/Axion.git
+cd axion
 
 # 编译打包
 mvn clean package -DskipTests
 
 # 初始化工作区
-java -jar oryxos-boot/target/oryxos-boot-*.jar init
+java -jar axion-boot/target/axion-boot-*.jar init
 ```
 
 ## 配置第一个 Agent
@@ -31,7 +31,7 @@ java -jar oryxos-boot/target/oryxos-boot-*.jar init
 export DEEPSEEK_API_KEY=sk-your-key-here
 ```
 
-2. 编辑 `.oryxos/agents/default/AGENT.md`：
+2. 编辑 `.axion/agents/default/AGENT.md`：
 
 ```markdown
 ---
@@ -58,10 +58,10 @@ settings:
 
 ```bash
 # 交互式对话
-java -jar oryxos-boot/target/oryxos-boot-*.jar chat
+java -jar axion-boot/target/axion-boot-*.jar chat
 
 # 或启动 HTTP API 服务
-java -jar oryxos-boot/target/oryxos-boot-*.jar serve --port 8080
+java -jar axion-boot/target/axion-boot-*.jar serve --port 8080
 
 # 然后调用 API
 curl -X POST http://localhost:8080/api/v1/sessions \
@@ -72,17 +72,17 @@ curl -X POST http://localhost:8080/api/v1/sessions \
 ## CLI 命令
 
 ```bash
-oryxos init                      # 初始化 .oryxos/ 工作区（幂等）
-oryxos status                    # 查看配置和运行状态
-oryxos chat [--profile <name>]   # 交互式多轮对话
-oryxos serve [--port 8080]       # 启动 HTTP API 服务
-oryxos profile list              # 列出所有 Agent
-oryxos tool list                 # 列出可用 Tool
-oryxos session list              # 列出活跃 Session
+axion init                      # 初始化 .axion/ 工作区（幂等）
+axion status                    # 查看配置和运行状态
+axion chat [--profile <name>]   # 交互式多轮对话
+axion serve [--port 8080]       # 启动 HTTP API 服务
+axion profile list              # 列出所有 Agent
+axion tool list                 # 列出可用 Tool
+axion session list              # 列出活跃 Session
 ```
 
 ## 下一步
 
-- [系统架构](./architecture) — 理解 OryxOS 的内部设计
+- [系统架构](./architecture) — 理解 Axion 的内部设计
 - [功能特性](./features) — 探索全部能力
 - [使用场景](./scenarios) — 真实企业落地案例

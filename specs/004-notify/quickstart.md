@@ -10,10 +10,10 @@
 mvn clean verify
 
 # 只跑本 feature 两模块（日常迭代）
-mvn test -pl oryxos-tool,oryxos-storage -am
+mvn test -pl axion-tool,axion-storage -am
 ```
 
-预期结果：`oryxos-tool` 新增 3 个测试类 + `oryxos-storage` 新增 1 个测试类全绿，前序全部测试回归绿。
+预期结果：`axion-tool` 新增 3 个测试类 + `axion-storage` 新增 1 个测试类全绿，前序全部测试回归绿。
 
 | 测试类 | 验证点 |
 |--------|--------|
@@ -47,7 +47,7 @@ adapter.send(target, "人工验证消息：004-notify");
 
 ### 步骤二：临时 harness 全链路验证（真实落库 + 真实审计路径）
 
-放 `oryxos-boot/src/test/java/com/oryxos/boot/NotifyManualIT.java`（`@Tag("integration")`；`WEBHOOK_URL` 缺失时 `Assumptions.assumeTrue` SKIP 不 FAIL；**未提交、验收后删除**）。装配：真实 `NotifyChannelRepository`（boot 上下文）+ 真实 `ToolExecutor`（工具 Map 手工塞 `Map.of("notify", notifyTools)`）+ harness 内放行 stub `Sandbox`——不走第 20 节注册也能验到**真实审计落账**。四个用例：
+放 `axion-boot/src/test/java/com/axion/boot/NotifyManualIT.java`（`@Tag("integration")`；`WEBHOOK_URL` 缺失时 `Assumptions.assumeTrue` SKIP 不 FAIL；**未提交、验收后删除**）。装配：真实 `NotifyChannelRepository`（boot 上下文）+ 真实 `ToolExecutor`（工具 Map 手工塞 `Map.of("notify", notifyTools)`）+ harness 内放行 stub `Sandbox`——不走第 20 节注册也能验到**真实审计落账**。四个用例：
 
 1. **成功路径**：`repository.save(team-lark 行)` → ToolExecutor 执行 `notify(content="测试", channel="team-lark")` → 群里收到 + `tool_invocations` 落 `success=true`、`result_json="已推送到 team-lark"`（带渠道名，不裸记"已推送"）
 2. **反例一**：`notify(channel="no-such-channel")` → 明确报错、`tool_invocations` 落 `success=false` + error_message（不静默）
@@ -57,14 +57,14 @@ adapter.send(target, "人工验证消息：004-notify");
 跑法（PowerShell 一行写完）：
 
 ```bash
-mvn -pl oryxos-boot -am test -Dtest=NotifyManualIT -Dtest.groups=integration -Dtest.excludedGroups= -Dsurefire.failIfNoSpecifiedTests=false
+mvn -pl axion-boot -am test -Dtest=NotifyManualIT -Dtest.groups=integration -Dtest.excludedGroups= -Dsurefire.failIfNoSpecifiedTests=false
 ```
 
 ### 步骤三：落库核对
 
 1. `PRAGMA table_info(notify_channels)` 四列齐（`name` PK / `type` / `url` / `description`）+ 插入数据可见
 2. `tool_invocations` 里 notify 行：`result_json` 带渠道名、`success` / `duration_ms` / `created_at` 有值
-3. **已知坑**：surefire 工作目录 = 模块目录 → 数据落 `oryxos-boot/.oryxos/oryxos.db`（不是仓库根，指对路径即可）
+3. **已知坑**：surefire 工作目录 = 模块目录 → 数据落 `axion-boot/.axion/axion.db`（不是仓库根，指对路径即可）
 
 ### 步骤四：接口中立性自查（思维练习，测不出来）
 

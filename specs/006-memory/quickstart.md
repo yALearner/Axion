@@ -10,10 +10,10 @@
 mvn clean verify
 
 # 只跑本 feature 模块（日常迭代）
-mvn test -pl oryxos-memory,oryxos-core,oryxos-cli -am
+mvn test -pl axion-memory,axion-core,axion-cli -am
 ```
 
-预期结果：oryxos-memory 新增 6 个测试类 + 002 PromptBuilderTest 改造后全绿 + 005 回归全绿。
+预期结果：axion-memory 新增 6 个测试类 + 002 PromptBuilderTest 改造后全绿 + 005 回归全绿。
 
 | 测试类 | 验证点 |
 |--------|--------|
@@ -26,7 +26,7 @@ mvn test -pl oryxos-memory,oryxos-core,oryxos-cli -am
 
 ## 人工验证（机器判不了的部分；方法论见 `references/manual-acceptance.md`）
 
-1. **Demo 二对话版（真模型）**：第一次对话说"我项目用 Spring Boot，部署在 K8s 上" → Agent 主动 save_memory；重启/新会话问"我的项目能用什么数据库" → 引用记忆作答（依赖真模型 key；无 key 如实记待办；Agent prompt 套用 oryx-design template §六三件套）
+1. **Demo 二对话版（真模型）**：第一次对话说"我项目用 Spring Boot，部署在 K8s 上" → Agent 主动 save_memory；重启/新会话问"我的项目能用什么数据库" → 引用记忆作答（依赖真模型 key；无 key 如实记待办；Agent prompt 套用 axion-design template §六三件套）
 2. **跨进程验证**：重启后 MEMORY.md 内容还在（目检）；sqlite 档切换后 memory_entries 表核对（scope 列正确）
 3. **USER.md 只读核对（code review）**：grep 无写 USER.md 路径；MEMORY.md 写入仅经 MarkdownMemoryStore
 4. **三档切换实机**：`memory.backend=sqlite` 启动 + 写入后查表；`memory.backend=mem0` 需自托管实例（本地无 → 如实记待办，mock 层已验协议翻译）

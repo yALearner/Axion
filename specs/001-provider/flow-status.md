@@ -23,4 +23,4 @@ WARNING 记录: （累计 2/3）C1 Prompt 未建模（LOW-MED）；F4 plan.md �
 人工验收待办（机器已判卷之外的部分）:
 - [x] 集成冒烟 DeepSeek：2026-08-30 真实调用通过（ProviderSmokeIT 1/1，2.4s，非空响应 + 审计 success=true）（§13 两家要求已完成一家）
 - [ ] 集成冒烟 Kimi：用户确认无 key、不再测（2026-08-30），§13 第二家留作已知缺口；日后有 key 时按 quickstart 同命令补验
-- [ ] 打开 .oryxos/oryxos.db 核对 llm_calls 的 token 数与 API 实际返回一致（注意：冒烟中 Repository 为 mock，真实落库需等 US-2 整链路接通后验）
+- [ ] 打开 .axion/axion.db 核对 llm_calls 的 token 数与 API 实际返回一致（注意：冒烟中 Repository 为 mock，真实落库需等 US-2 整链路接通后验）

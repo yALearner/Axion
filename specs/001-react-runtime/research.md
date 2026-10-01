@@ -37,7 +37,7 @@ Phase 0 研究输出。格式：Decision / Rationale / Alternatives considered�
   - 建表：`spring.jpa.hibernate.ddl-auto=none` + `spring.sql.init.mode=always` + `src/main/resources/schema.sql`（`CREATE TABLE IF NOT EXISTS` 幂等）。
     - **关键坑**：Spring Boot 的 `EmbeddedDatabaseConnection` 枚举不含 SQLite，`spring.sql.init.mode` 默认 `embedded` 会**静默跳过** schema.sql，必须显式 `always`。
     - 顺序保证：默认 schema.sql 在 EntityManagerFactory 创建**之前**执行（`JpaDependsOnDatabaseInitializationDetector` 加 depends-on）；不需要 `spring.jpa.defer-datasource-initialization`。
-  - 数据源：`spring.datasource.url=jdbc:sqlite:.oryxos/oryxos.db?foreign_keys=on&journal_mode=wal&busy_timeout=5000`；driver `org.sqlite.JDBC`；Hikari `maximum-pool-size=4`；`spring.jpa.open-in-view=false`。
+  - 数据源：`spring.datasource.url=jdbc:sqlite:.axion/axion.db?foreign_keys=on&journal_mode=wal&busy_timeout=5000`；driver `org.sqlite.JDBC`；Hikari `maximum-pool-size=4`；`spring.jpa.open-in-view=false`。
     - SQLite 外键默认**关闭**且按连接生效——必须走 URL pragma（Hikari `connectionInitSql` 只执行首条语句，多 PRAGMA 放 URL）。
   - 测试：`jdbc:sqlite::memory:` + **`maximum-pool-size=1`** + `ddl-auto=create-drop` + `spring.sql.init.mode=never`；另加一个专门跑生产 `schema.sql` 的校验测试（`mode=always` + `ddl-auto=none` 同一内存库验证 DDL 有效）。
     - **关键坑**：`:memory:` 每个连接是独立空库，池 >1 时 schema 会"消失"；`WAL` 对内存库无效，只有池=1 可靠。
@@ -49,7 +49,7 @@ Phase 0 研究输出。格式：Decision / Rationale / Alternatives considered�
 
 ## R3. Logback 结构化 JSON 日志
 
-- **Decision**: `net.logstash.logback:logstash-logback-encoder:8.0`（root POM 依赖管理引入）；CLI 模式 = 控制台纯文本 + 滚动 JSON 文件 `logs/oryxos.jsonl`（常开）；`server` Spring profile 下 JSON 同时上 stdout。`logback-spring.xml` 放 oryxos-cli / oryxos-boot 资源目录。
+- **Decision**: `net.logstash.logback:logstash-logback-encoder:8.0`（root POM 依赖管理引入）；CLI 模式 = 控制台纯文本 + 滚动 JSON 文件 `logs/axion.jsonl`（常开）；`server` Spring profile 下 JSON 同时上 stdout。`logback-spring.xml` 放 axion-cli / axion-boot 资源目录。
 - **Rationale**:
   - Boot 3.3.5 管理 Logback **1.5.11**、Boot 3.5.16 管理 **1.5.34**（非 1.4.x）；encoder 8.0 要求 logback ≥1.5.0 且实测配套 Jackson 2.17/2.18——完全匹配，零冲突。
   - encoder 9.0 需要 Jackson 3，Boot 3.5.x 仍用 Jackson 2.x，不可用。

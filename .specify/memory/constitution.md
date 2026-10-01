@@ -10,9 +10,9 @@
   Follow-up TODOs: 无
 -->
 
-# OryxOS Constitution
+# Axion Constitution
 
-OryxOS 是面向企业场景的 Agent OS（Java 实现）。本宪法是项目最高治理文件，优先级高于
+Axion 是面向企业场景的 Agent OS（Java 实现）。本宪法是项目最高治理文件，优先级高于
 CLAUDE.md、docs/ 下的需求与技术方案、以及任何实现层面的习惯。所有代码、Spec、PR 必须遵守。
 
 > 来源：`CLAUDE.md`「不可违背的原则」、`docs/AiProgrammingGuide.md` §1.2（constitution 输入 =
@@ -28,7 +28,7 @@ CLAUDE.md、docs/ 下的需求与技术方案、以及任何实现层面的习�
 
 ### II. Spring AI 只用两件事
 
-Spring AI 在 OryxOS 里只做：① LLM Provider 协议转换；② `@Tool` 注解的 JSON Schema 生成。
+Spring AI 在 Axion 里只做：① LLM Provider 协议转换；② `@Tool` 注解的 JSON Schema 生成。
 MUST 禁用 Spring AI 的自动 tool 执行——Tool 的调度和执行完全由 `ReActLoop` + `ToolExecutor`
 控制。违反此原则会导致 tool 被调两次。
 
@@ -40,12 +40,12 @@ provider name）。
 
 ### IV. 一个目录 = 一个 Agent；Skill 以本地软连接绑定并渐进披露
 
-一个目录 = 一个 Agent：`.oryxos/agents/<name>/` 里 `AGENT.md` = frontmatter（运行配置）+
+一个目录 = 一个 Agent：`.axion/agents/<name>/` 里 `AGENT.md` = frontmatter（运行配置）+
 正文（任务指令），外加可选 `skills/`（Skill 绑定视图）、`scripts/`、`REFERENCE.md`。
 `AgentLoader.deriveProfile(agentDir)` 把 frontmatter 派生成底座认识的 `Profile`。
 
-公共 Skill 实体统一存放在 `.oryxos/skills/<name>/`。Agent 可见的 Skill 只由
-`.oryxos/agents/<agent>/skills/<name>` 下指向公共实体的**相对软连接**表达；软连接集合是
+公共 Skill 实体统一存放在 `.axion/skills/<name>/`。Agent 可见的 Skill 只由
+`.axion/agents/<agent>/skills/<name>` 下指向公共实体的**相对软连接**表达；软连接集合是
 唯一绑定真相源，`AGENT.md` frontmatter MUST NOT 声明 `skills:`。
 
 加载走三层渐进式披露：每轮 prompt 只注入当前 Agent 已绑定 Skill 的 name + description +
@@ -56,7 +56,7 @@ provider name）。
 ### V. 审计表 Day One 写入
 
 `tool_invocations` 和 `llm_calls` 两张审计表核心阶段 MUST 写入（不需要查询接口，但写入
-不能省）。MUST NOT 以"日志够了"为由跳过落库——可审计是 OryxOS 的核心差异化能力。
+不能省）。MUST NOT 以"日志够了"为由跳过落库——可审计是 Axion 的核心差异化能力。
 
 ### VI. 不使用 Java SecurityManager
 
@@ -80,15 +80,15 @@ user 都固定为 `scheduler`。
 
 ### IX. Tool 模块三合一
 
-内置 Tool、MCP Client、Sandbox、NotifyTools MUST 合并在一个 `oryxos-tool` 模块，不拆成多个
-模块。`AGENT.md` 正文加载归 `oryxos-core` 的 `ContextLoader`（Agent 目录不是 Tool）。
+内置 Tool、MCP Client、Sandbox、NotifyTools MUST 合并在一个 `axion-tool` 模块，不拆成多个
+模块。`AGENT.md` 正文加载归 `axion-core` 的 `ContextLoader`（Agent 目录不是 Tool）。
 
 ## 技术约束与安全要求
 
 - **运行时**：Java 21（MUST，virtual thread 处理并发）、Spring Boot 3.x、Spring MVC；
   LLM 调用复用 Spring AI Alibaba（受原则二约束）。
 - **构建与模块**：Maven 多模块，9 个模块按 CLAUDE.md 定义；模块之间通过接口解耦，新增
-  Channel 或 Tool 只加新模块，MUST NOT 改 `oryxos-core`。
+  Channel 或 Tool 只加新模块，MUST NOT 改 `axion-core`。
 - **持久化**：SQLite + Spring Data JPA（核心阶段）。SQLite 上 `hibernate.ddl-auto=update`
   的 ALTER TABLE 支持很弱，表结构变更 MUST NOT 依赖 Hibernate 自动迁移——手动维护建表脚本
   或引入 Flyway。

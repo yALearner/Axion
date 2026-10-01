@@ -73,7 +73,7 @@ skill 定义的定时任务（id + cron + zone + message）注册时登记进 `s
 
 ### User Story 4 - 管理台「定时任务」页（Priority: P2）
 
-管理台新增定时任务页：列表（任务/Profile/cron/下次触发/上次结果/次数/状态）+ 每行「立即执行」「启用·停用」——26 节只读管理台的**第一个写操作页**；复用 oryxos-admin-ui skill（⑦d：skill 只读纪律加例外条款）（课件 §2.1④）。
+管理台新增定时任务页：列表（任务/Profile/cron/下次触发/上次结果/次数/状态）+ 每行「立即执行」「启用·停用」——26 节只读管理台的**第一个写操作页**；复用 axion-admin-ui skill（⑦d：skill 只读纪律加例外条款）（课件 §2.1④）。
 
 **Why this priority**: 「agent os 能执行智能定时任务」的落地界面；skill 纪律更新是 30 节复用的前置。
 
@@ -84,7 +84,7 @@ skill 定义的定时任务（id + cron + zone + message）注册时登记进 `s
 1. **Given** 服务运行且有注册任务，**When** 打开 /admin 定时任务页，**Then** 列表渲染任务与状态、每行有立即执行/启用停用按钮
 2. **Given** 点击立即执行，**When** 等待返回，**Then** 结果显示执行结果（同步等待）
 3. **Given** 点击停用，**When** 列表刷新，**Then** 状态显示已停用
-4. **Given** oryxos-admin-ui skill，**When** 核对纪律条款，**Then** 含定时任务页例外（其余页面仍只读）
+4. **Given** axion-admin-ui skill，**When** 核对纪律条款，**Then** 含定时任务页例外（其余页面仍只读）
 
 ---
 
@@ -140,7 +140,7 @@ http.allowed_domains 加三样域名（api.open-meteo.com + webhook 域名 + 新
 - **FR-003**: AgentScheduler 改造（008 交付物）：registerAll 登记（含 next_run_at）；执行入口拆「看启用状态 → 真正执行」（停用跳过不记历史）；成败都写 task_executions + 更新状态；runNow(taskId)（无视启用）；**⑦a：runNow 与 runOnce 共用同一把锁、同一 executeInternal**（并发不双跑）
 - **FR-004**: `Profile.Schedule` 补 `id`（拍板 A）：frontmatter id 键、锁 key 与 task_id 直接用 id（008 派生 key 退役）、id 冲突启动报错（指明 Profile）、**⑦c：id 缺失启动报错**、CLAUDE.md 示例同步
 - **FR-005**: ScheduleApiController 四端点（双信封）：GET /schedules、GET /schedules/{id}/executions、POST /schedules/{id}/run（**⑦b 同步等待 60s + 504**，返回体 data = TaskExecutionView，与 executions 历史条目同形状）、PUT /schedules/{id}（启用/停用：setEnabled 仅改 enabled 字段，next_run_at 保留原值不动——Clarifications 2026-09-09）；任务不存在 → 404
-- **FR-006**: 管理台「定时任务」页（第一个写操作页：立即执行/启用停用）；**⑦d：oryxos-admin-ui skill 只读纪律加例外条款**
+- **FR-006**: 管理台「定时任务」页（第一个写操作页：立即执行/启用停用）；**⑦d：axion-admin-ui skill 只读纪律加例外条款**
 - **FR-007**: Demo 前置环境：三域名白名单（api.open-meteo.com + webhook + 新闻源按需）、notify_channels 配好、测试 Profile schedules（含 id + 显式时区）
 - **NFR-001**: 全程同步阻塞（宪法 VII）；定时链路 = 人推链路换触发头、加推送尾——中间引擎完全复用
 - **NFR-002**: 单任务失败不拖调度器（008 延续）；停用即不跑、不记历史
@@ -152,7 +152,7 @@ http.allowed_domains 加三样域名（api.open-meteo.com + webhook 域名 + 新
 - **TaskExecution**（storage 实体）：id/task_id/session_id/started_at/success/error_message/duration_ms
 - **ScheduledTaskStore**（storage 接口，落位拍板 2026-09-09）+ ScheduledTaskView/TaskExecutionView（storage 值对象）
 - **Profile.Schedule**（002 改造）：id + cron + zone + message 四字段
-- **ScheduleApiController**（oryxos-web）：四端点 + DTO
+- **ScheduleApiController**（axion-web）：四端点 + DTO
 
 ## Success Criteria *(mandatory)*
 

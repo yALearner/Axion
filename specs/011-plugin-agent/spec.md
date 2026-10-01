@@ -55,7 +55,7 @@
 
 ### User Story 3 - 上下文注入：正文 + 绑定路径 + 渐进式披露守点（Priority: P1）
 
-`ContextLoader.load(profile)` = **AGENT.md 正文**（现读、去 frontmatter、无缓存——坑三：缓存则"改完即时生效"破产）+ Bootstrap + 已绑定 Skill 元数据（注入**绑定路径** `<agentDir>/skills/<name>/SKILL.md`，修订说明 ⑦）；AGENT.md 缺失报错（坑四）；FILE_READ 动态白名单 = 静态 `file.allowed_paths` ∪ 当前 Agent 目录（坑七：不加则 read_file 读自己 REFERENCE.md/绑定 SKILL.md 全被拒，渐进式披露断链）；未绑定 Skill 实体路径（在 `.oryxos/skills/` 下）不可读——未绑定不可见。
+`ContextLoader.load(profile)` = **AGENT.md 正文**（现读、去 frontmatter、无缓存——坑三：缓存则"改完即时生效"破产）+ Bootstrap + 已绑定 Skill 元数据（注入**绑定路径** `<agentDir>/skills/<name>/SKILL.md`，修订说明 ⑦）；AGENT.md 缺失报错（坑四）；FILE_READ 动态白名单 = 静态 `file.allowed_paths` ∪ 当前 Agent 目录（坑七：不加则 read_file 读自己 REFERENCE.md/绑定 SKILL.md 全被拒，渐进式披露断链）；未绑定 Skill 实体路径（在 `.axion/skills/` 下）不可读——未绑定不可见。
 
 **Why this priority**: 渐进式披露三守点的落地层——正文常驻（现读）、子指令/参考按需 read_file、未绑定不可见；正文即时生效是课件验收清单的硬项。
 
@@ -92,7 +92,7 @@
 
 ### User Story 5 - daily-reconcile 示例 Agent（Priority: P2）
 
-按拍板②③改写课件 §1.3~1.4 全文：`daily-reconcile/`（AGENT.md：frontmatter 无 notify_channels、无 skills 字段，tools=[shell, read_file, notify, save_memory]，schedules 含 id；正文四步：跑脚本 → 判断 → 读规范写报告 → notify + save_memory，渠道按名引用）+ `scripts/reconcile.py`（纯标准库无 key）+ 公共技能实体 `.oryxos/skills/report-format/`（SKILL.md = 报告规范 + P0/P1/P2 分级）+ `REFERENCE.md`（字段字典/已知可接受差异）。四文件全文收录于设计文档 + 测试资源落位（AgentScanRegisterTest/ProgressiveDisclosureTest fixture）。
+按拍板②③改写课件 §1.3~1.4 全文：`daily-reconcile/`（AGENT.md：frontmatter 无 notify_channels、无 skills 字段，tools=[shell, read_file, notify, save_memory]，schedules 含 id；正文四步：跑脚本 → 判断 → 读规范写报告 → notify + save_memory，渠道按名引用）+ `scripts/reconcile.py`（纯标准库无 key）+ 公共技能实体 `.axion/skills/report-format/`（SKILL.md = 报告规范 + P0/P1/P2 分级）+ `REFERENCE.md`（字段字典/已知可接受差异）。四文件全文收录于设计文档 + 测试资源落位（AgentScanRegisterTest/ProgressiveDisclosureTest fixture）。
 
 **Why this priority**: "在底座上定义一个会自己跑的 Agent"的参照物——手动路径与 30/31 节的模板；spec-kit 按课件产出，不手工搓。
 
@@ -101,7 +101,7 @@
 **Acceptance Scenarios**:
 
 1. **Given** 测试资源里 daily-reconcile 四文件 + 技能实体 + 绑定，**When** AgentLoader 解析，**Then** 派生 Profile 正确（tools/schedules/provider 全对）
-2. **Given** 工作区放入 daily-reconcile 目录，**When** serve 启动，**Then** `oryxos profile list` 与 GET /api/v1/profiles 出现该 Agent——全程零 Java
+2. **Given** 工作区放入 daily-reconcile 目录，**When** serve 启动，**Then** `axion profile list` 与 GET /api/v1/profiles 出现该 Agent——全程零 Java
 3. **Given** 到点（或 runNow 补跑），**When** 触发，**Then** 脚本 JSON → 判断 → 报告 → 推送 → 留痕全链路完成（真模型人工项）
 
 ---
@@ -140,13 +140,13 @@
 
 ### Functional Requirements
 
-- **FR-001**: `AgentLoader`（`ProfileLoader` 更名 + 扩职责，003 交付物演进，落 oryxos-core）：读 AGENT.md 拆 frontmatter/正文（正文原样、同一解析器——坑一）；`detectResources(agentDir)` 认出 scripts//skills//REFERENCE.md；`deriveProfile(agentDir, providerNames)`（缺 name/provider 报错点名——坑二；**name 与目录名不一致报错——坑八**；schedules id 校验 010 ⑦c 延续）；`loadAll(agentsRoot, providerNames)`（坏目录记错误日志跳过）。`ProfileLoader` 删除，装配处与测试同步更名
-- **FR-002**: `ContextLoader.load(profile)` = AGENT.md 正文（现读、去 frontmatter、**无缓存**——坑三）+ Bootstrap + 已绑定 Skill 元数据（注入**绑定路径** `<agentDir>/skills/<name>/SKILL.md`，修订说明 ⑦；绑定目标仍校验位于 `.oryxos/skills/` 内、逃逸即报错）；AGENT.md 缺失报错（坑四）
+- **FR-001**: `AgentLoader`（`ProfileLoader` 更名 + 扩职责，003 交付物演进，落 axion-core）：读 AGENT.md 拆 frontmatter/正文（正文原样、同一解析器——坑一）；`detectResources(agentDir)` 认出 scripts//skills//REFERENCE.md；`deriveProfile(agentDir, providerNames)`（缺 name/provider 报错点名——坑二；**name 与目录名不一致报错——坑八**；schedules id 校验 010 ⑦c 延续）；`loadAll(agentsRoot, providerNames)`（坏目录记错误日志跳过）。`ProfileLoader` 删除，装配处与测试同步更名
+- **FR-002**: `ContextLoader.load(profile)` = AGENT.md 正文（现读、去 frontmatter、**无缓存**——坑三）+ Bootstrap + 已绑定 Skill 元数据（注入**绑定路径** `<agentDir>/skills/<name>/SKILL.md`，修订说明 ⑦；绑定目标仍校验位于 `.axion/skills/` 内、逃逸即报错）；AGENT.md 缺失报错（坑四）
 - **FR-003**: `ProfileRegistry` 增 `remove(String)`/`exists(String)`（register 已有）；运行时注册与启动扫描走同一段 deriveProfile + register（坑五：同一异常同一消息）
 - **FR-004**: `AgentScheduler.registerProfile(Profile)`：registerAll 循环体抽出（登记 scheduled_tasks 含 next_run_at → 注册 cron 触发 → 句柄入 scheduledTasks → 注册信息入 registrations）；id 冲突查 registrations、报错文案与 010 一致；registerAll = 遍历 ProfileRegistry.list() 调 registerProfile
 - **FR-005**: L3 脚本沙箱（007 演进，③ 拍板）：新配置键 `shell.allowed_interpreters`（`ShellSandboxProperties` 增字段）；解释器命令首 token 须**双白名单命中**（allowed_commands + allowed_interpreters；子集外声明构造期 WARN）；无 Agent 上下文拒绝（fail-closed）；**简单形态钉死（坑九）**——接受"解释器 + 单个 scripts/ 下相对路径参数（+ 可选脚本参数）"形态：token[1] 必须是 scripts/ 下相对路径、token[2..] 作为脚本参数透传（Clarifications 2026-09-13）；解释器与脚本路径之间的选项/引号/元字符/链式一律拒绝；脚本路径落本 Agent scripts/（Windows 大小写不敏感，007 ⑦b）；`ShellTools` 构造器增解释器集合 + workspaceRoot（agentDir = workspaceRoot/agents/<name> 派生）、仅解释器命令 cwd = Agent 目录（坑六）；`WhitelistSandbox` 构造器增 workspaceRoot；`Sandbox.enforce` 接口不变（宪法 VI）
 - **FR-006**: FILE_READ 动态白名单 = 静态 `file.allowed_paths` ∪ 当前 Agent 目录（坑七：渐进式披露断链防线）；未绑定实体路径不可读（未绑定不可见）；FILE_WRITE 不动（最小权限）
-- **FR-007**: daily-reconcile 示例 Agent（四文件 + 公共技能实体 + 绑定）：按拍板②③改写（frontmatter 无 notify_channels、无 skills 字段、正文渠道按名引用）；全文收录设计文档 + 测试资源落位（oryxos-core/src/test/resources）
+- **FR-007**: daily-reconcile 示例 Agent（四文件 + 公共技能实体 + 绑定）：按拍板②③改写（frontmatter 无 notify_channels、无 skills 字段、正文渠道按名引用）；全文收录设计文档 + 测试资源落位（axion-core/src/test/resources）
 - **FR-008**: 装配接线（003 装配处演进）：CliAgentConfiguration 改用 AgentLoader + 沙箱/ShellTools 新参数接线；application.yaml：allowed_commands 增补 python/bash（⑨）、新键 allowed_interpreters（③）；存量 Agent 身份/正文去重（⑩ 迁移注记）
 - **NFR-001**: 全程同步阻塞（宪法 VII）；底座零重写——AgentService/ReActLoop/PromptBuilder/AgentScheduler 只吃 Profile，本节只改 Profile 来源（课件 §二原则）
 - **NFR-002**: 正文即时生效（无缓存）+ 渐进式披露三守点（正文常驻 / 子指令按需 read_file / 脚本产出进上下文代码不进）（宪法 IV）
@@ -154,11 +154,11 @@
 
 ### Key Entities
 
-- **AgentLoader**（oryxos-core）：目录解析/派生——split/loadBody/detectResources/deriveProfile/loadAll
-- **ContextLoader**（oryxos-core，002 演进）：正文注入 + 绑定路径元数据
-- **ProfileRegistry**（oryxos-core，001 演进）：register/remove/exists/findByName/list
-- **AgentScheduler**（oryxos-core，008/010 演进）：registerProfile + scheduledTasks 句柄表 + registrations
-- **WhitelistSandbox / ShellTools / ShellSandboxProperties**（oryxos-tool，007/005 演进）：双白名单解释器校验 + FILE_READ 动态根 + cwd 绑定 + 新配置键
+- **AgentLoader**（axion-core）：目录解析/派生——split/loadBody/detectResources/deriveProfile/loadAll
+- **ContextLoader**（axion-core，002 演进）：正文注入 + 绑定路径元数据
+- **ProfileRegistry**（axion-core，001 演进）：register/remove/exists/findByName/list
+- **AgentScheduler**（axion-core，008/010 演进）：registerProfile + scheduledTasks 句柄表 + registrations
+- **WhitelistSandbox / ShellTools / ShellSandboxProperties**（axion-tool，007/005 演进）：双白名单解释器校验 + FILE_READ 动态根 + cwd 绑定 + 新配置键
 - **daily-reconcile 目录**（四文件）+ **公共技能实体 report-format**（SKILL.md）——无新表、无新模块
 
 ## Success Criteria *(mandatory)*

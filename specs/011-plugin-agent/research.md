@@ -16,8 +16,8 @@
 
 ## R3 · Skill 元数据改注入绑定路径（修订说明 ⑦）
 
-- **Decision**: ContextLoader 注入 `<agentDir>/skills/<name>/SKILL.md`（绑定路径，经软连接/junction 透传读实体）；绑定目标校验（位于 `.oryxos/skills/` 内、逃逸报错）保留 002 逻辑
-- **Rationale**: 技术方案 §12.2 验收原文"`tool_invocations` 有对 Agent 本地软连接路径的 `read_file`"即绑定路径口径；配合 FILE_READ 动态根（R5）实现"未绑定不可见"——未绑定实体路径在 `.oryxos/skills/` 下、不在 Agent 目录下，天然不可读
+- **Decision**: ContextLoader 注入 `<agentDir>/skills/<name>/SKILL.md`（绑定路径，经软连接/junction 透传读实体）；绑定目标校验（位于 `.axion/skills/` 内、逃逸报错）保留 002 逻辑
+- **Rationale**: 技术方案 §12.2 验收原文"`tool_invocations` 有对 Agent 本地软连接路径的 `read_file`"即绑定路径口径；配合 FILE_READ 动态根（R5）实现"未绑定不可见"——未绑定实体路径在 `.axion/skills/` 下、不在 Agent 目录下，天然不可读
 - **Alternatives considered**: 继续注入真实路径 + 沙箱动态并入"已绑定技能真实目录集合"——否决：沙箱须耦合绑定解析逻辑，且实体路径泄露进 prompt
 
 ## R4 · 解释器配置化（③ 拍板）+ 双白名单语义
@@ -30,7 +30,7 @@
 
 - **Decision**: `checkFilePath` 的 FILE_READ 分支 = 静态 `file.allowed_paths` ∪ 当前 Agent 目录（`workspaceRoot/agents/<name>`，经 ProfileContext；无上下文按静态白名单）；FILE_WRITE 不动
 - **Rationale**: 渐进式披露断链防线——不加则 read_file 读自己 REFERENCE.md/绑定 SKILL.md 全被拒；最小权限——他 Agent 目录、未绑定实体路径、写入自己的目录都不需要放开
-- **Alternatives considered**: 动态根扩到 `.oryxos/skills/` 整体——否决：任何 Agent 可猜路径读未绑定技能，违反"未绑定不可见"
+- **Alternatives considered**: 动态根扩到 `.axion/skills/` 整体——否决：任何 Agent 可猜路径读未绑定技能，违反"未绑定不可见"
 
 ## R6 · L3 简单形态判定规则（坑九 + S2 澄清）
 
@@ -52,12 +52,12 @@
 
 ## R9 · 测试 fixture 与 junction 策略
 
-- **Decision**: 示例 Agent 四文件 + 技能实体提交 git（oryxos-core/src/test/resources）；skills 绑定由测试程序创建（Windows `cmd /c mklink /J` junction、POSIX `Files.createSymbolicLink`，ContextLoaderTest 既有工具方法复用）；测试用 @TempDir 拷贝 fixture 后建绑定
+- **Decision**: 示例 Agent 四文件 + 技能实体提交 git（axion-core/src/test/resources）；skills 绑定由测试程序创建（Windows `cmd /c mklink /J` junction、POSIX `Files.createSymbolicLink`，ContextLoaderTest 既有工具方法复用）；测试用 @TempDir 拷贝 fixture 后建绑定
 - **Rationale**: junction/软连接是文件系统对象，git 无法提交；测试期程序创建既保证可移植又钉死绑定解析路径
-- **Alternatives considered**: fixture 里预建 junction 提交——否决：不可移植（Windows junction vs POSIX 软连接不可互换）；运行时工作区 `.oryxos` 提交——否决：gitignored，运行时目录不属于交付物
+- **Alternatives considered**: fixture 里预建 junction 提交——否决：不可移植（Windows junction vs POSIX 软连接不可互换）；运行时工作区 `.axion` 提交——否决：gitignored，运行时目录不属于交付物
 
 ## R10 · 存量 Agent 迁移（修订说明 ⑩）
 
-- **Decision**: 工作区运行时文件（`.oryxos/agents/weather|default`）由人工去重（identity.prompt 留人格、正文留任务步骤），不产生代码交付物；人工验收含一次 weather 对话核对
+- **Decision**: 工作区运行时文件（`.axion/agents/weather|default`）由人工去重（identity.prompt 留人格、正文留任务步骤），不产生代码交付物；人工验收含一次 weather 对话核对
 - **Rationale**: 工作区 gitignored、非交付物；迁移本质是内容编辑而非机制变更，人工项即可
 - **Alternatives considered**: 代码层去重（如注入时跳过与 prompt 重复的正文）——否决：语义猜测不可靠，"重复人格"应由作者自己收敛

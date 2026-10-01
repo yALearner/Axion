@@ -1,7 +1,7 @@
 ---
 name: java-spring-init
 description: >-
-  为 Java 21 + Spring Boot 3.x + Maven 项目（单模块 / 多模块 / OryxOS 式 9 模块）初始化工程地基：
+  为 Java 21 + Spring Boot 3.x + Maven 项目（单模块 / 多模块 / Axion 式 9 模块）初始化工程地基：
   Maven 骨架、结构化 JSON 日志（Logback）、监控（Actuator/Micrometer）、Spring MVC + 虚拟线程、
   springdoc OpenAPI + 统一响应体与全局异常/错误码、开发规范（Spotless Google 格式 +
   阿里编码规约 P3C + Checkstyle 兜底）、代码安全检查（从严：SpotBugs + Find Security Bugs +
@@ -9,7 +9,7 @@ description: >-
   GitHub Actions CI（build/style/security 三 job，均须通过）与 pre-commit。
   当用户要「初始化项目 / 搭工程骨架 / 起脚手架 / 加日志监控 / 加开发规范 / 加代码安全检查」时使用。
   执行时先探测环境与项目现状，逐块「检测→生成→验证」，每步完成后 git commit，并核对项目
-  CLAUDE.md/宪法约束（如 OryxOS 9 条原则）。
+  CLAUDE.md/宪法约束（如 Axion 9 条原则）。
 ---
 
 # Java/Spring 项目工程地基初始化
@@ -20,11 +20,11 @@ description: >-
 
 - 新建 Java/Spring Boot 仓库、或给空仓库起工程骨架时
 - 要给项目补齐日志 / 监控 / API 规范 / 开发规范 / 安全检查时
-- 任何 JDK 21 + Spring Boot 3.x 的 Maven 项目（含 OryxOS 式 9 模块），想一次到位装好工程地基时
+- 任何 JDK 21 + Spring Boot 3.x 的 Maven 项目（含 Axion 式 9 模块），想一次到位装好工程地基时
 
 ## 不做什么（边界）
 
-- 不实现业务功能（OryxOS 的 Provider/ReAct/Memory/Tool/Web 等走 Spec-Kit 拆解）
+- 不实现业务功能（Axion 的 Provider/ReAct/Memory/Tool/Web 等走 Spec-Kit 拆解）
 - 不硬编码任何密钥 / token / API key——一律环境变量占位（`${ENV_VAR}`）
 - 不替换已存在的业务代码与配置；只增量补齐缺失 / 过时项（幂等原则）
 - 不固化工具版本号——只固化**探测方法**（见步骤 2）
@@ -50,13 +50,13 @@ description: >-
 - 每步完成后 `git commit`（一次一步，回滚清晰）
 - 每块验证失败先修正，再进下一块；与项目 CLAUDE.md 冲突 → 停下报告，不静默覆盖
 - 若项目根存在 `CLAUDE.md` / `.specify/memory/constitution.md`：先读其"不可违背原则"章节，
-  逐条核对后续生成内容（OryxOS 9 条核对清单见 `references/constitution-checklist.md`）
+  逐条核对后续生成内容（Axion 9 条核对清单见 `references/constitution-checklist.md`）
 
 ---
 
 ### 步骤 0：确认参数
 
-向用户确认（有默认值）：`groupId`、根 `artifactId`、模块清单（多模块时；OryxOS 默认 9 模块：
+向用户确认（有默认值）：`groupId`、根 `artifactId`、模块清单（多模块时；Axion 默认 9 模块：
 storage/core/provider/memory/tool/channel-cli/web/cli/boot）、启动模块与端口（默认 8080）、
 JDK（21）、仓库可见性（public/private，决定 SAST 选型）、CI 平台（默认 GitHub Actions）。
 同时探测环境：`java -version`、`mvn -version`（PATH 未配置时定位安装路径并 export 注入当前会话）、
@@ -65,7 +65,7 @@ JDK（21）、仓库可见性（public/private，决定 SAST 选型）、CI 平�
 ### 步骤 1：Maven 骨架（仅当缺失）
 
 - 父 `pom.xml`（packaging=pom）+ 子模块；启动模块含 `main`，打 fat JAR
-- 多模块场景（OryxOS）：依赖方向单向——storage ← core ← 能力层（provider/memory/tool）←
+- 多模块场景（Axion）：依赖方向单向——storage ← core ← 能力层（provider/memory/tool）←
   channel-cli/web ← cli ← boot（以项目 CLAUDE.md 定义为准）
 - 版本统一在父 pom `dependencyManagement` / `pluginManagement`（多模块下插件统一配置放 pluginManagement）
 
@@ -227,7 +227,7 @@ java-spring-init/
 │   ├── logging.md                    # Logback/encoder 兼容矩阵与坑位
 │   ├── api-conventions.md            # REST 命名/错误信封/springdoc 约定
 │   ├── security.md                   # SCA/SAST 决策细节、密钥规范、NVD key 坑位
-│   ├── constitution-checklist.md     # 宪法对齐核对清单（OryxOS 9 条示例）
+│   ├── constitution-checklist.md     # 宪法对齐核对清单（Axion 9 条示例）
 │   └── alibaba-rules.md              # 阿里手册增量规则（P3C 规则集参考与回退兜底）
 └── templates/
     ├── logback-spring.xml.tpl

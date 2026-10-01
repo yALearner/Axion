@@ -1,7 +1,7 @@
 # java-spring-init Skill 验证报告
 
 > 验证时间:2026-08-26 ~ 2026-08-27
-> 验证方式:在 OryxOS-one 项目(9 模块 Java 21 + Spring Boot 3.x)上按 SKILL.md 全流程真实执行
+> 验证方式:在 Axion 项目(9 模块 Java 21 + Spring Boot 3.x)上按 SKILL.md 全流程真实执行
 > 执行分支:`feat/engineering-foundation`(9 步 commit,未推送、未合并)
 > 验证人:Claude Code(java-spring-init skill 的执行与验证)
 
@@ -10,7 +10,7 @@
 ## 结论
 
 **skill 流程设计合理、可执行,但存在 3 处事实错误和若干未预警坑位,已全部修正并沉淀进 skill 自身。**
-工程地基已在 `D:\myproject\OryxOS-one` 完整落地,分 9 步 commit。
+工程地基已在 `D:\myproject\Axion` 完整落地,分 9 步 commit。
 
 ---
 
@@ -19,8 +19,8 @@
 | 检查项 | 结果 | 验证方式 |
 |--------|------|---------|
 | `mvn clean package` 出 fat JAR | ✅ 181MB JAR 构建并启动成功 | 实测 |
-| 结构化 JSON 日志 + JSONL 文件 | ✅ `logs/oryxos.jsonl` 持续写入 | 启动后查文件 |
-| `/actuator/health` `/actuator/prometheus` | ✅ UP + 指标(带 `application=oryxos` 标签) | curl 实测 |
+| 结构化 JSON 日志 + JSONL 文件 | ✅ `logs/axion.jsonl` 持续写入 | 启动后查文件 |
+| `/actuator/health` `/actuator/prometheus` | ✅ UP + 指标(带 `application=axion` 标签) | curl 实测 |
 | 虚拟线程 | ✅ 已存在(`spring.threads.virtual.enabled: true`),确认未动 | 核对 yaml |
 | `/swagger-ui.html` + OpenAPI JSON | ✅ 200 / 200 | curl 实测 |
 | ApiResponse + GlobalExceptionHandler | ✅ 404 返回 `{"errorCode":404,"message":"资源不存在: ..."}` 统一信封 | curl 实测 |
@@ -61,9 +61,9 @@
 
 ## 四、执行中额外发现并修复的项目问题
 
-- **扫描范围 bug**:`@SpringBootApplication` 默认只扫 `com.oryxos.boot` 包,导致
+- **扫描范围 bug**:`@SpringBootApplication` 默认只扫 `com.axion.boot` 包,导致
   GlobalExceptionHandler 未被注册(冒烟测试抓出,404 返回的是 Boot 默认错误体而非统一信封)
-  → 修复为 `scanBasePackages = "com.oryxos"`。
+  → 修复为 `scanBasePackages = "com.axion"`。
 - **5 处真实依赖版本分裂**(snakeyaml、jsonschema-generator ×2、antlr4-runtime、commons-lang3)
   由 `requireUpperBoundDeps` 门禁抓出并钉上界;snakeyaml 同版本双路径误报(MENFORCER-336)
   以两处带注释 exclusion 处理。
@@ -84,7 +84,7 @@
 | `b38b609` | feat: 开发规范工具链(Spotless/Enforcer/Error Prone/Checkstyle/阿里 P3C) |
 | `286bf15` | feat: 代码安全检查接入 verify 链(SpotBugs + FSB + Dependency-Check) |
 | `9c2bb6d` | feat: CI 三 job 门禁 + CodeQL + pre-commit |
-| `6c4d9ec` | fix: 启动模块扫描根扩大到 com.oryxos |
+| `6c4d9ec` | fix: 启动模块扫描根扩大到 com.axion |
 | `f449f39` | docs: 补全 skill 的 references 与 templates,修正验证发现的错误 |
 | `fce0980` | fix: Dependency-Check NVD key 处理修正 |
 

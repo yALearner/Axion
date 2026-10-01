@@ -6,7 +6,7 @@
 
 ## Summary
 
-补上第三种触发源（钟推）：`AgentScheduler`（oryxos-core）启动扫描 Profile.schedules 逐条动态注册 `ThreadPoolTaskScheduler` + `CronTrigger`，到点 `runOnce` 按派生锁 key tryLock（坑二防重叠）→ 固定 `("scheduler","scheduler",profileName)` 三元组取 Session → 调 `AgentService.process`（与 CLI/Web 完全同一入口，审计零新增）→ 失败 catch 记日志不崩调度器 + finally 放锁（坑三）。装配在 CliAgentConfiguration（ThreadPoolTaskScheduler `setPoolSize(4)` ⑦a + AgentScheduler bean + 显式 registerAll）。zone 非法启动报错（⑦b）、ScheduledFuture 句柄存 Map（⑦c）、28 节 task_id 重议注记（⑦d）。
+补上第三种触发源（钟推）：`AgentScheduler`（axion-core）启动扫描 Profile.schedules 逐条动态注册 `ThreadPoolTaskScheduler` + `CronTrigger`，到点 `runOnce` 按派生锁 key tryLock（坑二防重叠）→ 固定 `("scheduler","scheduler",profileName)` 三元组取 Session → 调 `AgentService.process`（与 CLI/Web 完全同一入口，审计零新增）→ 失败 catch 记日志不崩调度器 + finally 放锁（坑三）。装配在 CliAgentConfiguration（ThreadPoolTaskScheduler `setPoolSize(4)` ⑦a + AgentScheduler bean + 显式 registerAll）。zone 非法启动报错（⑦b）、ScheduledFuture 句柄存 Map（⑦c）、28 节 task_id 重议注记（⑦d）。
 
 ## Technical Context
 
@@ -20,7 +20,7 @@
 
 **Target Platform**: Windows（开发本机）与 Linux（部署目标）——cron/时区语义平台无关
 
-**Project Type**: Maven 多模块（9 模块不动；AgentScheduler 落 oryxos-core，装配改造落 oryxos-cli）
+**Project Type**: Maven 多模块（9 模块不动；AgentScheduler 落 axion-core，装配改造落 axion-cli）
 
 **Performance Goals**: 注册阶段 O(profiles×schedules) 一次扫描；触发开销 = 锁获取（微秒）+ 会话获取（内存）——相对 ReAct 秒级延迟可忽略
 
@@ -64,18 +64,18 @@ specs/008-scheduler/
 ### Source Code (repository root)
 
 ```text
-oryxos-core/src/main/java/com/oryxos/core/
+axion-core/src/main/java/com/axion/core/
 ├── AgentScheduler.java   # 本节新增（钟推入口，无组件注解纯类）
 └── Profile.java          # 002 已交付，零改动（Schedule 三字段不动——拍板 B）
 
-oryxos-cli/src/main/java/com/oryxos/cli/
+axion-cli/src/main/java/com/axion/cli/
 └── CliAgentConfiguration.java   # 本节改造：+ThreadPoolTaskScheduler @Bean（setPoolSize(4)）
                                  # +AgentScheduler @Bean + registerAll 显式调用
 
-oryxos-core/src/test/java/com/oryxos/core/
+axion-core/src/test/java/com/axion/core/
 └── AgentSchedulerTest.java      # 本节新增（四坑 harness + 两最值钱 + 三元组 + ⑦b）
-oryxos-cli/src/test/java/com/oryxos/cli/
+axion-cli/src/test/java/com/axion/cli/
 └── CliAgentConfigurationTest.java  # 本节增补（bean 存在 + poolSize>1）
 ```
 
-**Structure Decision**: 沿用 9 模块与既有包结构（AgentScheduler 落 oryxos-core——技术方案 §8.5 明文「归 oryxos-core」；装配改造落 oryxos-cli——003/007 先例）。不新建模块、不改依赖方向。
+**Structure Decision**: 沿用 9 模块与既有包结构（AgentScheduler 落 axion-core——技术方案 §8.5 明文「归 axion-core」；装配改造落 axion-cli——003/007 先例）。不新建模块、不改依赖方向。

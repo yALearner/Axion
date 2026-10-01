@@ -103,7 +103,7 @@ schedules 来自 AGENT.md frontmatter（改 cron 不重新编译），注册时 
 
 ### Functional Requirements
 
-- **FR-001**: `AgentScheduler`（oryxos-core，无组件注解纯类）——`registerAll()` 扫 `ProfileRegistry.list()` 每个 Profile 的 `schedules` 逐条 `taskScheduler.schedule(runOnce, new CronTrigger(cron, zone))` 动态注册（不用静态 @Scheduled——坑一配置驱动）；zone 空 → 单参 CronTrigger 按系统时区；zone 非空先经 `ZoneId.of` 校验，非法 → 包装带 profile/zone 的 IllegalStateException（⑦b 不静默回退 GMT）；`schedule` 返回值存 `Map<String, ScheduledFuture<?>>`（⑦c 预留）
+- **FR-001**: `AgentScheduler`（axion-core，无组件注解纯类）——`registerAll()` 扫 `ProfileRegistry.list()` 每个 Profile 的 `schedules` 逐条 `taskScheduler.schedule(runOnce, new CronTrigger(cron, zone))` 动态注册（不用静态 @Scheduled——坑一配置驱动）；zone 空 → 单参 CronTrigger 按系统时区；zone 非空先经 `ZoneId.of` 校验，非法 → 包装带 profile/zone 的 IllegalStateException（⑦b 不静默回退 GMT）；`schedule` 返回值存 `Map<String, ScheduledFuture<?>>`（⑦c 预留）
 - **FR-002**: `runOnce` 重叠防护（坑二）——按派生 key `profileName|cron|message`（拍板 B）每任务一把 `ReentrantLock`，`tryLock` 失败 → log 跳过返回；`finally` unlock（最值钱之二）
 - **FR-003**: 失败隔离（坑三）——`runOnce` 内 `catch (Exception)` → `log.error`（任务 key + 异常栈，不带 message 内容）→ 不外抛；审计零新增（AgentService 内部既有路径落账）
 - **FR-004**: 会话身份（宪法 VIII）——`sessionManager.getOrCreate("scheduler", "scheduler", profileName)`，历次触发复用同一 Session

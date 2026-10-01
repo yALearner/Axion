@@ -2,7 +2,7 @@
 
 ## notify_channels（通知渠道全局注册表，新表，SQLite 第 4 张）
 
-oryxos-storage 新增。手工 schema.sql 增量建表（坑八口径：不依赖 `ddl-auto=update`，测试执行生产同一份脚本）。
+axion-storage 新增。手工 schema.sql 增量建表（坑八口径：不依赖 `ddl-auto=update`，测试执行生产同一份脚本）。
 
 | 列 | 类型 | 约束 | 说明 |
 |------|------|------|------|
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS notify_channels (
 - **生命周期**：无状态机——纯配置数据，CRUD 归 Web Service 节（本节只交表 + 仓储 + 解析）；本节无写路径。
 - **实体/仓储**：`NotifyChannelEntity` + `NotifyChannelRepository extends JpaRepository<NotifyChannelEntity, String>`（按 name 主键查 = findById，storage 模式机械延伸；沿用 storage flat 包与既有风格，无 ISO 时间列故不涉 `InstantTextConverter`）。
 
-## NotifyTarget（解析结果，oryxos-tool，非持久化）
+## NotifyTarget（解析结果，axion-tool，非持久化）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -49,5 +49,5 @@ CREATE TABLE IF NOT EXISTS notify_channels (
 
 ## 涉及的其他既有实体
 
-- **OryxTool / ToolResult**（core，001 交付）：NotifyTools 实现与返回值，原样使用
+- **AxionTool / ToolResult**（core，001 交付）：NotifyTools 实现与返回值，原样使用
 - **Sandbox / SandboxAction / ActionType / SandboxViolationException**（tool，002 交付）：`enforce(new SandboxAction(HTTP_REQUEST, url))`，原样使用
