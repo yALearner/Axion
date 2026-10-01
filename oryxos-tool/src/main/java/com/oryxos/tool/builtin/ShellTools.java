@@ -3,6 +3,8 @@ package com.oryxos.tool.builtin;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.oryxos.core.JsonSchema;
 import com.oryxos.core.OryxTool;
+import com.oryxos.core.Profile;
+import com.oryxos.core.ProfileContext;
 import com.oryxos.core.ToolResult;
 import com.oryxos.tool.ActionType;
 import com.oryxos.tool.Sandbox;
@@ -13,12 +15,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
  * 内置 Tool {@code shell}（FR-3）：执行 bash 命令——execute 首行 {@code sandbox.enforce(SHELL_COMMAND,
  * command)} 先于执行（坑十）；带超时（构造注入 timeoutMs、装配处默认 30_000——G4-C1 可测性），超时强制销毁进程 + 明确报错； 退出码非 0 →
  * failure（stdout/stderr 合并进 errorMessage）。命令白名单规则本体归 23/24 节。
+ *
+ * <p>011-plugin-agent FR-5（坑六）：构造注入解释器集合 + workspaceRoot——首 token ∈ 解释器集合且处于 Agent 处理上下文时， 子进程 cwd
+ * 设为当前 Agent 目录（{@code workspaceRoot/agents/<name>}，经 ProfileContext）——相对路径按"这个 Agent 的目录"解析， 不设则
+ * {@code python scripts/foo.py} 按进程启动目录解析，要么找不到、要么跑到别的目录的同名脚本；非解释器命令（ls/cat 等） cwd 行为不变（007 回归）。
  *
  * <p>平台假设：生产 Linux（bash 在 PATH）；Windows 开发机按「PATH 探测 → {@code where git} 推导 Git 根目录 → 标准安装路径」 解析
  * Git Bash 的 bash（PowerShell 终端 bash 不在 PATH 的实测修复，2026-09-05）；全部解析失败时保持 "bash" 并由 ProcessBuilder
@@ -35,11 +42,15 @@ public class ShellTools implements OryxTool {
   private final Sandbox sandbox;
   private final long timeoutMs;
   private final String shell;
+  private final Set<String> interpreters;
+  private final Path workspaceRoot;
 
-  public ShellTools(Sandbox sandbox, long timeoutMs) {
+  public ShellTools(Sandbox sandbox, long timeoutMs, Set<String> interpreters, Path workspaceRoot) {
     this.sandbox = sandbox;
     this.timeoutMs = timeoutMs;
     this.shell = resolveShell();
+    this.interpreters = Set.copyOf(interpreters);
+    this.workspaceRoot = workspaceRoot.normalize().toAbsolutePath();
   }
 
   @Override
@@ -77,6 +88,7 @@ public class ShellTools implements OryxTool {
     try {
       ProcessBuilder pb = new ProcessBuilder(shell, "-c", command).redirectErrorStream(true);
       enrichGitBashPath(pb);
+      bindAgentWorkingDir(pb, command); // 坑六：解释器命令 cwd = 当前 Agent 目录
       process = pb.start();
     } catch (IOException e) {
       return ToolResult.failure("启动命令失败: " + e.getMessage(), false);
@@ -99,6 +111,24 @@ public class ShellTools implements OryxTool {
       process.destroyForcibly();
       return ToolResult.failure("命令执行被中断", false);
     }
+  }
+
+  /**
+   * 坑六（011 FR-5）：解释器命令且处于 Agent 处理上下文时，cwd 设为当前 Agent 目录——相对路径按"这个 Agent 的目录"解析。 非解释器命令（ls/cat
+   * 等）cwd 行为不变（007 回归）；无 Agent 上下文时解释器命令已在沙箱被拒（⑥ fail-closed），此处不设。
+   */
+  private void bindAgentWorkingDir(ProcessBuilder pb, String command) {
+    String firstToken = command.trim().split("\\s+", 2)[0];
+    if (!interpreters.contains(firstToken)) {
+      return;
+    }
+    Profile profile = ProfileContext.current();
+    if (profile == null) {
+      return;
+    }
+    Path agentDir =
+        workspaceRoot.resolve("agents").resolve(profile.name()).normalize().toAbsolutePath();
+    pb.directory(agentDir.toFile());
   }
 
   /**

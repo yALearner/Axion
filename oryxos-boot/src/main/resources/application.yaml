@@ -78,7 +78,12 @@ oryxos:
 # 诚实标注：应用层白名单是劝阻级防线——防模型犯傻误操作、防不住蓄意攻击（软链/DNS rebinding 等不覆盖）。
 # 010 FR-7 Demo 前置：http 白名单「加」三样域名（保留 007 既有条目——存量 weather Agent 的 prompt 写死 wttr.in）：
 # ① 天气源 api.open-meteo.com ② 团队通知 webhook 域名（按实际渠道选一：飞书 *.feishu.cn / 企业微信 qyapi.weixin.qq.com）
-# ③ 新闻源域名按需。file/shell 保持 007 原状（两个 Demo 用不上，不新增放开）。
+# ③ 新闻源域名按需。
+# 011 FR-5/FR-8（⑨：010 FR-7"file/shell 保持原状"结论到期——29 节 Demo 要跑 python 脚本）：
+# allowed_commands 增补解释器 python/bash；新键 allowed_interpreters（③ 拍板：解释器集合，须为 allowed_commands 子集——
+# 首 token 双白名单命中才按 L3 脚本校验处理（简单形态 + 限本 Agent scripts/ 目录 + cwd=Agent 目录）；
+# 声明了但不在 allowed_commands 的项构造期 WARN 永不命中）。file.allowed_paths 静态条目不变——
+# Agent 自有资源读取走 FILE_READ 动态白名单（当前 Agent 目录，运行时生效，非配置键）。
 file:
   allowed_paths:
     - .oryxos/workspace
@@ -87,6 +92,11 @@ shell:
   allowed_commands:
     - ls
     - cat
+    - python
+    - bash
+  allowed_interpreters:
+    - python
+    - bash
 http:
   allowed_domains:
     - wttr.in

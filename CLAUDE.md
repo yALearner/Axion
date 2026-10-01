@@ -451,6 +451,11 @@ provider:
 | 同模块多个 @SpringBootTest 共用测试工作区 `.oryxos` | 测试类互踩：删除已打开中的 db 文件 Windows 报错、断言被污染 | 每个测试类专属 db 文件（@DynamicPropertySource 覆盖 url）+ agents 目录整体重建（010 实录） |
 | 前端 `npm ci/build` 报 -4048 | `esbuild.exe` 被残留 vite/杀软进程占用，删不掉装不进 | 先 `Get-Process node` 强杀，再删 node_modules 重装（009/010 实录） |
 | Spring `CronExpression.parse/next` 的 @Nullable 契约不判空 | SpotBugs NP 门禁拦（NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE），verify 红 | 两处显式判空抛 IllegalStateException（010 实录） |
+| `Set.of(集合变量)` 编译报 `Set<List<String>>` 构造不匹配 | `Set.of` 只有元素重载，没有 Collection 重载——传一个 List 参数被解析成单元素泛型 | 集合入参用 `Set.copyOf(collection)`（011 实录） |
+| 测试里把 Windows 路径手拼进 JSON 字符串 | 反斜杠不转义 → Jackson `Unrecognized character escape 'U'`，工具执行失败 | 用 `ObjectMapper.createObjectNode().put("path", path)` 构造参数节点（011 实录） |
+| ErrorProne `-Werror` 报 StringConcatToTextBlock | spotless 把长字符串重排成 `+` 连接后撞 ErrorProne 门禁 | 直接写 Java text block（`"""..."""`），两者都满意（011 实录） |
+| SpotBugs `NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE`：`getFileName() == null ? "" : getFileName().toString()` | @Nullable 方法二次调用判空无效——第二次调用仍可能返回 null | 单次取值入局部变量再判空（011 实录） |
+| 给 ContextLoader/PromptBuilder 相关测试加新行为（如正文注入） | 前序测试全部依赖"工作区无 agents 目录"隐式假设，改造后逐个炸（晚失败在他人测试里） | 改造点波及的前序测试（PromptBuilderTest/ReActLoopTest/CliAgentConfigurationTest 等）同步补 agent 目录 fixture（011 实录） |
 
 ---
 

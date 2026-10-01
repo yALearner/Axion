@@ -16,6 +16,7 @@ import com.oryxos.tool.Sandbox;
 import com.oryxos.tool.SandboxViolationException;
 import com.oryxos.tool.ShellSandboxProperties;
 import com.oryxos.tool.WhitelistSandbox;
+import java.nio.file.Path;
 import java.util.List;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -112,8 +113,9 @@ class HttpToolsTest {
   void whitelistSandboxBlocksRequest() {
     WhitelistSandbox sandbox =
         new WhitelistSandbox(
+            Path.of("."),
             new FileSandboxProperties(List.of()),
-            new ShellSandboxProperties(List.of()),
+            new ShellSandboxProperties(List.of(), List.of()),
             new HttpSandboxProperties(List.of("wttr.in")));
     HttpGetTool tool = new HttpGetTool(sandbox, restClient);
 

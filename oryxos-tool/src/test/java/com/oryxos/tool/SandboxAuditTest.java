@@ -10,8 +10,10 @@ import com.oryxos.core.ToolResult;
 import com.oryxos.storage.ToolInvocation;
 import com.oryxos.storage.ToolInvocationRepository;
 import com.oryxos.tool.builtin.ShellTools;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -32,10 +34,13 @@ class SandboxAuditTest {
     ShellTools shellTool =
         new ShellTools(
             new WhitelistSandbox(
+                Path.of("."),
                 new FileSandboxProperties(List.of()),
-                new ShellSandboxProperties(List.of("ls")),
+                new ShellSandboxProperties(List.of("ls"), List.of()),
                 new HttpSandboxProperties(List.of())),
-            30_000);
+            30_000,
+            Set.of(),
+            Path.of("."));
     ToolExecutor executor =
         new ToolExecutor(Map.of("shell", shellTool), auditRepo, new ObjectMapper());
 
@@ -59,10 +64,13 @@ class SandboxAuditTest {
     ShellTools shellTool =
         new ShellTools(
             new WhitelistSandbox(
+                Path.of("."),
                 new FileSandboxProperties(List.of()),
-                new ShellSandboxProperties(List.of("echo")),
+                new ShellSandboxProperties(List.of("echo"), List.of()),
                 new HttpSandboxProperties(List.of())),
-            30_000);
+            30_000,
+            Set.of(),
+            Path.of("."));
     ToolExecutor executor =
         new ToolExecutor(Map.of("shell", shellTool), auditRepo, new ObjectMapper());
 

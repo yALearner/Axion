@@ -8,6 +8,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.oryxos.core.Profile;
+import com.oryxos.core.ProfileContext;
 import com.oryxos.core.ToolResult;
 import com.oryxos.tool.ActionType;
 import com.oryxos.tool.FileSandboxProperties;
@@ -19,6 +21,7 @@ import com.oryxos.tool.WhitelistSandbox;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -34,7 +37,7 @@ class ShellToolsTest {
   @Test
   @DisplayName("正常：执行命令返回标准输出")
   void executesCommand() {
-    ShellTools tool = new ShellTools(mock(Sandbox.class), 30_000);
+    ShellTools tool = new ShellTools(mock(Sandbox.class), 30_000, Set.of(), Path.of("."));
 
     ToolResult result =
         tool.execute(objectMapper.createObjectNode().put("command", "echo hello-shell"));
@@ -47,7 +50,7 @@ class ShellToolsTest {
   @DisplayName("坑十：执行前先过 enforce(SHELL_COMMAND, 命令)")
   void enforcesBeforeExecution() {
     Sandbox sandbox = mock(Sandbox.class);
-    ShellTools tool = new ShellTools(sandbox, 30_000);
+    ShellTools tool = new ShellTools(sandbox, 30_000, Set.of(), Path.of("."));
 
     tool.execute(objectMapper.createObjectNode().put("command", "echo x"));
 
@@ -63,7 +66,7 @@ class ShellToolsTest {
     org.mockito.Mockito.doThrow(new SandboxViolationException("命令不在白名单"))
         .when(sandbox)
         .enforce(any());
-    ShellTools tool = new ShellTools(sandbox, 30_000);
+    ShellTools tool = new ShellTools(sandbox, 30_000, Set.of(), Path.of("."));
 
     assertThatThrownBy(() -> tool.execute(objectMapper.createObjectNode().put("command", "echo x")))
         .isInstanceOf(SandboxViolationException.class);
@@ -74,10 +77,11 @@ class ShellToolsTest {
   void whitelistSandboxBlocksCommand(@TempDir Path tmp) {
     WhitelistSandbox sandbox =
         new WhitelistSandbox(
+            Path.of("."),
             new FileSandboxProperties(List.of()),
-            new ShellSandboxProperties(List.of("ls")),
+            new ShellSandboxProperties(List.of("ls"), List.of()),
             new HttpSandboxProperties(List.of()));
-    ShellTools tool = new ShellTools(sandbox, 30_000);
+    ShellTools tool = new ShellTools(sandbox, 30_000, Set.of(), Path.of("."));
     Path marker = tmp.resolve("marker.txt");
 
     assertThatThrownBy(
@@ -89,7 +93,7 @@ class ShellToolsTest {
   @Test
   @DisplayName("退出码非 0：failure，输出进 errorMessage")
   void nonZeroExitFails() {
-    ShellTools tool = new ShellTools(mock(Sandbox.class), 30_000);
+    ShellTools tool = new ShellTools(mock(Sandbox.class), 30_000, Set.of(), Path.of("."));
 
     ToolResult result =
         tool.execute(objectMapper.createObjectNode().put("command", "echo boom; exit 3"));
@@ -101,11 +105,39 @@ class ShellToolsTest {
   @Test
   @DisplayName("超时：强制销毁进程 + 明确报错（构造注入 100ms 小超时）")
   void timeoutDestroysProcess() {
-    ShellTools tool = new ShellTools(mock(Sandbox.class), 100);
+    ShellTools tool = new ShellTools(mock(Sandbox.class), 100, Set.of(), Path.of("."));
 
     ToolResult result = tool.execute(objectMapper.createObjectNode().put("command", "sleep 5"));
 
     assertThat(result.success()).isFalse();
     assertThat(result.errorMessage()).contains("超时");
+  }
+
+  @Test
+  @DisplayName("坑六回归（011 FR-5）：解释器命令子进程 cwd = 当前 Agent 目录（相对路径按\"这个 Agent 的目录\"解析）")
+  void interpreterCommandRunsInAgentDir(@TempDir Path workspace) throws Exception {
+    Path agentDir = Files.createDirectories(workspace.resolve("agents").resolve("ops-agent"));
+    Files.writeString(agentDir.resolve("AGENT.md"), "---\nname: ops-agent\n---\n");
+    // 用 pwd 充当"解释器"验证 cwd 绑定（bindAgentWorkingDir 只认解释器集合成员，不关心真实解释器）
+    ShellTools tool = new ShellTools(mock(Sandbox.class), 30_000, Set.of("pwd"), workspace);
+    ProfileContext.set(
+        new Profile(
+            "ops-agent",
+            null,
+            new Profile.Identity(null, null),
+            new Profile.ProviderRef("deepseek", null, null),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            new Profile.Settings(10, 20)));
+    try {
+      ToolResult result = tool.execute(objectMapper.createObjectNode().put("command", "pwd"));
+      assertThat(result.success()).isTrue();
+      assertThat(result.content()).contains("agents").contains("ops-agent");
+    } finally {
+      ProfileContext.clear();
+    }
   }
 }

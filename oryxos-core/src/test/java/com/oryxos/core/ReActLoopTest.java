@@ -24,6 +24,8 @@ import org.springframework.ai.chat.prompt.Prompt;
 /** ReActLoop 验收 harness——多轮循环、累积、坑一死循环兜底、坑六执行权唯一。 */
 class ReActLoopTest {
 
+  @org.junit.jupiter.api.io.TempDir Path workspace;
+
   private final LlmGateway gateway = mock(LlmGateway.class);
   private final ToolExecutor toolExecutor = mock(ToolExecutor.class);
 
@@ -36,13 +38,21 @@ class ReActLoopTest {
 
   private ReActLoop loop() {
     // 真实 PromptBuilder（骨架期无历史注入也无妨——ReActLoop 只关心拿到 Prompt）；
-    // 工作区用当前目录（无 bootstrap/skills 时不报错）；MemoryService mock（002 改造点：构造器新增参数）
+    // 011 改造点适配：ContextLoader 现注入 AGENT.md 正文（FR-2）——工作区从 cwd 改为 @TempDir 并建
+    // test-agent 目录（frontmatter-only 且无尾换行：正文为空）；MemoryService mock（002 改造点：构造器新增参数）
+    try {
+      java.nio.file.Path agentDir =
+          java.nio.file.Files.createDirectories(workspace.resolve("agents").resolve("test-agent"));
+      java.nio.file.Files.writeString(agentDir.resolve("AGENT.md"), "---\nname: test-agent\n---");
+    } catch (java.io.IOException e) {
+      throw new IllegalStateException("fixture 创建失败", e);
+    }
     MemoryService memoryService = mock(MemoryService.class);
     when(memoryService.buildContext(org.mockito.ArgumentMatchers.any(Session.class)))
         .thenReturn("");
     PromptBuilder promptBuilder =
         new PromptBuilder(
-            new ContextLoader(Path.of(".")),
+            new ContextLoader(workspace),
             new ToolSchemaAdapter(new ObjectMapper()),
             Map.of(),
             memoryService);
