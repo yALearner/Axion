@@ -1,4 +1,4 @@
-package com.oryxos.cli;
+package com.axion.cli;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -6,14 +6,14 @@ import java.nio.file.Path;
 import picocli.CommandLine.Command;
 
 /**
- * init 命令（轻命令，不启动 Spring）——幂等初始化 `.oryxos/` 工作区（技术方案 §8.1 目录树，用户拍板口径）： 已存在的目录与文件一律不覆盖（需求文档
+ * init 命令（轻命令，不启动 Spring）——幂等初始化 `.axion/` 工作区（技术方案 §8.1 目录树，用户拍板口径）： 已存在的目录与文件一律不覆盖（需求文档
  * §5.1）；同时生成默认 Agent `agents/default/AGENT.md` 模板 （provider=deepseek + ${DEEPSEEK_API_KEY} 占位，001
  * 校验口径：引用必须命中全局层）。
  */
-@Command(name = "init", description = "初始化 .oryxos 工作区（幂等）", mixinStandardHelpOptions = true)
+@Command(name = "init", description = "初始化 .axion 工作区（幂等）", mixinStandardHelpOptions = true)
 public class InitCommand implements Runnable {
 
-  static final String WORKSPACE = ".oryxos";
+  static final String WORKSPACE = ".axion";
 
   private static final String DEFAULT_AGENT_TEMPLATE =
       """
@@ -21,7 +21,7 @@ public class InitCommand implements Runnable {
       name: default
       description: 默认 Agent
       identity:
-        agent_name: OryxOS
+        agent_name: Axion
         prompt: 你是一个专业的企业助手，回答严谨、简洁、用中文。
       provider:
         name: deepseek
@@ -44,7 +44,7 @@ public class InitCommand implements Runnable {
   public void run() {
     try {
       initWorkspace(Path.of(WORKSPACE));
-      System.out.println("已初始化 .oryxos 工作区（幂等：已存在内容未覆盖）");
+      System.out.println("已初始化 .axion 工作区（幂等：已存在内容未覆盖）");
     } catch (IOException e) {
       throw new IllegalStateException("工作区初始化失败: " + e.getMessage(), e);
     }

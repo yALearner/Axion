@@ -1,4 +1,4 @@
-package com.oryxos.cli;
+package com.axion.cli;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,7 +21,7 @@ public class ProfileCreateCommand implements Runnable {
 
   @Override
   public void run() {
-    Path agentDir = Path.of(".oryxos", "agents", name);
+    Path agentDir = Path.of(".axion", "agents", name);
     Path agentFile = agentDir.resolve("AGENT.md");
     if (Files.exists(agentFile)) {
       System.out.println("Agent [" + name + "] 已存在，未覆盖");
@@ -30,7 +30,7 @@ public class ProfileCreateCommand implements Runnable {
     try {
       Files.createDirectories(agentDir);
       Files.writeString(agentFile, templateFor(name));
-      System.out.println("已创建 Agent [" + name + "]：.oryxos/agents/" + name + "/AGENT.md");
+      System.out.println("已创建 Agent [" + name + "]：.axion/agents/" + name + "/AGENT.md");
     } catch (IOException e) {
       throw new IllegalStateException("Agent 创建失败: " + e.getMessage(), e);
     }

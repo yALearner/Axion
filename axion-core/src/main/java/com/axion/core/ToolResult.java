@@ -1,6 +1,6 @@
-package com.oryxos.core;
+package com.axion.core;
 
-/** Tool 执行结果（{@link OryxTool#execute} 的返回类型）。 */
+/** Tool 执行结果（{@link AxionTool#execute} 的返回类型）。 */
 public record ToolResult(boolean success, String content, String errorMessage, boolean retryable) {
 
   public static ToolResult success(String content) {

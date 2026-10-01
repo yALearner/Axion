@@ -1,7 +1,7 @@
-package com.oryxos.tool.notify;
+package com.axion.tool.notify;
 
-import com.oryxos.storage.NotifyChannelEntity;
-import com.oryxos.storage.NotifyChannelRepository;
+import com.axion.storage.NotifyChannelEntity;
+import com.axion.storage.NotifyChannelRepository;
 import java.util.List;
 import java.util.Map;
 

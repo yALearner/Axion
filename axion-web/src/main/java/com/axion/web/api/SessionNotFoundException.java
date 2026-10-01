@@ -1,4 +1,4 @@
-package com.oryxos.web.api;
+package com.axion.web.api;
 
 /** 会话不存在（404）——按 session id 查不到会话时抛出，由 {@link GlobalExceptionHandler} 统一转换为错误信封。 */
 public class SessionNotFoundException extends RuntimeException {

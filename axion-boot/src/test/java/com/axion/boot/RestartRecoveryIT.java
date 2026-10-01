@@ -1,4 +1,4 @@
-package com.oryxos.boot;
+package com.axion.boot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -7,12 +7,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.axion.storage.LlmCallRepository;
+import com.axion.storage.ScheduledTaskStore;
+import com.axion.storage.ScheduledTaskView;
+import com.axion.storage.SessionRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.storage.LlmCallRepository;
-import com.oryxos.storage.ScheduledTaskStore;
-import com.oryxos.storage.ScheduledTaskView;
-import com.oryxos.storage.SessionRepository;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -36,17 +36,17 @@ import org.springframework.test.web.servlet.MockMvc;
  * 不断档——四样全恢复。无 key 时 assumeTrue 跳过（ProviderSmokeIT 同款，F2 口径）。
  */
 @Tag("integration")
-@SpringBootTest(classes = OryxOsApplication.class)
+@SpringBootTest(classes = AxionApplication.class)
 @AutoConfigureMockMvc
 class RestartRecoveryIT {
 
-  private static final String AGENT_DIR = ".oryxos/agents/weather-agent";
-  private static final String DB_FILE = ".oryxos/restart-test.db"; // 类专属库
+  private static final String AGENT_DIR = ".axion/agents/weather-agent";
+  private static final String DB_FILE = ".axion/restart-test.db"; // 类专属库
 
   static {
     // 与 E2E/MultiAgent 共用测试工作区：agents 目录整体重建、各自独占；真 key 对话用无 tools 的 weather-agent
     try {
-      deleteRecursively(Path.of(".oryxos", "agents"));
+      deleteRecursively(Path.of(".axion", "agents"));
       Files.createDirectories(Path.of(AGENT_DIR));
       Files.deleteIfExists(Path.of(DB_FILE));
       Files.writeString(
@@ -84,15 +84,15 @@ class RestartRecoveryIT {
   @DynamicPropertySource
   static void providerProperties(DynamicPropertyRegistry registry) {
     registry.add("spring.datasource.url", () -> "jdbc:sqlite:" + DB_FILE);
-    registry.add("oryxos.providers[0].name", () -> "deepseek");
+    registry.add("axion.providers[0].name", () -> "deepseek");
     // 有真 key 注入真 key；无 key 用 dummy 让 context 起得来、测试内 assumeTrue 跳过（F2 口径）
     registry.add(
-        "oryxos.providers[0].api-key",
+        "axion.providers[0].api-key",
         () -> System.getenv().getOrDefault("DEEPSEEK_API_KEY", "dummy"));
-    registry.add("oryxos.providers[0].base-url", () -> "https://api.deepseek.com");
-    registry.add("oryxos.providers[1].name", () -> "kimi");
-    registry.add("oryxos.providers[1].api-key", () -> "dummy");
-    registry.add("oryxos.providers[1].base-url", () -> "http://127.0.0.1:9");
+    registry.add("axion.providers[0].base-url", () -> "https://api.deepseek.com");
+    registry.add("axion.providers[1].name", () -> "kimi");
+    registry.add("axion.providers[1].api-key", () -> "dummy");
+    registry.add("axion.providers[1].base-url", () -> "http://127.0.0.1:9");
   }
 
   @Autowired private MockMvc mockMvc;
@@ -147,7 +147,7 @@ class RestartRecoveryIT {
 
     // 3) 重启：同 db 文件起第二个上下文（web NONE——只验数据面，Tomcat 不重复占端口）
     try (ConfigurableApplicationContext restarted =
-        new SpringApplicationBuilder(OryxOsApplication.class).web(WebApplicationType.NONE).run()) {
+        new SpringApplicationBuilder(AxionApplication.class).web(WebApplicationType.NONE).run()) {
       ScheduledTaskStore restartedStore = restarted.getBean(ScheduledTaskStore.class);
 
       // ④ GET /schedules 状态与历史：run_count/上次结果/执行历史原样

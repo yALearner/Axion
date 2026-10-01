@@ -1,6 +1,6 @@
 # Scenarios
 
-Eight real-world enterprise use cases where OryxOS provides the Agent runtime foundation.
+Eight real-world enterprise use cases where Axion provides the Agent runtime foundation.
 
 ## 01 — Banking Compliance Assistant
 

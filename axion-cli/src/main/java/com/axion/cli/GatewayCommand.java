@@ -1,4 +1,4 @@
-package com.oryxos.cli;
+package com.axion.cli;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -25,9 +25,9 @@ public class GatewayCommand implements Runnable {
 
   private Class<?> applicationClass() {
     try {
-      return Class.forName("com.oryxos.boot.OryxOsApplication");
+      return Class.forName("com.axion.boot.AxionApplication");
     } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("未找到 Spring 启动类 com.oryxos.boot.OryxOsApplication", e);
+      throw new IllegalStateException("未找到 Spring 启动类 com.axion.boot.AxionApplication", e);
     }
   }
 }

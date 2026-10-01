@@ -1,12 +1,12 @@
-package com.oryxos.provider;
+package com.axion.provider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.oryxos.core.Profile;
-import com.oryxos.storage.LlmCall;
-import com.oryxos.storage.LlmCallRepository;
+import com.axion.core.Profile;
+import com.axion.storage.LlmCall;
+import com.axion.storage.LlmCallRepository;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assumptions;
@@ -25,7 +25,7 @@ import org.springframework.ai.openai.api.OpenAiApi;
 /**
  * 集成冒烟（@Tag("integration")，CI 默认跳过）： 读环境变量真 key、真调一次、断言拿到非空响应且 llm_calls 落一条 success=true。
  *
- * <p>跑法：{@code mvn -pl oryxos-provider -am test -Dtest.groups=integration -Dtest.excludedGroups=}
+ * <p>跑法：{@code mvn -pl axion-provider -am test -Dtest.groups=integration -Dtest.excludedGroups=}
  * （bash 前缀 {@code DEEPSEEK_API_KEY=xxx}；PowerShell 先 {@code $env:DEEPSEEK_API_KEY = "xxx"}）
  */
 @Tag("integration")

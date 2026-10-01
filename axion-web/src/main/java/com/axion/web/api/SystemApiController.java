@@ -1,6 +1,6 @@
-package com.oryxos.web.api;
+package com.axion.web.api;
 
-import com.oryxos.provider.ProviderProperties;
+import com.axion.provider.ProviderProperties;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +40,7 @@ public class SystemApiController {
   public ApiResponse<InfoResponse> info() {
     List<ProviderProperties> providers =
         Binder.get(environment)
-            .bind("oryxos.providers", Bindable.listOf(ProviderProperties.class))
+            .bind("axion.providers", Bindable.listOf(ProviderProperties.class))
             .orElse(List.of());
     List<ProviderStatus> statuses =
         providers.stream()

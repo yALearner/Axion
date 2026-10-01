@@ -1,4 +1,4 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,7 +28,7 @@ public final class ContextLoader {
   private final Path workspaceRoot;
 
   /**
-   * @param workspaceRoot 工作区根（即 .oryxos/ 目录：bootstrap 在其根、skills 在其 skills/ 子目录、agents 在其 agents/
+   * @param workspaceRoot 工作区根（即 .axion/ 目录：bootstrap 在其根、skills 在其 skills/ 子目录、agents 在其 agents/
    *     子目录）
    */
   public ContextLoader(Path workspaceRoot) {
@@ -125,7 +125,7 @@ public final class ContextLoader {
         + System.lineSeparator();
   }
 
-  /** 解析绑定真实目标并验证位于公共 Skill 根（.oryxos/skills/）内——逃逸即报错。 */
+  /** 解析绑定真实目标并验证位于公共 Skill 根（.axion/skills/）内——逃逸即报错。 */
   private Path resolveRealSkillDir(Path binding) {
     Path real;
     try {

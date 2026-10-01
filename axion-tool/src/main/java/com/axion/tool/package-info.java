@@ -1,5 +1,5 @@
 /**
- * OryxOS Tool — 核心能力四：工具体系.
+ * Axion Tool — 核心能力四：工具体系.
  *
  * <p>三合一模块（内置 Tool + MCP Client + Sandbox + NotifyTools），包含：
  *
@@ -11,4 +11,4 @@
  *   <li>{@code NotifyChannelAdapter} + {@code WebhookNotifyAdapter} — 通知推送
  * </ul>
  */
-package com.oryxos.tool;
+package com.axion.tool;

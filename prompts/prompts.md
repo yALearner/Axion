@@ -1,4 +1,4 @@
-# OryxOS — 对话提示词记录
+# Axion — 对话提示词记录
 
 ## 1
 帮我清楚项目的九个模块
@@ -13,10 +13,10 @@
 boot目录现在能不能 java -jar运行了吗？ 是一个main函数
 
 ## 5
-oryxos 的cli 需要一个main函数，他要能运行 打印oryxos的版本信息
+axion 的cli 需要一个main函数，他要能运行 打印axion的版本信息
 
 ## 6
-帮我画一个oryxos的logo,放在readme,用svg格式，自由发挥 我需要一个logo
+帮我画一个axion的logo,放在readme,用svg格式，自由发挥 我需要一个logo
 
 ## 7
 帮我在优化一下这个logo 在简介大方一点 建议去掉下面文字

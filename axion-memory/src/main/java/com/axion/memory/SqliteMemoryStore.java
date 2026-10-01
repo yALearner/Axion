@@ -1,7 +1,7 @@
-package com.oryxos.memory;
+package com.axion.memory;
 
-import com.oryxos.core.LongTermMemoryStore;
-import com.oryxos.core.MemoryScope;
+import com.axion.core.LongTermMemoryStore;
+import com.axion.core.MemoryScope;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;

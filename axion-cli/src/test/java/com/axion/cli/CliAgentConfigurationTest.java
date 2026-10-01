@@ -1,27 +1,27 @@
-package com.oryxos.cli;
+package com.axion.cli;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.axion.core.LongTermMemoryStore;
+import com.axion.core.MemoryService;
+import com.axion.core.Message;
+import com.axion.core.Profile;
+import com.axion.core.PromptBuilder;
+import com.axion.core.Session;
+import com.axion.core.SessionManager;
+import com.axion.memory.MarkdownMemoryStore;
+import com.axion.memory.MemoryServiceImpl;
+import com.axion.provider.ProviderService;
+import com.axion.storage.NotifyChannelRepository;
+import com.axion.storage.ScheduledTaskRepository;
+import com.axion.storage.SessionRepository;
+import com.axion.storage.TaskExecutionRepository;
+import com.axion.storage.ToolInvocationRepository;
+import com.axion.tool.ToolRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.core.LongTermMemoryStore;
-import com.oryxos.core.MemoryService;
-import com.oryxos.core.Message;
-import com.oryxos.core.Profile;
-import com.oryxos.core.PromptBuilder;
-import com.oryxos.core.Session;
-import com.oryxos.core.SessionManager;
-import com.oryxos.memory.MarkdownMemoryStore;
-import com.oryxos.memory.MemoryServiceImpl;
-import com.oryxos.provider.ProviderService;
-import com.oryxos.storage.NotifyChannelRepository;
-import com.oryxos.storage.ScheduledTaskRepository;
-import com.oryxos.storage.SessionRepository;
-import com.oryxos.storage.TaskExecutionRepository;
-import com.oryxos.storage.ToolInvocationRepository;
-import com.oryxos.tool.ToolRegistry;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -121,10 +121,10 @@ class CliAgentConfigurationTest {
   @Test
   @DisplayName("MemoryService 注入 PromptBuilder：build 后 system 含长期记忆段")
   void memoryServiceInjectedIntoPromptBuilder() throws Exception {
-    // 011 改造点适配：ContextLoader 现注入 AGENT.md 正文（FR-2）——fixture 建 .oryxos/agents/ops-agent
+    // 011 改造点适配：ContextLoader 现注入 AGENT.md 正文（FR-2）——fixture 建 .axion/agents/ops-agent
     // （frontmatter-only 且无尾换行：正文为空；load 在 build 时现读，故在 runner.run 之前建）
     java.nio.file.Path agentDir =
-        java.nio.file.Files.createDirectories(Path.of(".oryxos", "agents", "ops-agent"));
+        java.nio.file.Files.createDirectories(Path.of(".axion", "agents", "ops-agent"));
     java.nio.file.Files.writeString(agentDir.resolve("AGENT.md"), "---\nname: ops-agent\n---");
     runner.run(
         context -> {
@@ -140,7 +140,7 @@ class CliAgentConfigurationTest {
                   .get(0)
                   .getText();
 
-          // 测试环境无 .oryxos/memory/MEMORY.md：load 为空，但 buildContext 结构头仍在
+          // 测试环境无 .axion/memory/MEMORY.md：load 为空，但 buildContext 结构头仍在
           assertThat(system).contains("## 长期记忆").contains("## 会话历史").contains("[用户] hi");
         });
   }
@@ -149,11 +149,11 @@ class CliAgentConfigurationTest {
   @DisplayName("换档 sqlite：backend=sqlite → LongTermMemoryStore bean 为 SqliteMemoryStore")
   void sqliteBackendWired() {
     runner
-        .withPropertyValues("oryxos.memory.backend=sqlite")
+        .withPropertyValues("axion.memory.backend=sqlite")
         .run(
             context ->
                 assertThat(context.getBean(LongTermMemoryStore.class))
-                    .isInstanceOf(com.oryxos.memory.SqliteMemoryStore.class));
+                    .isInstanceOf(com.axion.memory.SqliteMemoryStore.class));
   }
 
   @Test
@@ -161,20 +161,20 @@ class CliAgentConfigurationTest {
   void mem0BackendWired() {
     runner
         .withPropertyValues(
-            "oryxos.memory.backend=mem0",
+            "axion.memory.backend=mem0",
             "MEM0_BASE_URL=http://localhost:9999",
             "MEM0_API_KEY=test-key")
         .run(
             context ->
                 assertThat(context.getBean(LongTermMemoryStore.class))
-                    .isInstanceOf(com.oryxos.memory.Mem0MemoryStore.class));
+                    .isInstanceOf(com.axion.memory.Mem0MemoryStore.class));
   }
 
   @Test
   @DisplayName("mem0 缺凭证：backend=mem0 无 MEM0_BASE_URL → 启动失败明确报错（FR-6 配置校验不静默）")
   void mem0WithoutCredentialsFails() {
     runner
-        .withPropertyValues("oryxos.memory.backend=mem0")
+        .withPropertyValues("axion.memory.backend=mem0")
         .run(context -> assertThat(context).hasFailed());
   }
 
@@ -182,7 +182,7 @@ class CliAgentConfigurationTest {
   @DisplayName("非法 backend 值 → 启动失败明确报错（FR-6，001 ConfigLoader 口径不静默）")
   void illegalBackendFails() {
     runner
-        .withPropertyValues("oryxos.memory.backend=bogus")
+        .withPropertyValues("axion.memory.backend=bogus")
         .run(context -> assertThat(context).hasFailed());
   }
 
@@ -191,8 +191,8 @@ class CliAgentConfigurationTest {
   void agentSchedulerWiredWithPoolSize() {
     runner.run(
         context -> {
-          assertThat(context.getBean(com.oryxos.core.AgentScheduler.class))
-              .isInstanceOf(com.oryxos.core.AgentScheduler.class);
+          assertThat(context.getBean(com.axion.core.AgentScheduler.class))
+              .isInstanceOf(com.axion.core.AgentScheduler.class);
           org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler taskScheduler =
               context.getBean(
                   org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler.class);
@@ -206,15 +206,15 @@ class CliAgentConfigurationTest {
   void sandboxBeanIsWhitelistSandbox() {
     runner.run(
         context ->
-            assertThat(context.getBean(com.oryxos.tool.Sandbox.class))
-                .isInstanceOf(com.oryxos.tool.WhitelistSandbox.class));
+            assertThat(context.getBean(com.axion.tool.Sandbox.class))
+                .isInstanceOf(com.axion.tool.WhitelistSandbox.class));
   }
 
   @Test
   @DisplayName("007 FR-6：PermissiveSandbox 类已删除（javadoc 承诺「24 节替换后本类删除」兑现）")
   void permissiveSandboxClassIsGone() {
     org.assertj.core.api.Assertions.assertThatThrownBy(
-            () -> Class.forName("com.oryxos.tool.PermissiveSandbox"))
+            () -> Class.forName("com.axion.tool.PermissiveSandbox"))
         .isInstanceOf(ClassNotFoundException.class);
   }
 }

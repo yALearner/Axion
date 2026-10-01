@@ -1,7 +1,7 @@
-package com.oryxos.cli;
+package com.axion.cli;
 
-import com.oryxos.core.OryxTool;
-import com.oryxos.tool.ToolRegistry;
+import com.axion.core.AxionTool;
+import com.axion.tool.ToolRegistry;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -21,9 +21,9 @@ public class ToolListCommand implements Runnable {
   public void run() {
     Class<?> applicationClass;
     try {
-      applicationClass = Class.forName("com.oryxos.boot.OryxOsApplication");
+      applicationClass = Class.forName("com.axion.boot.AxionApplication");
     } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("未找到 Spring 启动类 com.oryxos.boot.OryxOsApplication", e);
+      throw new IllegalStateException("未找到 Spring 启动类 com.axion.boot.AxionApplication", e);
     }
     try (ConfigurableApplicationContext context =
         new SpringApplicationBuilder(applicationClass)
@@ -31,7 +31,7 @@ public class ToolListCommand implements Runnable {
             .headless(true)
             .run()) {
       ToolRegistry registry = context.getBean(ToolRegistry.class);
-      for (OryxTool tool : registry.all()) {
+      for (AxionTool tool : registry.all()) {
         System.out.println(tool.getName() + "\t" + tool.getDescription());
       }
     }

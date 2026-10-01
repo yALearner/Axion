@@ -1,6 +1,6 @@
-package com.oryxos.cli;
+package com.axion.cli;
 
-import com.oryxos.channel.cli.CliChannel;
+import com.axion.channel.cli.CliChannel;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -10,8 +10,8 @@ import picocli.CommandLine.Option;
 /**
  * chat 命令（重命令，启动 Spring）——课件第 18 节 §三骨架：读—转交—打印，交给 {@link CliChannel} 执行交互循环。
  *
- * <p>启动类按名加载 {@code com.oryxos.boot.OryxOsApplication}（坑九防线所在）：oryxos-cli 与 oryxos-boot 是
- * 编译期反向依赖（boot 依赖 cli），故用 {@link Class#forName} 打破编译期循环——运行时 fat jar 内 boot 类必然在 classpath。
+ * <p>启动类按名加载 {@code com.axion.boot.AxionApplication}（坑九防线所在）：axion-cli 与 axion-boot 是 编译期反向依赖（boot
+ * 依赖 cli），故用 {@link Class#forName} 打破编译期循环——运行时 fat jar 内 boot 类必然在 classpath。
  */
 @Command(name = "chat", description = "在终端里和 Agent 交互式对话", mixinStandardHelpOptions = true)
 public class ChatCommand implements Runnable {
@@ -26,9 +26,9 @@ public class ChatCommand implements Runnable {
   public void run() {
     Class<?> applicationClass;
     try {
-      applicationClass = Class.forName("com.oryxos.boot.OryxOsApplication");
+      applicationClass = Class.forName("com.axion.boot.AxionApplication");
     } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("未找到 Spring 启动类 com.oryxos.boot.OryxOsApplication", e);
+      throw new IllegalStateException("未找到 Spring 启动类 com.axion.boot.AxionApplication", e);
     }
     try (ConfigurableApplicationContext context =
         new SpringApplicationBuilder(applicationClass)

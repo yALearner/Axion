@@ -12,7 +12,7 @@
   <!-- Global config -->
   <rect x="30" y="55" width="230" height="88" rx="6" fill="#10203f" stroke="#3b82f6" stroke-width="1.2" filter="url(#sh)"/>
   <text x="145" y="73" text-anchor="middle" font-size="9" font-weight="bold" fill="#93c5fd">全局层 application.yaml</text>
-  <text x="145" y="90" text-anchor="middle" font-size="8" fill="#93c5fd">oryxos.providers:</text>
+  <text x="145" y="90" text-anchor="middle" font-size="8" fill="#93c5fd">axion.providers:</text>
   <text x="145" y="105" text-anchor="middle" font-size="8" fill="#93c5fd">name · api-key: ${ENV} · base-url</text>
   <text x="145" y="120" text-anchor="middle" font-size="8" fill="#93c5fd">凭证只允许环境变量占位（禁明文）</text>
 
@@ -64,7 +64,7 @@
 
   <!-- Tool schema -->
   <rect x="660" y="55" width="170" height="44" rx="6" fill="#141b2c" stroke="#64748b" stroke-width="1.2" filter="url(#sh)"/>
-  <text x="745" y="73" text-anchor="middle" font-size="9" font-weight="bold" fill="#9db0c9">OryxTool（core 抽象）</text>
+  <text x="745" y="73" text-anchor="middle" font-size="9" font-weight="bold" fill="#9db0c9">AxionTool（core 抽象）</text>
   <text x="745" y="90" text-anchor="middle" font-size="8" fill="#9db0c9">name / description / schema / execute</text>
 
   <rect x="660" y="119" width="170" height="78" rx="6" fill="#2a2110" stroke="#f59e0b" stroke-width="1.2" filter="url(#sh)"/>

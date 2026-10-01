@@ -1,10 +1,10 @@
-package com.oryxos.memory;
+package com.axion.memory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.axion.core.MemoryScope;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.core.MemoryScope;
 import java.util.List;
 import java.util.Map;
 import okhttp3.mockwebserver.MockResponse;
@@ -54,7 +54,7 @@ class Mem0MemoryStoreTest {
     Map<String, Object> body =
         objectMapper.readValue(
             request.getBody().readUtf8(), new com.fasterxml.jackson.core.type.TypeReference<>() {});
-    assertThat(body).containsEntry("user_id", "oryxos");
+    assertThat(body).containsEntry("user_id", "axion");
     assertThat(((Map<?, ?>) ((List<?>) body.get("messages")).get(0)).get("content"))
         .isEqualTo("项目用 Spring Boot");
     Object metadata = body.get("metadata");
@@ -78,7 +78,7 @@ class Mem0MemoryStoreTest {
     assertThat(loaded.indexOf("归档条目")).isGreaterThan(loaded.indexOf("## 归档记忆"));
     RecordedRequest request = server.takeRequest();
     assertThat(request.getMethod()).isEqualTo("GET");
-    assertThat(request.getPath()).contains("/memories").contains("user_id=oryxos");
+    assertThat(request.getPath()).contains("/memories").contains("user_id=axion");
   }
 
   @Test

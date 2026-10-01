@@ -23,7 +23,7 @@ Agent 调七个内置 Tool（005 已接线，本节零改动）
 
 ## 二、逐文件梳理
 
-### oryxos-tool/com/oryxos/tool（4 新增 + 1 删除，主代码零改动其余）
+### axion-tool/com/axion/tool（4 新增 + 1 删除，主代码零改动其余）
 
 | 文件 | 关键点 |
 |------|--------|
@@ -31,13 +31,13 @@ Agent 调七个内置 Tool（005 已接线，本节零改动）
 | `FileSandboxProperties` / `ShellSandboxProperties` / `HttpSandboxProperties` | 三 record（prefix file/shell/http）+ 紧凑构造器 null→空归一（构造器绑定缺失配置键给 null 时不 NPE、保持 fail-closed）+ EI_EXPOSE_REP 抑制（record 访问器是绑定契约要求，构造期 copyOf 后不保留引用——004/006 先例） |
 | `PermissiveSandbox`（删除） | 005 拍板方案 A 全放行占位——javadoc 承诺「24 节替换后本类删除」兑现；编译暴露引用点仅 CliAgentConfiguration 一处，已同步替换 |
 
-### oryxos-cli（1 改造）
+### axion-cli（1 改造）
 
 | 文件 | 关键点 |
 |------|--------|
 | `CliAgentConfiguration` | `sandbox()` @Bean 改为构造注入三 properties 返回 WhitelistSandbox；装配类加 `@EnableConfigurationProperties` 注册三配置类（G4-C1 无组件注解口径）；类 javadoc「PermissiveSandbox 临时接线」措辞同步更新 |
 
-### oryxos-boot（1 配置）
+### axion-boot（1 配置）
 
 | 文件 | 关键点 |
 |------|--------|

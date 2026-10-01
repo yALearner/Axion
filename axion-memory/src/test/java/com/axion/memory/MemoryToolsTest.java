@@ -1,4 +1,4 @@
-package com.oryxos.memory;
+package com.axion.memory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -7,14 +7,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.axion.core.MemoryScope;
+import com.axion.core.MemoryService;
+import com.axion.core.ToolExecutor;
+import com.axion.core.ToolResult;
+import com.axion.storage.ToolInvocation;
+import com.axion.storage.ToolInvocationRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.core.MemoryScope;
-import com.oryxos.core.MemoryService;
-import com.oryxos.core.ToolExecutor;
-import com.oryxos.core.ToolResult;
-import com.oryxos.storage.ToolInvocation;
-import com.oryxos.storage.ToolInvocationRepository;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -36,10 +36,10 @@ class MemoryToolsTest {
 
   @Test
   @DisplayName(
-      "坑十二同款契约：两 Tool 的 name/description/inputSchema 三件套非空（跨模块不可用 OryxToolContractTest"
+      "坑十二同款契约：两 Tool 的 name/description/inputSchema 三件套非空（跨模块不可用 AxionToolContractTest"
           + " 自动纳入，此处等价覆盖）")
   void bothToolsHaveCompleteContract() {
-    for (com.oryxos.core.OryxTool tool : List.of(saveMemoryTool, recallMemoryTool)) {
+    for (com.axion.core.AxionTool tool : List.of(saveMemoryTool, recallMemoryTool)) {
       assertThat(tool.getName()).isNotBlank();
       assertThat(tool.getDescription()).isNotBlank();
       assertThat(tool.getInputSchema()).isNotNull(); // 缺了它，Provider 翻译 Function Calling 时直接卡死

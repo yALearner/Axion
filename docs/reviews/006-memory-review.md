@@ -7,8 +7,8 @@
 
 ```
 Agent 主动 save_memory(content, scope)（坑十七：写哪区由 Agent 显式声明，缺省 ARCHIVAL）
-  → SaveMemoryTool（OryxTool 纯实现）→ MemoryService.remember（门面，core 接口）
-  → LongTermMemoryStore.append（按 oryxos.memory.backend 三档装配）：
+  → SaveMemoryTool（AxionTool 纯实现）→ MemoryService.remember（门面，core 接口）
+  → LongTermMemoryStore.append（按 axion.memory.backend 三档装配）：
       markdown（默认）→ MEMORY.md 两 header 分区，双层互斥 + 锁内重读 + ATOMIC_MOVE 原子写
       sqlite           → memory_entries 表 INSERT（schema.sql 手工增量，坑八）
       mem0             → POST /memories（自托管 OSS 无 /v1/ 前缀，H3 核实；scope 落 metadata）
@@ -28,7 +28,7 @@ Agent 主动 recall_memory(keyword) → MemoryService.recall → 后端只搜归
 
 ## 二、逐文件梳理
 
-### oryxos-core/com/oryxos/core（依赖倒置端口 3 件 + 1 改造）
+### axion-core/com/axion/core（依赖倒置端口 3 件 + 1 改造）
 
 | 文件 | 职责与关键点 |
 |------|-------------|
@@ -37,29 +37,29 @@ Agent 主动 recall_memory(keyword) → MemoryService.recall → 后端只搜归
 | `MemoryScope` | CORE/ARCHIVAL 枚举——坑十七的显式声明载体 |
 | `PromptBuilder`（002 交付物改造） | 构造器 +MemoryService 参数；system 组装插 buildContext 输出（技术方案 §4.2 第 2 部分）；日期时间行保持 system 最末 |
 
-### oryxos-memory/com/oryxos/memory（实现 + 三档 + 两 Tool，7 个文件）
+### axion-memory/com/axion/memory（实现 + 三档 + 两 Tool，7 个文件）
 
 | 文件 | 关键点 |
 |------|--------|
 | `MemoryServiceImpl` | 门面实现：buildContext = load() + 会话历史渲染（传入 session 是权威内存态——当前轮消息尚未落库，不回查 SQLite）；EI_EXPOSE_REP2 抑制（004 先例） |
 | `MarkdownMemoryStore` | **并发与原子写**（FR-3）：append `synchronized` + 伴生 `.lock` 文件 FileChannel.lock（记忆文件被原子替换、锁不能挂它上面）+ 锁内重读 + 临时文件 ATOMIC_MOVE；load 免锁（原子写保证读不到半写）；截断只接收归档段（4000 字保留最近——核心区物理上动不到）；文件缺失自愈模板；读失败 IllegalStateException 上抛 |
 | `SqliteMemoryStore` | JdbcTemplate（spring-jdbc 显式声明）：INSERT / CORE 全量 + ARCHIVAL `ORDER BY id DESC LIMIT 200` 再翻转（与 markdown「最新在尾部」口径一致）/ LIKE 仅归档 + 通配符转义 `ESCAPE '\'`；库损坏 DataAccessException 自然上抛 |
-| `Mem0MemoryStore` | RestClient 直连自托管（X-API-Key 头）：POST /memories（user_id 固定租户 oryxos + messages 原文 + metadata.scope）/ GET /memories?user_id= / POST /search（query+filters.user_id+top_k=20）；scope 缺失按 ARCHIVAL；归档 4000 字客户端截断；非 2xx 上抛不吞 |
-| `SaveMemoryTool` / `RecallMemoryTool` | OryxTool 纯实现（005 机械适配）：content/keyword 必填、scope 缺省 archival、非法 scope 走 ToolResult.failure（重试救不了参数错误、不标 retryable）；未命中友好措辞不抛异常；写入失败异常上抛由 ToolExecutor 审计 |
+| `Mem0MemoryStore` | RestClient 直连自托管（X-API-Key 头）：POST /memories（user_id 固定租户 axion + messages 原文 + metadata.scope）/ GET /memories?user_id= / POST /search（query+filters.user_id+top_k=20）；scope 缺失按 ARCHIVAL；归档 4000 字客户端截断；非 2xx 上抛不吞 |
+| `SaveMemoryTool` / `RecallMemoryTool` | AxionTool 纯实现（005 机械适配）：content/keyword 必填、scope 缺省 archival、非法 scope 走 ToolResult.failure（重试救不了参数错误、不标 retryable）；未命中友好措辞不抛异常；写入失败异常上抛由 ToolExecutor 审计 |
 
-### oryxos-storage（模式机械延伸 + 建表）
+### axion-storage（模式机械延伸 + 建表）
 
 | 文件 | 关键点 |
 |------|--------|
 | `MemoryEntry` / `MemoryEntryRepository` | 实体无 setter、InstantTextConverter 复用；Web Service 节管理端点直接消费本表口径 |
 | `schema.sql` | 增量追加 memory_entries（id/content/scope/created_at）；坑八——测试与生产同一份手工脚本 |
 
-### oryxos-cli / oryxos-boot（装配与配置）
+### axion-cli / axion-boot（装配与配置）
 
 | 文件 | 关键点 |
 |------|--------|
-| `CliAgentConfiguration` | 换档装配：`environment.getProperty("oryxos.memory.backend","markdown")` switch 三档——sqlite 走 ObjectProvider 可选注入（markdown 档不要求数据源在场）；mem0 缺凭证启动报错；非法值启动报错（001 口径）；两 Tool 注册进 ToolRegistry；MemoryService 注入 PromptBuilder |
-| `application.yaml` | `oryxos.memory.backend: markdown` + mem0 凭证占位注释；验证时可用 `ORYXOS_MEMORY_BACKEND` 环境变量会话级覆盖（宽松绑定），零 yaml 改动 |
+| `CliAgentConfiguration` | 换档装配：`environment.getProperty("axion.memory.backend","markdown")` switch 三档——sqlite 走 ObjectProvider 可选注入（markdown 档不要求数据源在场）；mem0 缺凭证启动报错；非法值启动报错（001 口径）；两 Tool 注册进 ToolRegistry；MemoryService 注入 PromptBuilder |
+| `application.yaml` | `axion.memory.backend: markdown` + mem0 凭证占位注释；验证时可用 `AXION_MEMORY_BACKEND` 环境变量会话级覆盖（宽松绑定），零 yaml 改动 |
 
 ## 三、重点 review 清单（按风险排序）
 

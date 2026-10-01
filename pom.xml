@@ -4,11 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.oryxos</groupId>
-    <artifactId>oryxos</artifactId>
+    <groupId>com.axion</groupId>
+    <artifactId>axion</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>OryxOS</name>
+    <name>Axion</name>
     <description>Java 原生的、企业私有可审计的 Agent 统一底座</description>
 
     <parent>
@@ -19,15 +19,15 @@
     </parent>
 
     <modules>
-        <module>oryxos-storage</module>
-        <module>oryxos-core</module>
-        <module>oryxos-provider</module>
-        <module>oryxos-memory</module>
-        <module>oryxos-tool</module>
-        <module>oryxos-channel-cli</module>
-        <module>oryxos-web</module>
-        <module>oryxos-cli</module>
-        <module>oryxos-boot</module>
+        <module>axion-storage</module>
+        <module>axion-core</module>
+        <module>axion-provider</module>
+        <module>axion-memory</module>
+        <module>axion-tool</module>
+        <module>axion-channel-cli</module>
+        <module>axion-web</module>
+        <module>axion-cli</module>
+        <module>axion-boot</module>
     </modules>
 
     <properties>
@@ -68,48 +68,48 @@
 
             <!-- ========== Internal Modules ========== -->
             <dependency>
-                <groupId>com.oryxos</groupId>
-                <artifactId>oryxos-storage</artifactId>
+                <groupId>com.axion</groupId>
+                <artifactId>axion-storage</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.oryxos</groupId>
-                <artifactId>oryxos-core</artifactId>
+                <groupId>com.axion</groupId>
+                <artifactId>axion-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.oryxos</groupId>
-                <artifactId>oryxos-provider</artifactId>
+                <groupId>com.axion</groupId>
+                <artifactId>axion-provider</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.oryxos</groupId>
-                <artifactId>oryxos-memory</artifactId>
+                <groupId>com.axion</groupId>
+                <artifactId>axion-memory</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.oryxos</groupId>
-                <artifactId>oryxos-tool</artifactId>
+                <groupId>com.axion</groupId>
+                <artifactId>axion-tool</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.oryxos</groupId>
-                <artifactId>oryxos-channel-cli</artifactId>
+                <groupId>com.axion</groupId>
+                <artifactId>axion-channel-cli</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.oryxos</groupId>
-                <artifactId>oryxos-web</artifactId>
+                <groupId>com.axion</groupId>
+                <artifactId>axion-web</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.oryxos</groupId>
-                <artifactId>oryxos-cli</artifactId>
+                <groupId>com.axion</groupId>
+                <artifactId>axion-cli</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.oryxos</groupId>
-                <artifactId>oryxos-boot</artifactId>
+                <groupId>com.axion</groupId>
+                <artifactId>axion-boot</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -215,7 +215,7 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!-- 编译：JDK 21 + Error Prone + NullAway（AnnotatedPackages 参数化为根包 com.oryxos） -->
+                <!-- 编译：JDK 21 + Error Prone + NullAway（AnnotatedPackages 参数化为根包 com.axion） -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -275,7 +275,7 @@
                             </requireMavenVersion>
                             <requireUpperBoundDeps>
                                 <excludes>
-                                    <!-- MENFORCER-336 平局误报：snakeyaml 由 oryxos-core 直接声明（2.4），
+                                    <!-- MENFORCER-336 平局误报：snakeyaml 由 axion-core 直接声明（2.4），
                                          Boot starter / Spring AI 等多条传递路径同为 2.4，
                                          规则在版本平局时误判为违反上界 -->
                                     <exclude>org.yaml:snakeyaml</exclude>

@@ -1,12 +1,12 @@
-package com.oryxos.tool.builtin;
+package com.axion.tool.builtin;
 
+import com.axion.core.AxionTool;
+import com.axion.core.JsonSchema;
+import com.axion.core.ToolResult;
+import com.axion.tool.ActionType;
+import com.axion.tool.Sandbox;
+import com.axion.tool.SandboxAction;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.oryxos.core.JsonSchema;
-import com.oryxos.core.OryxTool;
-import com.oryxos.core.ToolResult;
-import com.oryxos.tool.ActionType;
-import com.oryxos.tool.Sandbox;
-import com.oryxos.tool.SandboxAction;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.net.URI;
 import java.util.List;
@@ -19,7 +19,7 @@ import org.springframework.web.client.RestClient;
  * sandbox.enforce(HTTP_REQUEST, url)} 先于请求（坑十）；contentType 默认 application/json、body 为 JSON
  * 字符串原样送达（form/文件上传明确不做）；响应体上限 1MB；4xx/5xx 异常上抛（坑十一口径）。 纯类交付无组件注解（G4-C1）。
  */
-public class HttpPostTool implements OryxTool {
+public class HttpPostTool implements AxionTool {
 
   private final Sandbox sandbox;
   private final RestClient restClient;

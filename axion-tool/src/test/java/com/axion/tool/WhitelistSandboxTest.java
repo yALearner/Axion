@@ -1,4 +1,4 @@
-package com.oryxos.tool;
+package com.axion.tool;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -168,8 +168,8 @@ class WhitelistSandboxTest {
   @Test
   @DisplayName("⑦a 回归钉：相对根 + 绝对 target 放行（根构造期 toAbsolutePath 后命中）")
   void relativeRootMatchesAbsoluteTarget() {
-    WhitelistSandbox sandbox = filesOnly(".oryxos/workspace");
-    String absoluteTarget = Path.of(".oryxos/workspace", "x.txt").toAbsolutePath().toString();
+    WhitelistSandbox sandbox = filesOnly(".axion/workspace");
+    String absoluteTarget = Path.of(".axion/workspace", "x.txt").toAbsolutePath().toString();
     assertThatCode(() -> sandbox.enforce(new SandboxAction(ActionType.FILE_READ, absoluteTarget)))
         .doesNotThrowAnyException();
   }

@@ -1,11 +1,11 @@
-package com.oryxos.tool.mcp;
+package com.axion.tool.mcp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.axion.tool.ToolRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.tool.ToolRegistry;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.net.ConnectException;

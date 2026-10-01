@@ -1,5 +1,5 @@
 /**
- * OryxOS CLI — 命令行入口.
+ * Axion CLI — 命令行入口.
  *
  * <p>Picocli 主入口，注册 12 个子命令：
  *
@@ -11,4 +11,4 @@
  *
  * <p>包含 {@code ConfigLoader} — 统一配置与密钥加载。
  */
-package com.oryxos.cli;
+package com.axion.cli;

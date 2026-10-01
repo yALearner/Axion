@@ -5,7 +5,7 @@
 ## 前置条件
 
 1. 分支 `002-react`（自 `001-provider` 拉出），JDK 21，Maven 可用
-2. 001 已交付并全绿（ProviderService / Profile / Message / OryxTool / ToolResult / llm_calls）
+2. 001 已交付并全绿（ProviderService / Profile / Message / AxionTool / ToolResult / llm_calls）
 3. 每次构建前导出环境（本机未配置 JAVA_HOME/PATH）：
    ```bash
    export JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot"
@@ -43,4 +43,4 @@ mvn clean verify     # 全绿（含静态检查门禁）才算实现完成
    注：`http_get` 归第 20 节——本节可先用最小临时工具验证循环（临时代码不进交付物），
    工具就位后按 001 quickstart 同款命令补跑完整 Demo，如实记录。
 2. **人工 review**：确认循环是自己实现的、没用框架现成的 Agent 封装（code review 确认，测不出来）。
-3. **审计核对**：打开 `.oryxos/oryxos.db` 核对一次真实调用后 `llm_calls` / `tool_invocations` 记录与调用实际一致。
+3. **审计核对**：打开 `.axion/axion.db` 核对一次真实调用后 `llm_calls` / `tool_invocations` 记录与调用实际一致。

@@ -1,4 +1,4 @@
-package com.oryxos.tool;
+package com.axion.tool;
 
 /**
  * 一个待校验的涉外动作（类型 + 目标：路径 / 命令 / URL）。

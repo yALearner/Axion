@@ -15,11 +15,11 @@
 mvn clean verify
 
 # 本 feature 单测（core 六类 + tool 沙箱扩展）
-mvn -pl oryxos-core -am test -Dtest='AgentLoaderTest,DeriveProfileTest,AgentScanRegisterTest,ProfileRegistryRuntimeTest,AgentSchedulerRegisterTest,ProgressiveDisclosureTest'
-mvn -pl oryxos-tool -am test -Dtest='WhitelistSandboxTest'
+mvn -pl axion-core -am test -Dtest='AgentLoaderTest,DeriveProfileTest,AgentScanRegisterTest,ProfileRegistryRuntimeTest,AgentSchedulerRegisterTest,ProgressiveDisclosureTest'
+mvn -pl axion-tool -am test -Dtest='WhitelistSandboxTest'
 
 # 前序 feature 回归（DoD 4：跨 feature 契约证据）
-mvn -pl oryxos-core,oryxos-tool,oryxos-cli -am test
+mvn -pl axion-core,axion-tool,axion-cli -am test
 ```
 
 预期：坑一~坑九逐一对号（正文原样/报错点名/name=目录名/现读即时生效/AGENT.md 缺失报错/同一异常同一消息/未绑定不可读/链式拒绝/cwd 绑定）；双白名单与子集 WARN 回归绿；前序 001~010 测试零回退。
@@ -29,11 +29,11 @@ mvn -pl oryxos-core,oryxos-tool,oryxos-cli -am test
 ### 1. 一个目录定义一个 Agent（零 Java）
 
 ```bash
-oryxos init                                   # 幂等
-# 把 daily-reconcile 四文件放入 .oryxos/agents/daily-reconcile/（设计文档全文收录）
-# skills 绑定：Windows 用 mklink /J（POSIX 用软连接）指向 .oryxos/skills/report-format/
-oryxos serve                                  # 启动（定时任务随 serve 常驻）
-oryxos profile list                           # 预期：出现 daily-reconcile
+axion init                                   # 幂等
+# 把 daily-reconcile 四文件放入 .axion/agents/daily-reconcile/（设计文档全文收录）
+# skills 绑定：Windows 用 mklink /J（POSIX 用软连接）指向 .axion/skills/report-format/
+axion serve                                  # 启动（定时任务随 serve 常驻）
+axion profile list                           # 预期：出现 daily-reconcile
 curl http://localhost:8080/api/v1/profiles    # 预期：同上（009 端点）
 ```
 
@@ -53,7 +53,7 @@ curl http://localhost:8080/api/v1/profiles    # 预期：同上（009 端点）
 
 ### 5. 存量 Agent 迁移核对（修订说明 ⑩）
 
-`oryxos chat` 对话 weather Agent：system prompt 无重复人格（identity.prompt 与正文已去重）、仍会调 http_get（行为不回退）。
+`axion chat` 对话 weather Agent：system prompt 无重复人格（identity.prompt 与正文已去重）、仍会调 http_get（行为不回退）。
 
 ## 验收清单（课件 §三逐条）
 

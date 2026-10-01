@@ -1,7 +1,7 @@
-package com.oryxos.memory;
+package com.axion.memory;
 
-import com.oryxos.core.LongTermMemoryStore;
-import com.oryxos.core.MemoryScope;
+import com.axion.core.LongTermMemoryStore;
+import com.axion.core.MemoryScope;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 长期记忆默认档（FR-3）：底层 {@code .oryxos/memory/MEMORY.md} 一个文件、{@code ## 核心记忆}/{@code ## 归档记忆} 两 header
+ * 长期记忆默认档（FR-3）：底层 {@code .axion/memory/MEMORY.md} 一个文件、{@code ## 核心记忆}/{@code ## 归档记忆} 两 header
  * 分区（003 init 已建模板；文件缺失时本类按同款模板自愈重建）。
  *
  * <p>行为契约：append 按 scope 写对应区块（条目带日期前缀）；load 每次 {@code Files.readString} 重读（坑十五）、核心区完整返回、 归档区超

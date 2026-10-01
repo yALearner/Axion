@@ -6,7 +6,7 @@
 
 ## Summary
 
-补上能力五（US-5，五大能力最后一块拼图）：六个薄 Controller + 10 端点（统一前缀 /api/v1，与 CLI 共享 AgentService.process——宪法 VIII）；GlobalExceptionHandler 扩展（双信封拍板 B：成功 ApiResponse / 错误 ErrorResponse 单出口 + ⑨a 503 收紧 + 504 + 500 不泄漏）；serve 命令真启动（8080 + virtual thread + 排除 Spring AI eager 装配——单 key 可启动）；防呆限制（32KB/100 条）；springdoc-openapi；管理平台 v1 只读（Vue3+Vite + frontend-maven-plugin 拍板 B + SPA 回落 + oryxos-admin-ui 风格 skill）。
+补上能力五（US-5，五大能力最后一块拼图）：六个薄 Controller + 10 端点（统一前缀 /api/v1，与 CLI 共享 AgentService.process——宪法 VIII）；GlobalExceptionHandler 扩展（双信封拍板 B：成功 ApiResponse / 错误 ErrorResponse 单出口 + ⑨a 503 收紧 + 504 + 500 不泄漏）；serve 命令真启动（8080 + virtual thread + 排除 Spring AI eager 装配——单 key 可启动）；防呆限制（32KB/100 条）；springdoc-openapi；管理平台 v1 只读（Vue3+Vite + frontend-maven-plugin 拍板 B + SPA 回落 + axion-admin-ui 风格 skill）。
 
 ## Technical Context
 
@@ -20,7 +20,7 @@
 
 **Target Platform**: Windows（开发本机）与 Linux（部署目标）；前端产物随 fat JAR
 
-**Project Type**: Maven 多模块（9 模块不动：Controller 落 oryxos-web/api，ServeCommand 改造落 oryxos-cli，配置落 oryxos-boot，前端工程 oryxos-web/src/main/frontend）
+**Project Type**: Maven 多模块（9 模块不动：Controller 落 axion-web/api，ServeCommand 改造落 axion-cli，配置落 axion-boot，前端工程 axion-web/src/main/frontend）
 
 **Performance Goals**: 端点本身零业务逻辑（委托核心层）；60s 超时上限；virtual thread 高并发下同步阻塞无瓶颈
 
@@ -64,7 +64,7 @@ specs/009-web-service/
 ### Source Code (repository root)
 
 ```text
-oryxos-web/src/main/java/com/oryxos/web/api/
+axion-web/src/main/java/com/axion/web/api/
 ├── SessionApiController.java       # 本节新增（4 端点）
 ├── AgentApiController.java         # 本节新增（invoke，三元组 ("web","invoke",name)）
 ├── ProfileApiController.java       # 本节新增（GET /profiles）
@@ -80,13 +80,13 @@ oryxos-web/src/main/java/com/oryxos/web/api/
 ├── ErrorCode.java                  # 地基类补 GATEWAY_TIMEOUT(504)
 ├── ApiResponse.java / ErrorResponse.java / ServiceUnavailableException.java  # 地基保留不动（拍板 B）
 
-oryxos-web/src/main/frontend/       # 本节新增（Vue3+Vite 只读管理台五页）
-oryxos-web/src/main/resources/static/admin/   # npm build 产物（Spring 托管）
-oryxos-web/pom.xml                  # +web starter（如缺）+springdoc+frontend-maven-plugin+skip 配置
-oryxos-core/.../SessionManager.java # 002 交付物改造：补 findById（⑨b 一致性核实前置）
-oryxos-cli/.../ServeCommand.java    # 003 交付物改造：web(SERVLET) 真启动
-oryxos-boot/src/main/resources/application.yaml  # +server.port +autoconfigure.exclude
-.claude/skills/oryxos-admin-ui/SKILL.md  # 本节新增（风格 skill + 双信封请求封装）
+axion-web/src/main/frontend/       # 本节新增（Vue3+Vite 只读管理台五页）
+axion-web/src/main/resources/static/admin/   # npm build 产物（Spring 托管）
+axion-web/pom.xml                  # +web starter（如缺）+springdoc+frontend-maven-plugin+skip 配置
+axion-core/.../SessionManager.java # 002 交付物改造：补 findById（⑨b 一致性核实前置）
+axion-cli/.../ServeCommand.java    # 003 交付物改造：web(SERVLET) 真启动
+axion-boot/src/main/resources/application.yaml  # +server.port +autoconfigure.exclude
+.claude/skills/axion-admin-ui/SKILL.md  # 本节新增（风格 skill + 双信封请求封装）
 ```
 
-**Structure Decision**: 沿用 9 模块与既有包结构（Controller 落 oryxos-web/api——技术方案 §7.1 明文；前端工程落 oryxos-web/src/main/frontend——课件点名）。不新建模块、不改依赖方向。
+**Structure Decision**: 沿用 9 模块与既有包结构（Controller 落 axion-web/api——技术方案 §7.1 明文；前端工程落 axion-web/src/main/frontend——课件点名）。不新建模块、不改依赖方向。

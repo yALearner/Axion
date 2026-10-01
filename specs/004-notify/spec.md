@@ -67,7 +67,7 @@
 
 **Acceptance Scenarios**:
 
-1. **Given** NotifyTools 已按 OryxTool 抽象交付（getName="notify"、schema 两参数、execute 四步），**When** 20 节将其注册进工具集，**Then** 无需改动本节任何代码即可被 LLM 按名调用
+1. **Given** NotifyTools 已按 AxionTool 抽象交付（getName="notify"、schema 两参数、execute 四步），**When** 20 节将其注册进工具集，**Then** 无需改动本节任何代码即可被 LLM 按名调用
 2. **Given** 后续节（25 定时、31 Demo）接入出站推送，**When** 它们调 notify，**Then** 本节交付的接口与表口径保持不变
 
 ---
@@ -93,7 +93,7 @@
 - **FR-003**: 系统 MUST 提供核心阶段唯一实现 `WebhookNotifyAdapter`：对 target.config 里的 url 发 POST（JSON content-type、body 为通用 text 格式 `{"msgtype":"text","text":{"content": content}}`——2026-09-05 人工验收 40008 实锤修正：企业微信与钉钉共用此形态，飞书归扩展阶段专用 Adapter）；URL 只从 NotifyTarget.config 取、MUST NOT 硬编码；webhook 返回 5xx 或网络失败时异常原样上抛、MUST NOT 静默吞掉
 - **FR-004**: 系统 MUST 提供 `notify_channels` 全局注册表：name（PK，注册名）、type（渠道类型）、url、description（可空）四列；建表走手工 schema.sql 增量（MUST NOT 依赖自动迁移）；JPA 实体 + Repository 按既有存储口径延伸；Agent 配置 frontmatter MUST NOT 含 notify_channels 字段，webhook 地址不进对话、不进配置键
 - **FR-005**: 系统 MUST 提供注册表解析服务 `NotifyChannelRegistry`（纯数据）：按渠道名解析出 NotifyTarget（channelType = 表 type 列，config 含 url 与渠道 name）；查不到 MUST 明确报错；`channel` 缺省口径——注册表恰好一条渠道才允许缺省取它，多条或为空时 MUST 明确报错要求显式指定 channel；adapter 选择不在此服务内
-- **FR-006**: 系统 MUST 提供 `NotifyTools`（内置 Tool `notify`，实现 OryxTool 抽象）：入参 content 必填、channel 可选；execute 四步顺序钉死——① 按 channel 名从注册表解析 NotifyTarget（缺省口径见 FR-005）② 按 target.channelType() 从装配处显式 Map<channelType, NotifyChannelAdapter> 选 adapter（MUST NOT 靠容器扫描），未知 type MUST 明确报错 ③ sandbox.enforce(HTTP_REQUEST, url) MUST 先于 send（顺序违反 = 白名单被绕过）④ adapter.send(target, content)；成功返回 MUST 带渠道名（"已推送到 <渠道名>"，审计可查出推给了谁）
+- **FR-006**: 系统 MUST 提供 `NotifyTools`（内置 Tool `notify`，实现 AxionTool 抽象）：入参 content 必填、channel 可选；execute 四步顺序钉死——① 按 channel 名从注册表解析 NotifyTarget（缺省口径见 FR-005）② 按 target.channelType() 从装配处显式 Map<channelType, NotifyChannelAdapter> 选 adapter（MUST NOT 靠容器扫描），未知 type MUST 明确报错 ③ sandbox.enforce(HTTP_REQUEST, url) MUST 先于 send（顺序违反 = 白名单被绕过）④ adapter.send(target, content)；成功返回 MUST 带渠道名（"已推送到 <渠道名>"，审计可查出推给了谁）
 - **FR-007**: 系统 MUST 满足依赖与装配要求：WebhookNotifyAdapter 构造注入 HTTP 客户端并设 connect/read timeout（慢 webhook 不得拖死 ReAct 轮次）；adapter 显式映射由装配处构建（加新渠道 = 新增实现类 + 映射表加一行，已验收代码零改动）；`NotifyTools` 注册进工具集归第 20 节（本节交付类 + mock 单测，工具执行器当前注入空 Map 为既定口径）
 
 ### Non-Functional Requirements
@@ -120,10 +120,10 @@
 
 ## Assumptions
 
-- **前序交付物已就位、无缺口**：OryxTool/ToolResult 抽象（001）、工具执行器 + Sandbox 接口四件套 + 契约文档（002）、存储口径与手工建表脚本先例（003）均按现状实测确认（2026-09-03）；"Sandbox 纯接口、零实现、无人调用"与"工具集注册归第 20 节"是既定跨节契约，本节以 mock 承接，不构成缺口
+- **前序交付物已就位、无缺口**：AxionTool/ToolResult 抽象（001）、工具执行器 + Sandbox 接口四件套 + 契约文档（002）、存储口径与手工建表脚本先例（003）均按现状实测确认（2026-09-03）；"Sandbox 纯接口、零实现、无人调用"与"工具集注册归第 20 节"是既定跨节契约，本节以 mock 承接，不构成缺口
 - **Sandbox 实现后补**：本节注入 Sandbox 接口，测试用 mock；WhitelistSandbox 三层白名单实现归第 23/24 节（002 FR-7 契约），届时本节代码零改动
 - **工具集注册后补**：NotifyTools 注册进工具执行器的工具 Map 与生产 bean 接线归第 20 节（003 FR-10 口径）；"LLM 在对话里自动调 notify"的端到端版在 20 节后补验
 - **渠道 CRUD 归 Web Service 节**：本节只交表 + 仓储 + 解析服务，不做 REST 端点与 Web 管理页（拍板 2026-09-03）
 - **核心阶段只做通用 webhook**：通用 text 格式（`msgtype/text/content`）覆盖企业微信与钉钉（2026-09-05 人工验收实测企业微信 errcode 0）；飞书 text 格式不同（msg_type/content/text）归扩展阶段专用 Adapter；签名算法、AccessToken 刷新、富文本卡片、body errcode 解析均明确不做；4xx/5xx 重试语义不细分、消息长度截断不做（有意留白）
 - **外部依赖**：HTTP 客户端由既有 Spring 生态提供（Boot 3.5 自带，BOM 管理版本）；测试用本地假 webhook（MockWebServer，属单测层、不算外网依赖，全仓首次引入）；真实 webhook 地址由用户在人工验收时提供
-- **无前序公共接口改造**：Agent 配置不动（notify_channels frontmatter 字段方案已拍板否决）、工具执行器/OryxTool/Sandbox 原样使用；对前序产物的变化仅为 schema.sql 增量追加 + oryxos-tool pom 增依赖，均为增量
+- **无前序公共接口改造**：Agent 配置不动（notify_channels frontmatter 字段方案已拍板否决）、工具执行器/AxionTool/Sandbox 原样使用；对前序产物的变化仅为 schema.sql 增量追加 + axion-tool pom 增依赖，均为增量

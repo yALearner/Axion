@@ -1,15 +1,15 @@
-package com.oryxos.memory;
+package com.axion.memory;
 
-import com.oryxos.core.LongTermMemoryStore;
-import com.oryxos.core.MemoryScope;
-import com.oryxos.core.MemoryService;
-import com.oryxos.core.Message;
-import com.oryxos.core.Session;
+import com.axion.core.LongTermMemoryStore;
+import com.axion.core.MemoryScope;
+import com.axion.core.MemoryService;
+import com.axion.core.Message;
+import com.axion.core.Session;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 
 /**
- * {@link MemoryService} 统一门面实现（FR-1，落 oryxos-memory）。
+ * {@link MemoryService} 统一门面实现（FR-1，落 axion-memory）。
  *
  * <p>buildContext 组装本会话的记忆上下文（技术方案 §4.2 第 2 部分）：长期记忆经 {@link LongTermMemoryStore#load()} 取得（核心区全量 +
  * 归档区截断后，截断契约在 store 侧钉死）、会话历史取自 SessionManager 管理的 Session 实例 （传入的 session 是 ReAct

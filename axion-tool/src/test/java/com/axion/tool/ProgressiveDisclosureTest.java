@@ -1,4 +1,4 @@
-package com.oryxos.tool;
+package com.axion.tool;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -8,21 +8,21 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.axion.core.AgentLoader;
+import com.axion.core.ContextLoader;
+import com.axion.core.MemoryService;
+import com.axion.core.Profile;
+import com.axion.core.ProfileContext;
+import com.axion.core.PromptBuilder;
+import com.axion.core.Session;
+import com.axion.core.ToolExecutor;
+import com.axion.core.ToolResult;
+import com.axion.core.ToolSchemaAdapter;
+import com.axion.storage.ToolInvocation;
+import com.axion.storage.ToolInvocationRepository;
+import com.axion.tool.builtin.ReadFileTool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.core.AgentLoader;
-import com.oryxos.core.ContextLoader;
-import com.oryxos.core.MemoryService;
-import com.oryxos.core.Profile;
-import com.oryxos.core.ProfileContext;
-import com.oryxos.core.PromptBuilder;
-import com.oryxos.core.Session;
-import com.oryxos.core.ToolExecutor;
-import com.oryxos.core.ToolResult;
-import com.oryxos.core.ToolSchemaAdapter;
-import com.oryxos.storage.ToolInvocation;
-import com.oryxos.storage.ToolInvocationRepository;
-import com.oryxos.tool.builtin.ReadFileTool;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,8 +42,7 @@ import org.springframework.ai.chat.messages.SystemMessage;
  * 参考/脚本不预载（经 read_file/shell 按需取）、未绑定不可见（FILE_READ 动态根 = 当前 Agent 目录）。解释器命令简单形态（坑九）与
  * fail-closed（⑥）同班验证。
  *
- * <p>落 oryxos-tool 测试（S5 F1 修正）：消费 core 的 PromptBuilder/ContextLoader/AgentLoader + tool
- * 沙箱类，依赖方向合法。
+ * <p>落 axion-tool 测试（S5 F1 修正）：消费 core 的 PromptBuilder/ContextLoader/AgentLoader + tool 沙箱类，依赖方向合法。
  */
 class ProgressiveDisclosureTest {
 

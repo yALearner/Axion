@@ -1,4 +1,4 @@
-package com.oryxos.web.api;
+package com.axion.web.api;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -9,11 +9,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.oryxos.core.AgentService;
-import com.oryxos.core.Profile;
-import com.oryxos.core.ProfileRegistry;
-import com.oryxos.core.Session;
-import com.oryxos.core.SessionManager;
+import com.axion.core.AgentService;
+import com.axion.core.Profile;
+import com.axion.core.ProfileRegistry;
+import com.axion.core.Session;
+import com.axion.core.SessionManager;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

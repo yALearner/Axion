@@ -1,9 +1,9 @@
-package com.oryxos.memory;
+package com.axion.memory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.oryxos.core.MemoryScope;
+import com.axion.core.MemoryScope;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;

@@ -1,6 +1,6 @@
-# Agent OS 行业调研：业界格局、Java 生态缺位与 OryxOS 定位
+# Agent OS 行业调研：业界格局、Java 生态缺位与 Axion 定位
 
-这份调研聚焦"**Agent OS**"这件事本身。先把 Agent OS 是什么讲清楚，再看业界两个最具代表性的开源 Agent OS 项目（**OpenClaw** 和 **Hermes Agent**）分别做到了什么、企业用得怎么样、留下了什么空白，然后看 Java 生态在这件事上的位置，最后落到 **OryxOS** 的定位和愿景。OryxOS 想做的事是清晰的：一个企业能完全掌控的、Java 原生的、私有可审计的 Agent 统一底座。调研要回答的是，业界已经做了什么，这件事在 Java 生态里为什么还没人做，以及 OryxOS 想把它做成什么样子。
+这份调研聚焦"**Agent OS**"这件事本身。先把 Agent OS 是什么讲清楚，再看业界两个最具代表性的开源 Agent OS 项目（**OpenClaw** 和 **Hermes Agent**）分别做到了什么、企业用得怎么样、留下了什么空白，然后看 Java 生态在这件事上的位置，最后落到 **Axion** 的定位和愿景。Axion 想做的事是清晰的：一个企业能完全掌控的、Java 原生的、私有可审计的 Agent 统一底座。调研要回答的是，业界已经做了什么，这件事在 Java 生态里为什么还没人做，以及 Axion 想把它做成什么样子。
 
 ---
 
@@ -73,7 +73,7 @@
 
 **Hermes Agent** 由开源 AI 实验室 NousResearch 在 2026 年 2 月发布，**Python** 实现，MIT 协议。它代表的是工程级、健壮性优先的取向：三层记忆、自我进化的 skill 机制、安全扫描、**HERMES_HOME** 多用户隔离，企业级方向投入明显，有商业化样本和云厂商背书，到 2026 年 5 月约 15 万 stars，且在日活推理量上一度反超 OpenClaw。它比 OpenClaw 更接近企业，但企业级 OS 治理（多租户 RBAC、SSO、完整审计）仍是空白。一句话，Hermes 是更偏团队和企业的 Agent OS。
 
-两个项目合起来，基本就勾勒出了当前开源 Agent OS 的格局：一个偏消费级可玩、一个偏工程级健壮，都从个人和小团队起步，产品形态都是"装在自己机器上、提供完整 Agent 运行环境的底座"。这个格局的意义不在于它们各自做了什么，而在于它们合起来留下了什么空白，而那个空白正是理解 OryxOS 定位的起点。
+两个项目合起来，基本就勾勒出了当前开源 Agent OS 的格局：一个偏消费级可玩、一个偏工程级健壮，都从个人和小团队起步，产品形态都是"装在自己机器上、提供完整 Agent 运行环境的底座"。这个格局的意义不在于它们各自做了什么，而在于它们合起来留下了什么空白，而那个空白正是理解 Axion 定位的起点。
 
 ### 2.2 两者共同留下的空白
 
@@ -163,31 +163,31 @@ Java/Spring 生态在企业后端是极其完整的，从 Web 框架（**Spring 
 
 ---
 
-## 五、OryxOS 的定位与愿景
+## 五、Axion 的定位与愿景
 
-前面把 Agent OS 是什么、业界做到哪、Java 生态缺在哪都讲清楚了。这一章讲 OryxOS 自己想做什么、想做成什么样子。
+前面把 Agent OS 是什么、业界做到哪、Java 生态缺在哪都讲清楚了。这一章讲 Axion 自己想做什么、想做成什么样子。
 
-### 5.1 OryxOS 是什么
+### 5.1 Axion 是什么
 
-**OryxOS** 是一个企业能完全掌控的、Java 原生的、私有可审计的 Agent 统一底座。
+**Axion** 是一个企业能完全掌控的、Java 原生的、私有可审计的 Agent 统一底座。
 
 它装在企业自己的 K8s、服务器或物理机上，作为统一底座，在底座上跑各种业务 Agent（运维助手、客服助手、HR 助手、销售助手、知识管理助手等），共享一套渠道接入、模型路由、记忆系统、工具调用、安全审计能力。数据完全留在企业自己的基础设施，不锁任何云生态。
 
-业务方在 OryxOS 上配置 Agent（prompt、模型、Tool 列表、渠道绑定），Agent 跑起来；业务方写 Tool（用 Java、Python、Shell 或任何语言，通过 **MCP** 协议暴露）接入 OryxOS，Agent 就能用上。业务方不需要写 Agent 后端代码，只需要写 Tool 实现和 Skill 配置。
+业务方在 Axion 上配置 Agent（prompt、模型、Tool 列表、渠道绑定），Agent 跑起来；业务方写 Tool（用 Java、Python、Shell 或任何语言，通过 **MCP** 协议暴露）接入 Axion，Agent 就能用上。业务方不需要写 Agent 后端代码，只需要写 Tool 实现和 Skill 配置。
 
-### 5.2 OryxOS 把自己锚在哪里
+### 5.2 Axion 把自己锚在哪里
 
-OryxOS 用"Agent OS"这个框架来理解和构建自己，但 OryxOS 不把自己锚在"Agent OS 这个概念"上，而是锚在它背后那个不会变的企业刚需上：**严监管企业需要一个自己能完全掌控的 Agent 底座，私有部署、完全可审计、跟 Java 体系对齐、数据不出企业、IT 能掌控**。
+Axion 用"Agent OS"这个框架来理解和构建自己，但 Axion 不把自己锚在"Agent OS 这个概念"上，而是锚在它背后那个不会变的企业刚需上：**严监管企业需要一个自己能完全掌控的 Agent 底座，私有部署、完全可审计、跟 Java 体系对齐、数据不出企业、IT 能掌控**。
 
-这个区别很重要。锚在概念上，意味着如果有一天"Agent OS"这个词被别的说法取代、这个中间层被上下层吸收，项目就失去了立足点。锚在需求上，意味着无论技术概念怎么演变，OryxOS 服务的那个需求都还在。OryxOS 把根扎在不变的东西上。
+这个区别很重要。锚在概念上，意味着如果有一天"Agent OS"这个词被别的说法取代、这个中间层被上下层吸收，项目就失去了立足点。锚在需求上，意味着无论技术概念怎么演变，Axion 服务的那个需求都还在。Axion 把根扎在不变的东西上。
 
-### 5.3 OryxOS 的愿景
+### 5.3 Axion 的愿景
 
-OryxOS 想做成的样子，可以用几个画面来描述：
+Axion 想做成的样子，可以用几个画面来描述：
 
 1. **让企业装一个 Agent 底座，像装一个 Spring Boot 应用一样自然。** 不需要学新的技术栈，不需要为它单独搭运维和审计，装上就纳入企业现有的体系。
-2. **让业务方只关心业务。** 渠道、模型、记忆、多租户、审计这些公共能力下沉到 OryxOS，业务方之上只写 Tool、配 Agent，上一个新 Agent 不用重复造这些轮子。
-3. **让数据和能力都留在企业。** 数据完全留在企业自己的基础设施，OryxOS 本身不收集任何企业数据。更进一步，通过 Skill 体系让高级员工的经验沉淀下来、资产化、留在企业，新员工可以继承。沉淀的知识和能力，永远属于企业。
+2. **让业务方只关心业务。** 渠道、模型、记忆、多租户、审计这些公共能力下沉到 Axion，业务方之上只写 Tool、配 Agent，上一个新 Agent 不用重复造这些轮子。
+3. **让数据和能力都留在企业。** 数据完全留在企业自己的基础设施，Axion 本身不收集任何企业数据。更进一步，通过 Skill 体系让高级员工的经验沉淀下来、资产化、留在企业，新员工可以继承。沉淀的知识和能力，永远属于企业。
 
 把这几个画面收成四个词：**统一、私有、易接入、可观测**：
 
@@ -196,35 +196,35 @@ OryxOS 想做成的样子，可以用几个画面来描述：
 - **易接入**：基于标准 Spring Boot 工程结构、跟现有系统和工具链直接对接
 - **可观测**：标准 Prometheus 指标、结构化日志、健康检查、Web 管理台
 
-### 5.4 OryxOS 的边界：做运行时，不做编排
+### 5.4 Axion 的边界：做运行时，不做编排
 
-OryxOS 的定位有一条清晰的边界：在分层上守住运行时这一层，不往上做编排。OryxOS 做的事是提供 Agent 运行所需的基础设施，包括 Channel、LLM Provider、Memory、Tool 注册、Sandbox、多租户、SSO、审计、可观测性、Web 管理台。业务方在上面配置 Agent，Agent 跑起来。
+Axion 的定位有一条清晰的边界：在分层上守住运行时这一层，不往上做编排。Axion 做的事是提供 Agent 运行所需的基础设施，包括 Channel、LLM Provider、Memory、Tool 注册、Sandbox、多租户、SSO、审计、可观测性、Web 管理台。业务方在上面配置 Agent，Agent 跑起来。
 
-OryxOS 不做可视化 workflow 编排、复杂任务分解、多 Agent 显式协作。如果业务需要复杂 workflow，可以用 Dify 之类的编排平台在 OryxOS 之上跑（Dify 作为客户端调 OryxOS 的 API）。OryxOS 跟编排平台是互补关系，不是竞争关系。
+Axion 不做可视化 workflow 编排、复杂任务分解、多 Agent 显式协作。如果业务需要复杂 workflow，可以用 Dify 之类的编排平台在 Axion 之上跑（Dify 作为客户端调 Axion 的 API）。Axion 跟编排平台是互补关系，不是竞争关系。
 
-### 5.5 OryxOS 不是什么：跟 Dify 工作流和 LangChain 框架的区别
+### 5.5 Axion 不是什么：跟 Dify 工作流和 LangChain 框架的区别
 
-把 OryxOS、Dify 这类编排平台、LangChain/Spring AI 这类框架放在一起，用三个维度看，区别就清楚了：产物是什么、谁来用、跑在哪一层。
+把 Axion、Dify 这类编排平台、LangChain/Spring AI 这类框架放在一起，用三个维度看，区别就清楚了：产物是什么、谁来用、跑在哪一层。
 
 **跟 Dify、Coze 这类工作流编排平台的区别：**
 
-Dify 的产物是一条 workflow，你用拖拽的方式，把 Prompt 节点、HTTP 节点、Code 节点、条件分支拼成一个有向流程，平台负责按这个流程执行。它的核心是"把一个复杂业务流程显式地编排出来"，适合一次性的、流程明确的任务。OryxOS 的产物不是 workflow，是一个配置出来的、常驻运行的 Agent，它没有显式的流程图，Agent 在运行时自己根据 prompt、工具和上下文决定下一步做什么。
+Dify 的产物是一条 workflow，你用拖拽的方式，把 Prompt 节点、HTTP 节点、Code 节点、条件分支拼成一个有向流程，平台负责按这个流程执行。它的核心是"把一个复杂业务流程显式地编排出来"，适合一次性的、流程明确的任务。Axion 的产物不是 workflow，是一个配置出来的、常驻运行的 Agent，它没有显式的流程图，Agent 在运行时自己根据 prompt、工具和上下文决定下一步做什么。
 
-> 一句话区别：Dify 编排的是"流程"，OryxOS 承载的是"常驻的 Agent"。
+> 一句话区别：Dify 编排的是"流程"，Axion 承载的是"常驻的 Agent"。
 
 **跟 LangChain、LangGraph、Spring AI、LangChain4j 这类框架的区别：**
 
-框架的产物是代码，它给开发者一组库和 SDK，让你用代码把一个 Agent 写出来，写完之后部署、运维、扩展、保活都是你自己的事，框架不管运行环境。OryxOS 的产物是一个装好就跑的服务，基础设施一应俱全，业务方不写 Agent 后端代码，只配置 Agent、写 Tool。
+框架的产物是代码，它给开发者一组库和 SDK，让你用代码把一个 Agent 写出来，写完之后部署、运维、扩展、保活都是你自己的事，框架不管运行环境。Axion 的产物是一个装好就跑的服务，基础设施一应俱全，业务方不写 Agent 后端代码，只配置 Agent、写 Tool。
 
-> 一句话区别：框架是"给你材料让你自己盖房子"，OryxOS 是"盖好的房子，你拎包入住"。两者是复用关系而非竞争关系，OryxOS 内部的 LLM 调用层，正是直接复用 Spring AI / Spring AI Alibaba 这类框架来实现的。
+> 一句话区别：框架是"给你材料让你自己盖房子"，Axion 是"盖好的房子，你拎包入住"。两者是复用关系而非竞争关系，Axion 内部的 LLM 调用层，正是直接复用 Spring AI / Spring AI Alibaba 这类框架来实现的。
 
-把三者收成一句话：框架给你代码、要你自己搭运行环境；编排平台给你流程、跑在运行时之上；OryxOS 给你运行时本身，一个让 Agent 能常驻、可治理、可审计地跑起来的底座。
+把三者收成一句话：框架给你代码、要你自己搭运行环境；编排平台给你流程、跑在运行时之上；Axion 给你运行时本身，一个让 Agent 能常驻、可治理、可审计地跑起来的底座。
 
-OryxOS 既复用了框架（拿它当 LLM 调用的底层组件），又托住了编排平台（给它当后端运行时），自己专注守在"运行时"这一层。
+Axion 既复用了框架（拿它当 LLM 调用的底层组件），又托住了编排平台（给它当后端运行时），自己专注守在"运行时"这一层。
 
-### 5.6 OryxOS 在安全上怎么不重蹈 OpenClaw 的覆辙
+### 5.6 Axion 在安全上怎么不重蹈 OpenClaw 的覆辙
 
-OpenClaw 的安全问题（CVE、恶意 skill、凭证收割、第三方 skill 供应链风险）不是偶然的 bug，是结构性的。OryxOS 既然定位严监管企业，安全就必须是 **day one** 的设计，而不是事后打补丁。具体在几件事上跟 OpenClaw 走相反的路：
+OpenClaw 的安全问题（CVE、恶意 skill、凭证收割、第三方 skill 供应链风险）不是偶然的 bug，是结构性的。Axion 既然定位严监管企业，安全就必须是 **day one** 的设计，而不是事后打补丁。具体在几件事上跟 OpenClaw 走相反的路：
 
 1. **Skill 和 Tool 来源受控，不做无约束的公开市场。** 企业内的 Skill 和 Tool 要经过注册、审核、签名、版本管理，来源可追溯。
 2. **最小权限，而不是默认全开。** 每个 Agent、每个 Tool 拿到的权限是显式授予的最小集合，文件系统、网络、shell 的访问范围默认收紧，按需放开。
@@ -233,23 +233,23 @@ OpenClaw 的安全问题（CVE、恶意 skill、凭证收割、第三方 skill �
 5. **prompt injection 和数据外泄要主动防御。** 借鉴 Hermes 的做法，记忆写入和工具输入要经过安全扫描，检测注入和外泄模式。
 6. **全链路审计是底座能力，不是事后补。** 谁、在什么时候、让哪个 Agent、调了什么 Tool、访问了什么数据、产生了什么结果，全程结构化留痕，可以接入企业现有的审计和 SIEM 系统。
 
-OryxOS 既然是 Java/Spring 实现、跑在企业自己基础设施上，它就能纳入企业现有的代码审计、安全扫描、合规过审流程。安全不是额外加的一层壳，是从架构里长出来的。
+Axion 既然是 Java/Spring 实现、跑在企业自己基础设施上，它就能纳入企业现有的代码审计、安全扫描、合规过审流程。安全不是额外加的一层壳，是从架构里长出来的。
 
-### 5.7 OryxOS 跟业界其他项目的关系
+### 5.7 Axion 跟业界其他项目的关系
 
-OryxOS 借鉴了开源 Agent OS 领域已经被验证的设计哲学。Agent 配置和生命周期、Channel 抽象、三层记忆、目录形态的 Agent 定义（借 **Anthropic Agent Skills** 的目录 + 渐进式披露形态，在 OryxOS 里一个目录定义的是一个 Agent）、Tool 调用通过 **MCP** 协议、单二进制部署这些设计，在 OpenClaw 和 Hermes 上都验证过能撑住真实场景。OryxOS 把这套设计在 Java 生态里重新实现，并补齐企业级 Agent OS 必需的多租户、SSO、RBAC、审计、合规、Web 管理台、深度集成这些能力。
+Axion 借鉴了开源 Agent OS 领域已经被验证的设计哲学。Agent 配置和生命周期、Channel 抽象、三层记忆、目录形态的 Agent 定义（借 **Anthropic Agent Skills** 的目录 + 渐进式披露形态，在 Axion 里一个目录定义的是一个 Agent）、Tool 调用通过 **MCP** 协议、单二进制部署这些设计，在 OpenClaw 和 Hermes 上都验证过能撑住真实场景。Axion 把这套设计在 Java 生态里重新实现，并补齐企业级 Agent OS 必需的多租户、SSO、RBAC、审计、合规、Web 管理台、深度集成这些能力。
 
-- **OryxOS 跟 OpenClaw、Hermes 的关系**是同类不同定位。三者都是 Agent OS，OpenClaw 偏个人、Hermes 偏个人到小团队，OryxOS 直接定位严监管企业场景。三者都采用 markdown + frontmatter 的目录形态，社区的优质 Skill 经过企业审查后理论上可以导入 OryxOS 的全局 Skill 库（`.oryxos/skills/`）。
-- **OryxOS 跟 Dify、Coze 这类编排平台的关系**是互补。两者甚至可以组合（Dify 作应用层，OryxOS 作基础设施层）。
-- **OryxOS 跟 Spring AI、Spring AI Alibaba、LangChain4j 这些 Java AI 框架的关系**是复用。OryxOS 的 LLM Provider 抽象直接基于 Spring AI Alibaba 的主流 LLM connector，不重复造轮子。
+- **Axion 跟 OpenClaw、Hermes 的关系**是同类不同定位。三者都是 Agent OS，OpenClaw 偏个人、Hermes 偏个人到小团队，Axion 直接定位严监管企业场景。三者都采用 markdown + frontmatter 的目录形态，社区的优质 Skill 经过企业审查后理论上可以导入 Axion 的全局 Skill 库（`.axion/skills/`）。
+- **Axion 跟 Dify、Coze 这类编排平台的关系**是互补。两者甚至可以组合（Dify 作应用层，Axion 作基础设施层）。
+- **Axion 跟 Spring AI、Spring AI Alibaba、LangChain4j 这些 Java AI 框架的关系**是复用。Axion 的 LLM Provider 抽象直接基于 Spring AI Alibaba 的主流 LLM connector，不重复造轮子。
 
 ---
 
 ## 六、未来方向：从单机到分布式
 
-需要先把当前的边界讲清楚：**OryxOS 当前版本做的是单机私有部署**。
+需要先把当前的边界讲清楚：**Axion 当前版本做的是单机私有部署**。
 
-一个 OryxOS 实例，装在企业自己的一台服务器或一个容器里，跑起一组 Agent，服务一个部门或一个场景。这是刻意的选择。先把单机这件事做扎实，是当前阶段的全部重心。
+一个 Axion 实例，装在企业自己的一台服务器或一个容器里，跑起一组 Agent，服务一个部门或一个场景。这是刻意的选择。先把单机这件事做扎实，是当前阶段的全部重心。
 
 但架构上要为未来留出方向。当一个企业从"一个部门试点"走向"服务全公司"，单机会撞到三件事：
 
@@ -282,7 +282,7 @@ OryxOS 借鉴了开源 Agent OS 领域已经被验证的设计哲学。Agent 配
 
 ### 6.4 为什么 Java 生态做分布式是顺手的
 
-分布式系统要解决的服务注册发现、配置管理、限流熔断、分布式追踪、负载均衡这些问题，Java 生态有一整套企业级验证过的成熟方案：服务注册和配置中心用 **Nacos**，限流熔断用 **Sentinel**，网关用 **Spring Cloud Gateway**，分布式追踪用 **SkyWalking**，监控告警用 **Prometheus + Grafana**。OryxOS 做分布式，不需要自己造这些轮子，直接站在 Spring Cloud 这套成熟的分布式基础设施上。
+分布式系统要解决的服务注册发现、配置管理、限流熔断、分布式追踪、负载均衡这些问题，Java 生态有一整套企业级验证过的成熟方案：服务注册和配置中心用 **Nacos**，限流熔断用 **Sentinel**，网关用 **Spring Cloud Gateway**，分布式追踪用 **SkyWalking**，监控告警用 **Prometheus + Grafana**。Axion 做分布式，不需要自己造这些轮子，直接站在 Spring Cloud 这套成熟的分布式基础设施上。
 
 这正是 Node.js 的 OpenClaw 和 Python 的 Hermes 做企业级分布式时要费很大劲、而 Java 顺手就能做的地方。
 
@@ -296,13 +296,13 @@ OryxOS 借鉴了开源 Agent OS 领域已经被验证的设计哲学。Agent 配
 
 这件事现在还很早。业界关于 **multi-agent** 的探索，大多还停留在单机进程内的几个 Agent 互相 delegate，真正跨节点、跨组织的 Agent 协作，基础设施几乎还是空白。
 
-OryxOS 的远期图景：OryxOS 是单个节点上的 Agent 运行时，而连接多个 OryxOS 节点、让上面的 Agent 能跨节点可靠协作的，是一层专门的 **Agent 通信底座**。单节点的运行时和跨节点的通信底座是两件事，分开演进，最后合起来，才构成完整的"分布式 Agent OS"。
+Axion 的远期图景：Axion 是单个节点上的 Agent 运行时，而连接多个 Axion 节点、让上面的 Agent 能跨节点可靠协作的，是一层专门的 **Agent 通信底座**。单节点的运行时和跨节点的通信底座是两件事，分开演进，最后合起来，才构成完整的"分布式 Agent OS"。
 
 三个阶段路线图，路标就清楚了：
 
 | 阶段          | 形态           | 重点                                   |
 | ----------- | ------------ | ------------------------------------ |
-| **阶段一（当前）** | 单机私有部署       | 单 OryxOS 实例，完整运行时内核，把单机做扎实           |
+| **阶段一（当前）** | 单机私有部署       | 单 Axion 实例，完整运行时内核，把单机做扎实           |
 | **阶段二（中期）** | 底座分布式部署      | 多实例 + 外置状态，高可用，水平扩展，解决扛量和故障问题        |
 | **阶段三（远期）** | 分布式 Agent 协作 | 跨节点 / 跨组织 Agent 互发现、互委托，分布式 Agent OS |
 
@@ -312,7 +312,7 @@ OryxOS 的远期图景：OryxOS 是单个节点上的 Agent 运行时，而连�
 
 1. **Agent OS**：Agent Operating System，运行和管理 AI Agent 的基础设施层，装在用户（或企业）自己的机器上，提供多渠道、多 LLM 路由、记忆、工具、隔离等完整运行环境。
 2. **Agent**：具象的智能体，有具体的工种、人格设定和任务范围。一个 Agent 由 prompt、Skills、Tools、Memory 几部分组合而成，在 Agent OS 上配置出来，不是写代码写出来的。
-3. **Skill**：可复用的 Agent 能力模板，用 `SKILL.md` 文件格式描述，兼容 agentskills.io 开放标准。OpenClaw 和 Hermes 都用这个格式。在 OryxOS 里 Skill 是**全局共享能力库**（`.oryxos/skills/<name>/SKILL.md`），Agent 按名引用、正文注入 system prompt；Agent 本身的定义本体则是 `.oryxos/agents/<name>/AGENT.md`。
+3. **Skill**：可复用的 Agent 能力模板，用 `SKILL.md` 文件格式描述，兼容 agentskills.io 开放标准。OpenClaw 和 Hermes 都用这个格式。在 Axion 里 Skill 是**全局共享能力库**（`.axion/skills/<name>/SKILL.md`），Agent 按名引用、正文注入 system prompt；Agent 本身的定义本体则是 `.axion/agents/<name>/AGENT.md`。
 4. **Tool**：Agent 可以调用的外部能力，通常通过 MCP 协议暴露。业务方用任何语言写 Tool，注册到 Agent OS 供 Agent 使用。
 5. **Channel**：Agent 对外接入的渠道，包括企业微信、飞书、钉钉、Slack、邮件、HTTP API、Web 等。
 6. **LLM Provider**：大模型的提供方抽象，实现统一接口让 Agent 不感知具体调的是哪家模型。

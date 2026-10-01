@@ -1,12 +1,12 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import java.util.List;
 
 /**
- * Agent 运行时配置——派生自 {@code .oryxos/agents/<name>/AGENT.md} 的 frontmatter （派生见 {@link AgentLoader}）。
+ * Agent 运行时配置——派生自 {@code .axion/agents/<name>/AGENT.md} 的 frontmatter （派生见 {@link AgentLoader}）。
  *
  * <p>类本身一次建全：后续各节（Memory / Tool / Channel 等）用到哪个字段就取哪个字段， 各自字段的校验规则归后续各节补充。本节的校验范围只有一条：{@code
- * provider.name} 必须命中全局层 {@code oryxos.providers} 声明（见 {@link AgentLoader#deriveProfile}）。
+ * provider.name} 必须命中全局层 {@code axion.providers} 声明（见 {@link AgentLoader#deriveProfile}）。
  */
 public record Profile(
     String name,
@@ -60,7 +60,7 @@ public record Profile(
   /**
    * Provider 引用（Profile 层：声明"这个 Agent 怎么用"）。
    *
-   * @param name 必须命中全局层 {@code oryxos.providers} 的 Provider 名
+   * @param name 必须命中全局层 {@code axion.providers} 的 Provider 名
    * @param model 模型名
    * @param temperature 温度
    */

@@ -15,7 +15,7 @@ curl -s ".../spring-boot-starter-parent/maven-metadata.xml" \
   | grep -oE "<version>3\.5\.[0-9]+</version>" | tail -3
 ```
 
-## 历史记录（2026-08-26 探测，OryxOS-one 实施）
+## 历史记录（2026-08-26 探测，Axion 实施）
 
 | 组件 | 选定版本 | 线 | 备注 |
 |------|---------|-----|------|

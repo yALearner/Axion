@@ -1,4 +1,4 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -8,8 +8,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.axion.storage.SessionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.storage.SessionRepository;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;

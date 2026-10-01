@@ -5,13 +5,13 @@
 >
 > 修订说明（2026-09-01）：本版向课件第17节对齐——① 范围收窄至课件"本节交付物"（CLI/init/Session 内存版/最小 Tool 体系/Sandbox 移出，归第 18/20/23/24 节）；② 补齐课件独有的实现级细节（签名骨架、强制结束文案、缺失报错铁律、坑四 ThreadLocal 泄漏、AgentServiceTest/ContextLoaderTest、约定条目）；③ 课件与四文档的冲突点经用户拍板**一律参照课件**（唯一例外：课件"Profile 的 skills 字段"表述按宪法 IV 以软连接为准，见 FR-3）。修订依据见对话记录。
 >
-> 修订说明二（2026-09-01，实施前拍板）：① Session 前序缺口——**随本节交付最小 Session 契约**（core 的 `Session` 数据结构 + `SessionManager` 最小契约，见 FR-6；sessions 表与 JPA 持久化仍归第 18 节）；② **本节交付 Sandbox 纯接口**（`Sandbox`/`SandboxAction`/`ActionType`/`SandboxViolationException`，落位 oryxos-tool，见 FR-7；`WhitelistSandbox` 实现与三层白名单归第 23/24 节）；③ **core 引入 spring-ai 数据模型依赖**——边界为"可用其纯数据模型（Prompt/ChatResponse/ToolCall），禁用其 Agent 抽象与自动 tool 执行"（宪法 I/II 不变；001 review 中"core 保持框架无关"表述已同步修订）。修订依据见对话记录。
+> 修订说明二（2026-09-01，实施前拍板）：① Session 前序缺口——**随本节交付最小 Session 契约**（core 的 `Session` 数据结构 + `SessionManager` 最小契约，见 FR-6；sessions 表与 JPA 持久化仍归第 18 节）；② **本节交付 Sandbox 纯接口**（`Sandbox`/`SandboxAction`/`ActionType`/`SandboxViolationException`，落位 axion-tool，见 FR-7；`WhitelistSandbox` 实现与三层白名单归第 23/24 节）；③ **core 引入 spring-ai 数据模型依赖**——边界为"可用其纯数据模型（Prompt/ChatResponse/ToolCall），禁用其 Agent 抽象与自动 tool 执行"（宪法 I/II 不变；001 review 中"core 保持框架无关"表述已同步修订）。修订依据见对话记录。
 
 ## 背景与价值
 
 一句话：**ReAct 就是让大模型像人做事一样，在一个循环里反复"想一步、做一步、看结果"，直到把事办成**（课件 §一）。单独调一次大模型只是个 chatbot——你问一句、它答一句；但"看看今天天气，帮我决定穿什么"这种任务，模型得先去查天气、拿到结果、再根据结果给建议。ReAct 把"想—做—看"串成一个循环：模型想下一步该干嘛、调个工具去做、拿到结果看一眼，不够就再来一轮，够了就给最终答复。这个模式 2022 年提出，现在是事实标准——Claude Code、Cursor、LangChain 跑的都是它（课件 §一）。
 
-在 OryxOS 里，ReAct 是那个"大脑循环"：它自己不调模型、也不执行工具，而是指挥——想的时候通过上一节的 Provider 调一次大模型，做的时候把工具交给 ToolExecutor（课件 §一；技术方案 §2 把它放在引擎层，"Provider、Memory、Tool 三个能力供养 ReAct 循环这个引擎"）。它对 OryxOS 定位的意义是直接的：OryxOS 做运行时、不做编排（IndustryResearch §5.4），没有显式流程图，Agent 在运行时自己决定下一步——ReAct 循环就是"不做编排"的技术支点（需求文档 §5.4）。所以它是"OryxOS 最关键的一段代码"（需求文档 §5.4、编程指南 §4.2）。
+在 Axion 里，ReAct 是那个"大脑循环"：它自己不调模型、也不执行工具，而是指挥——想的时候通过上一节的 Provider 调一次大模型，做的时候把工具交给 ToolExecutor（课件 §一；技术方案 §2 把它放在引擎层，"Provider、Memory、Tool 三个能力供养 ReAct 循环这个引擎"）。它对 Axion 定位的意义是直接的：Axion 做运行时、不做编排（IndustryResearch §5.4），没有显式流程图，Agent 在运行时自己决定下一步——ReAct 循环就是"不做编排"的技术支点（需求文档 §5.4）。所以它是"Axion 最关键的一段代码"（需求文档 §5.4、编程指南 §4.2）。
 
 两个技术决策决定了它怎么写：
 
@@ -40,13 +40,13 @@ Session 的对话历史包含完整的 LLM 调用链和 Tool 调用链（技术�
 
 | 编号 | 需求 | 交付物（落位模块） | 来源 |
 |------|------|-------------------|------|
-| FR-1 | **`ReActLoop` 主循环（本节核心交付）**：签名 `run(Session session, String userMessage, Profile profile)`（课件 §三骨架为准；技术方案 §4.2"输入 Session 和用户消息"为简写）。七步：① 用户消息追加到 Session ② 组装 Prompt ③ 调 `ProviderService.chat(session.id(), profile, prompt)`——**传 session.id()**，llm_calls 按 session 关联审计 ④ 无 tool 调用 → 返回最终响应（**停止条件**：模型没提出要调工具，就说明它觉得能给最终答复了）⑤ 有 → 逐个交 `ToolExecutor.execute(session.id(), call)`，结果追加回 Session ⑥ 回到②继续 ⑦ **坑一（死循环）兜底**：达到 `maxIterations`（默认 10，Profile 覆盖）强制结束，返回 **"达到最大轮数，已停止"**。**坑三（不累积）防护**：每轮先把 LLM 响应存回 Session 再继续——事后能审计、下一轮接得上。自实现约数十行 Java，不触发 Spring AI 自动执行（宪法 I/II） | `ReActLoop`（oryxos-core） | 课件 §一/§二/§三；技术方案 §4.1/§4.2/§4.3；需求文档 §5.4 |
-| FR-2 | **`PromptBuilder` 组装每轮 Prompt**，四部分按序：① system prompt = 角色设定（`Profile.identity.prompt`）+ 启动信息（Bootstrap 三件套，由 ContextLoader 提供）+ Skill 元数据，**末尾附当前日期时间**（模型自己不知道今天几号，定时场景的"今天"全靠这一行）② 长期记忆（Memory 模块提供的跨会话记忆——**没开就跳过**；Memory 模块归第 21/22 节，本节留拼接位）③ 会话历史（只留最近 N 轮，默认 20，超了截断——**坑二（context 撑爆）的解法**；长期记忆和会话历史是两码事，别混在一起说）④ 当前可用工具列表（Function Calling 格式，复用 001 的 `ToolSchemaAdapter`；工具注册归第 20 节，本节以注入的工具集支撑同一契约） | `PromptBuilder`（oryxos-core） | 课件 §三；技术方案 §4.2；编程指南 §4.2 |
-| FR-3 | **`ContextLoader`（Bootstrap + Skill 元数据供给者）**：按 Profile 的 `bootstrap` 引用读 Bootstrap 三件套 + 当前 Agent 已绑定 Skill 的元数据，拼成 system prompt 第一部分。两条铁律：① **每次组装 prompt 重新读文件、不缓存**——用户改完立即生效；② **显式引用的文件缺失要报错、Bootstrap 缺失至少 WARN**——静默跳过会造成"人格悄悄丢了"这类最难查的软故障（**坑五**）。绑定真相源按宪法 IV 的软连接集合（课件原文"Profile 的 bootstrap 和 skills 字段"为过期表述，不采用字段式声明）。**AGENT.md 正文注入 system prompt 归第 29 节**（插件化 Agent），本节不交付 | `ContextLoader`（oryxos-core） | 课件 §三/§四；技术方案 §8.3；宪法 IV |
-| FR-4 | **`ToolExecutor` 执行 LLM 返回的 tool 调用**：从工具表按名找到 `OryxTool` → 执行 → 结果包装成 `ToolResult` → **写 `tool_invocations` 审计表（day one，宪法 V）：成功要记、失败也要记**（`success`/`error_message` 与 llm_calls 同口径，**坑七**）。失败时错误信息带 `retryable` 回传（重试是 LLM 下一轮的决定，不内部自动重试）。**执行权唯一**：工具执行只在这一个地方发生——这就是上一节关掉 Spring AI 自动执行的原因，不能有第二条路。**沙箱检查不发生在 ToolExecutor 内**：涉外 IO 的 `enforce` 由各工具在 `execute` 首行自执行（技术方案 §6.7 原文；第 24 节改造点先例），ToolExecutor 不持 Sandbox 引用——core 不反向依赖 oryxos-tool（见 FR-7） | `ToolExecutor`（oryxos-core）+ `ToolInvocation` 实体、`ToolInvocationRepository`、schema.sql 增量（oryxos-storage） | 课件 §三；技术方案 §4.2/§6.7/§9.2；需求文档 §10 |
-| FR-5 | **`AgentService` 统一入口 + `ProfileContext`**：`process(Session session, String userMessage)` 是三种触发源共用的编排者（宪法 VIII）——Profile 放进 `ProfileContext`（ThreadLocal，虚拟线程下每请求独立）→ `ReActLoop.run` → `sessionManager.save(session)` → **finally 清理 `ProfileContext`**。**坑四（ThreadLocal 泄漏）**：处理抛异常也必须清——泄漏在单请求测试里永远不报错，只在并发复用时串号，是最阴险的一类 bug。`OryxTool.execute` 签名不带 Profile，工具执行时靠 `ProfileContext` 知道"当前是哪个 Agent"，不改工具接口。**本节交付编排者本体，触发源接入从第 18 节（CLI）开始**——`ReActLoop` 不感知消息从哪个入口来 | `AgentService`、`ProfileContext`（oryxos-core） | 课件 §三/§四；技术方案 §4.2/§8.5、宪法 VIII |
-| FR-6 | **Session 最小契约（前序缺口补位，经拍板随本节交付）**：课件第17节以 Session 为输入，但 Session 归第 18 节交付——本节交付最小契约补上前序缺口：`Session` 数据结构（对话历史累积容器，历史以 001 的 `Message` 承载，可序列化、第 18 节落库用）+ `SessionManager` 最小契约（`getOrCreate(channel, user, profileName)` / `get` / `save`，**session_id 只在 SessionManager 内一处拼接**——H4 不变量四）。内存版实现；sessions 表 + JPA 实体 + 跨重启恢复仍归第 18 节 | `Session`、`SessionManager`（oryxos-core） | 课件第18节（提前交付的最小契约）；需求文档 §5.9；技术方案 §9.2 |
-| FR-7 | **Sandbox 接口墙（经拍板随本节交付，纯抽象零实现）**：`Sandbox.enforce(SandboxAction)` 单方法、`ActionType` 四值（FILE_READ \| FILE_WRITE \| SHELL_COMMAND \| HTTP_REQUEST）、校验失败抛 `SandboxViolationException`——字面量照技术方案 §6.7，落位 oryxos-tool（宪法 IX 三合一）。本节无人调用、无白名单配置：涉外 IO 的 enforce 由各工具在 `execute` 首行接入（第 20 节起），`WhitelistSandbox` 实现与三层白名单归第 23/24 节。接口先立，H4 不变量一的接线从第 20 节开始落地 | `Sandbox` 接口、`SandboxAction`、`ActionType`、`SandboxViolationException`（oryxos-tool） | 技术方案 §6.7、宪法 VI/IX；课件 §三（"23、24 节细讲"） |
+| FR-1 | **`ReActLoop` 主循环（本节核心交付）**：签名 `run(Session session, String userMessage, Profile profile)`（课件 §三骨架为准；技术方案 §4.2"输入 Session 和用户消息"为简写）。七步：① 用户消息追加到 Session ② 组装 Prompt ③ 调 `ProviderService.chat(session.id(), profile, prompt)`——**传 session.id()**，llm_calls 按 session 关联审计 ④ 无 tool 调用 → 返回最终响应（**停止条件**：模型没提出要调工具，就说明它觉得能给最终答复了）⑤ 有 → 逐个交 `ToolExecutor.execute(session.id(), call)`，结果追加回 Session ⑥ 回到②继续 ⑦ **坑一（死循环）兜底**：达到 `maxIterations`（默认 10，Profile 覆盖）强制结束，返回 **"达到最大轮数，已停止"**。**坑三（不累积）防护**：每轮先把 LLM 响应存回 Session 再继续——事后能审计、下一轮接得上。自实现约数十行 Java，不触发 Spring AI 自动执行（宪法 I/II） | `ReActLoop`（axion-core） | 课件 §一/§二/§三；技术方案 §4.1/§4.2/§4.3；需求文档 §5.4 |
+| FR-2 | **`PromptBuilder` 组装每轮 Prompt**，四部分按序：① system prompt = 角色设定（`Profile.identity.prompt`）+ 启动信息（Bootstrap 三件套，由 ContextLoader 提供）+ Skill 元数据，**末尾附当前日期时间**（模型自己不知道今天几号，定时场景的"今天"全靠这一行）② 长期记忆（Memory 模块提供的跨会话记忆——**没开就跳过**；Memory 模块归第 21/22 节，本节留拼接位）③ 会话历史（只留最近 N 轮，默认 20，超了截断——**坑二（context 撑爆）的解法**；长期记忆和会话历史是两码事，别混在一起说）④ 当前可用工具列表（Function Calling 格式，复用 001 的 `ToolSchemaAdapter`；工具注册归第 20 节，本节以注入的工具集支撑同一契约） | `PromptBuilder`（axion-core） | 课件 §三；技术方案 §4.2；编程指南 §4.2 |
+| FR-3 | **`ContextLoader`（Bootstrap + Skill 元数据供给者）**：按 Profile 的 `bootstrap` 引用读 Bootstrap 三件套 + 当前 Agent 已绑定 Skill 的元数据，拼成 system prompt 第一部分。两条铁律：① **每次组装 prompt 重新读文件、不缓存**——用户改完立即生效；② **显式引用的文件缺失要报错、Bootstrap 缺失至少 WARN**——静默跳过会造成"人格悄悄丢了"这类最难查的软故障（**坑五**）。绑定真相源按宪法 IV 的软连接集合（课件原文"Profile 的 bootstrap 和 skills 字段"为过期表述，不采用字段式声明）。**AGENT.md 正文注入 system prompt 归第 29 节**（插件化 Agent），本节不交付 | `ContextLoader`（axion-core） | 课件 §三/§四；技术方案 §8.3；宪法 IV |
+| FR-4 | **`ToolExecutor` 执行 LLM 返回的 tool 调用**：从工具表按名找到 `AxionTool` → 执行 → 结果包装成 `ToolResult` → **写 `tool_invocations` 审计表（day one，宪法 V）：成功要记、失败也要记**（`success`/`error_message` 与 llm_calls 同口径，**坑七**）。失败时错误信息带 `retryable` 回传（重试是 LLM 下一轮的决定，不内部自动重试）。**执行权唯一**：工具执行只在这一个地方发生——这就是上一节关掉 Spring AI 自动执行的原因，不能有第二条路。**沙箱检查不发生在 ToolExecutor 内**：涉外 IO 的 `enforce` 由各工具在 `execute` 首行自执行（技术方案 §6.7 原文；第 24 节改造点先例），ToolExecutor 不持 Sandbox 引用——core 不反向依赖 axion-tool（见 FR-7） | `ToolExecutor`（axion-core）+ `ToolInvocation` 实体、`ToolInvocationRepository`、schema.sql 增量（axion-storage） | 课件 §三；技术方案 §4.2/§6.7/§9.2；需求文档 §10 |
+| FR-5 | **`AgentService` 统一入口 + `ProfileContext`**：`process(Session session, String userMessage)` 是三种触发源共用的编排者（宪法 VIII）——Profile 放进 `ProfileContext`（ThreadLocal，虚拟线程下每请求独立）→ `ReActLoop.run` → `sessionManager.save(session)` → **finally 清理 `ProfileContext`**。**坑四（ThreadLocal 泄漏）**：处理抛异常也必须清——泄漏在单请求测试里永远不报错，只在并发复用时串号，是最阴险的一类 bug。`AxionTool.execute` 签名不带 Profile，工具执行时靠 `ProfileContext` 知道"当前是哪个 Agent"，不改工具接口。**本节交付编排者本体，触发源接入从第 18 节（CLI）开始**——`ReActLoop` 不感知消息从哪个入口来 | `AgentService`、`ProfileContext`（axion-core） | 课件 §三/§四；技术方案 §4.2/§8.5、宪法 VIII |
+| FR-6 | **Session 最小契约（前序缺口补位，经拍板随本节交付）**：课件第17节以 Session 为输入，但 Session 归第 18 节交付——本节交付最小契约补上前序缺口：`Session` 数据结构（对话历史累积容器，历史以 001 的 `Message` 承载，可序列化、第 18 节落库用）+ `SessionManager` 最小契约（`getOrCreate(channel, user, profileName)` / `get` / `save`，**session_id 只在 SessionManager 内一处拼接**——H4 不变量四）。内存版实现；sessions 表 + JPA 实体 + 跨重启恢复仍归第 18 节 | `Session`、`SessionManager`（axion-core） | 课件第18节（提前交付的最小契约）；需求文档 §5.9；技术方案 §9.2 |
+| FR-7 | **Sandbox 接口墙（经拍板随本节交付，纯抽象零实现）**：`Sandbox.enforce(SandboxAction)` 单方法、`ActionType` 四值（FILE_READ \| FILE_WRITE \| SHELL_COMMAND \| HTTP_REQUEST）、校验失败抛 `SandboxViolationException`——字面量照技术方案 §6.7，落位 axion-tool（宪法 IX 三合一）。本节无人调用、无白名单配置：涉外 IO 的 enforce 由各工具在 `execute` 首行接入（第 20 节起），`WhitelistSandbox` 实现与三层白名单归第 23/24 节。接口先立，H4 不变量一的接线从第 20 节开始落地 | `Sandbox` 接口、`SandboxAction`、`ActionType`、`SandboxViolationException`（axion-tool） | 技术方案 §6.7、宪法 VI/IX；课件 §三（"23、24 节细讲"） |
 | NFR-1 | 全程同步阻塞，不引入 Reactor / WebFlux / CompletableFuture；并发由 Java 21 虚拟线程承担 | — | 技术方案 §1.1 决策三、宪法 VII |
 | NFR-2 | 结构化 JSON 日志（Logback）：每次 LLM 调用和 Tool 调用都记录结构化日志，日志与审计落库并存（日志不等价于审计） | — | 需求文档 §5.4、技术方案 §1.2 |
 | NFR-3 | **职责边界划窄（正向定义）**：循环本身只做调度——转圈、判断停不停、攒结果；拼 prompt、调模型、执行工具全都交出去。循环里塞的东西越少，越好读、越不容易出 bug | — | 课件 §二、技术方案 §2 |
@@ -90,9 +90,9 @@ public String process(Session session, String userMessage) {
 
 **类型落地说明**（拍板 2026-09-01）：骨架中的 `Prompt`/`Response`/`ToolCall` 是 Spring AI 数据模型（`Prompt`/`ChatResponse`/`ToolCall`）——core 引入 spring-ai 数据模型依赖，边界为"可用其纯数据模型、禁用其 Agent 抽象与自动 tool 执行"（宪法 I/II）。`session.append(resp)` 落地时把 `ChatResponse` 转成 core 的 `Message`（`ToolCallRequest`/`ToolCallResult` 嵌套）再累积——Session 历史保持框架无关、可 JSON 序列化（第 18 节落库）。
 
-### 本节交付物清单（Spec-Kit 拆解锚点 / oryx-spec 交付清单比对基准）
+### 本节交付物清单（Spec-Kit 拆解锚点 / axion-spec 交付清单比对基准）
 
-- **代码**：`ReActLoop`、`PromptBuilder`、`ToolExecutor`、`AgentService`、`ProfileContext`、`ContextLoader`、`Session`、`SessionManager`（最小契约）、`LlmGateway`（oryxos-core 依赖倒置端口，G2 拍板 2026-09-01：签名 = `ChatResponse chat(String sessionId, Profile profile, Prompt prompt)`，与 ProviderService.chat 完全一致，ReActLoop 依赖端口而非具体类）、`Sandbox` 接口 + `SandboxAction` + `ActionType` + `SandboxViolationException`（oryxos-tool）、`ToolInvocation` 实体 + `ToolInvocationRepository`
+- **代码**：`ReActLoop`、`PromptBuilder`、`ToolExecutor`、`AgentService`、`ProfileContext`、`ContextLoader`、`Session`、`SessionManager`（最小契约）、`LlmGateway`（axion-core 依赖倒置端口，G2 拍板 2026-09-01：签名 = `ChatResponse chat(String sessionId, Profile profile, Prompt prompt)`，与 ProviderService.chat 完全一致，ReActLoop 依赖端口而非具体类）、`Sandbox` 接口 + `SandboxAction` + `ActionType` + `SandboxViolationException`（axion-tool）、`ToolInvocation` 实体 + `ToolInvocationRepository`
 - **测试**：`ReActLoopTest`、`PromptBuilderTest`、`ToolExecutorTest`、`AgentServiceTest`、`ContextLoaderTest`、`SessionManagerTest`（最小契约：id 拼接只此一处 + getOrCreate 幂等）、`ToolInvocationRepositoryTest`（沿用第16节 `LlmCallRepositoryTest` 的 schema.sql 同口径讲究；课件17节 harness 未单列，按课程既有模式补齐）
 - **表**：`tool_invocations`（含 `success`/`error_message` 列，手工建表脚本）
 - **约定**：最大轮数默认 10；历史截断默认 20 轮；prompt 末尾附当前日期时间
@@ -101,7 +101,7 @@ public String process(Session session, String userMessage) {
 
 > G2 门禁中发现的跨模块依赖摩擦点，2026-09-01 经用户逐项拍板（方案 A：端口接口 / 方案 A：迁移）：
 
-1. **`ToolSchemaAdapter` 自 oryxos-provider 迁移至 oryxos-core**（类 + `ToolSchemaAdapterTest` 随迁，逻辑零改动）：FR-2 要求 PromptBuilder（core）复用翻译能力，但依赖方向铁律 core ← provider 禁止反向依赖；实测其生产消费方为零（仅自身测试引用），迁移零破坏。CLAUDE.md 与 `TechnicalSolution.md` §10 模块表已同步修订。
+1. **`ToolSchemaAdapter` 自 axion-provider 迁移至 axion-core**（类 + `ToolSchemaAdapterTest` 随迁，逻辑零改动）：FR-2 要求 PromptBuilder（core）复用翻译能力，但依赖方向铁律 core ← provider 禁止反向依赖；实测其生产消费方为零（仅自身测试引用），迁移零破坏。CLAUDE.md 与 `TechnicalSolution.md` §10 模块表已同步修订。
 2. **`ProviderService` 增加 `implements LlmGateway`**（类声明一行，方法签名零改动）：ReActLoop（core）经 `LlmGateway` 端口调 LLM，装配时以 ProviderService 实例注入；001 既有调用方不受影响。
 
 ## 明确不做
@@ -181,7 +181,7 @@ void 处理中抛异常_ProfileContext也必须被清掉() {
 
 - **`ProviderService.chat(sessionId, Profile, Prompt)`**（001 FR-2）：每转一圈调一次；sessionId 参数正是为 `llm_calls` 按 session 关联审计（课件 §三逐行讲解）。001"跨节契约"条：该签名改动视为修改前序公共接口，需停下报告
 - **`Profile` / `ProfileLoader` / `ProfileRegistry`**（001 FR-6）：`identity.prompt`（角色设定）、`settings.max_iterations` / `max_history_turns` 一次建全
-- **`Message` / `OryxTool` / `ToolResult`**（001 FR-7/FR-8）、**`ToolSchemaAdapter`**（001 FR-4）：消息形态与工具契约、Tool 列表翻译
+- **`Message` / `AxionTool` / `ToolResult`**（001 FR-7/FR-8）、**`ToolSchemaAdapter`**（001 FR-4）：消息形态与工具契约、Tool 列表翻译
 - **`llm_calls` 审计与手工 schema.sql 口径**（001 FR-5）：本节的 `tool_invocations` 同构对称
 - **工程地基**：9 模块 Maven 骨架、JDK 21 + Spring Boot、Logback 结构化 JSON、静态检查门禁——本节不重复搭地基
 

@@ -2,10 +2,10 @@
 
 > 本 feature 无未决 NEEDS CLARIFICATION——全部裁决已在需求文档拍板（2026-09-05，含设计期自审修订 ⑤~⑧）。本文件记录裁决内容与备选，作为 plan/tasks 的依据。
 
-## 裁决 1：@Tool 注解骨架机械适配为 OryxTool 纯实现类（004 先例延续）
+## 裁决 1：@Tool 注解骨架机械适配为 AxionTool 纯实现类（004 先例延续）
 
-- **Decision**: 内置六件全部 implements `OryxTool` + 手写 JsonSchema，不加组件注解（G4-C1）；课件骨架的 `@Tool` 注解形态机械适配（004-notify 已拍板同一方向）
-- **Rationale**: boot 启动类 `scanBasePackages="com.oryxos"` 全树扫描——@Component/@Tool 类被拾取时依赖未必就位；宪法 II 只允许 Spring AI 的 schema 生成，方法级 @Tool 的自动注册把注册权交给 Spring AI 也把执行钩子带进来
+- **Decision**: 内置六件全部 implements `AxionTool` + 手写 JsonSchema，不加组件注解（G4-C1）；课件骨架的 `@Tool` 注解形态机械适配（004-notify 已拍板同一方向）
+- **Rationale**: boot 启动类 `scanBasePackages="com.axion"` 全树扫描——@Component/@Tool 类被拾取时依赖未必就位；宪法 II 只允许 Spring AI 的 schema 生成，方法级 @Tool 的自动注册把注册权交给 Spring AI 也把执行钩子带进来
 - **Alternatives considered**: 照抄课件 @Tool 方法形态（否决：G4-C1 全树扫描风险 + 执行路径与 ToolExecutor 唯一执行权冲突）
 
 ## 裁决 2：Sandbox 无实现期间生产装配 = 临时 PermissiveSandbox（拍板方案 A）
@@ -29,7 +29,7 @@
 ## 裁决 5：注册与过滤语义（自审补钉）
 
 - **Decision**: 重名注册明确拒绝 + WARN（不静默覆盖——防 MCP 工具意外遮蔽内置工具）；Profile 声明未注册工具名 → 启动校验明确报错（001 provider 引用校验同款纪律）
-- **Rationale**: 不静默是 OryxOS 全线纪律（001 配置校验、004 渠道解析）；静默少一个工具会让 Agent 以为调了其实没调
+- **Rationale**: 不静默是 Axion 全线纪律（001 配置校验、004 渠道解析）；静默少一个工具会让 Agent 以为调了其实没调
 - **Alternatives considered**: 重名后注册覆盖（否决：遮蔽内置工具 = 静默能力替换）；未知名静默跳过（否决：typo 工具名应显性暴露）
 
 ## 裁决 6：内置工具实现级细节（参数规格表）

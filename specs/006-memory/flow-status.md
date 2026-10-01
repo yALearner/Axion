@@ -20,11 +20,11 @@ WARNING 记录: （累计 0/3）
 人工验收待办（机器已判卷之外的部分，跑法见 quickstart.md 人工验证）:
 - [x] **Demo 二对话版（2026-09-06 用户实机跑通）**：① 写链——memo-writer 第 1 轮即含工具请求（1406ms）→ save_memory success=true（5ms）→ MEMORY.md 归档区落条目「用户项目用 Spring Boot，部署在 K8s 上」；② 读链——memo-reader 全新 session（sessions 表两个独立 session_id 实证）连调 2 次 recall_memory（keyword=数据库→未命中、keyword=用户偏好→命中，坑十八未命中友好措辞间接实证）→ 最终答复开篇「基于我的长期记忆，我了解到你的项目使用 Spring Boot 并部署在 K8s 上」并推荐 PostgreSQL 为主；③ 审计——tool_invocations 落 3 行（save×1 + recall×2）全 success=1、session 关联正确、durationMs 有值；④ 两次对话为两个独立 JVM 进程 = 跨进程持久化实证
 - [x] 审计落库核对（2026-09-06 jshell 查库）：见上 ③，input_json 含 content（记忆明文副本为已知设计）
-- [x] sqlite 档实机（2026-09-06 用户实跑 + jshell 查库）：`ORYXOS_MEMORY_BACKEND=sqlite` 启动装配正常（schema.sql 自动建 memory_entries 表）；真模型 save_memory 写入 → 查表 id=1 content=GitLab CI 部署、scope=ARCHIVAL（缺省 ✓）、created_at ISO-8601 ✓；换档隔离——MEMORY.md 无 GitLab 条目（sqlite 档未碰 markdown 文件）；审计 id=11 success=1
+- [x] sqlite 档实机（2026-09-06 用户实跑 + jshell 查库）：`AXION_MEMORY_BACKEND=sqlite` 启动装配正常（schema.sql 自动建 memory_entries 表）；真模型 save_memory 写入 → 查表 id=1 content=GitLab CI 部署、scope=ARCHIVAL（缺省 ✓）、created_at ISO-8601 ✓；换档隔离——MEMORY.md 无 GitLab 条目（sqlite 档未碰 markdown 文件）；审计 id=11 success=1
 - [x] mem0 档故障快速失败实机（2026-09-06 环境变量覆盖跑通）：无凭证启动报错「需要环境变量 MEM0_BASE_URL 与 MEM0_API_KEY」；不可达地址 chat 快速失败「Mem0 读取失败: I/O error on GET http://127.0.0.1:9/memories」不静默不降级（请求路径无 /v1/ 前缀 = H3 结论再实证）
-- [x] 非法 backend 值启动报错（2026-09-06 实跑）：`backend=bogus` 启动失败，异常根因「oryxos.memory.backend 非法值: bogus（取值 markdown/sqlite/mem0）」不静默
+- [x] 非法 backend 值启动报错（2026-09-06 实跑）：`backend=bogus` 启动失败，异常根因「axion.memory.backend 非法值: bogus（取值 markdown/sqlite/mem0）」不静默
 - [ ] 真实自托管 Mem0 实例验证：本地无实例 → **如实记待办**（mock 层已验协议翻译；验证口径见需求文档自审拍板）
-- [x] 无 yaml 改动（全程 `$env:ORYXOS_MEMORY_BACKEND` 会话级覆盖）→ 无需恢复，默认仍 markdown
+- [x] 无 yaml 改动（全程 `$env:AXION_MEMORY_BACKEND` 会话级覆盖）→ 无需恢复，默认仍 markdown
 
 停止清单触发记录:
 - （2026-09-06 S0）分支检查：hook 未配置、当前在 main → 按项目既有 {NNN}-{slug} 约定自 main 新建 006-memory（用户确认）；未提交的 006 设计文档/SKILL.md 课件路径更新随工作区带入新分支

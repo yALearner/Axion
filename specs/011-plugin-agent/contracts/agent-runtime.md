@@ -2,7 +2,7 @@
 
 > Phase 1 输出。本节不新增 REST 端点/数据表——本契约定义 30 节（`/api/v1/agents` + WorkspaceWatcher + 一句话生成）与后续节的**调用契约**；后续节改动以下任一视为修改前序公共接口，需停下报告（技术方案 §11.3）。
 
-## 1. AgentLoader（oryxos-core，30 节直接消费）
+## 1. AgentLoader（axion-core，30 节直接消费）
 
 ```java
 public final class AgentLoader {

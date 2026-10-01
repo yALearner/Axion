@@ -1,4 +1,4 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -8,7 +8,7 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 
 /**
- * ReAct 循环引擎——OryxOS 最核心的一段代码（宪法 I：自实现，不触发 Spring AI 的 Agent 抽象）。
+ * ReAct 循环引擎——Axion 最核心的一段代码（宪法 I：自实现，不触发 Spring AI 的 Agent 抽象）。
  *
  * <p>七步：① 用户消息追加到 Session ② 组装 Prompt ③ 调 {@link LlmGateway}（携带 session.id()，llm_calls 按会话 关联审计）④
  * 无工具调用 → 返回最终答复 ⑤ 有 → 逐个交 {@link ToolExecutor} 执行 ⑥ 结果回填 Session ⑦ 回到 ②。达到 {@code

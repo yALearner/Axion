@@ -1,12 +1,12 @@
-package com.oryxos.tool.builtin;
+package com.axion.tool.builtin;
 
+import com.axion.core.AxionTool;
+import com.axion.core.JsonSchema;
+import com.axion.core.ToolResult;
+import com.axion.tool.ActionType;
+import com.axion.tool.Sandbox;
+import com.axion.tool.SandboxAction;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.oryxos.core.JsonSchema;
-import com.oryxos.core.OryxTool;
-import com.oryxos.core.ToolResult;
-import com.oryxos.tool.ActionType;
-import com.oryxos.tool.Sandbox;
-import com.oryxos.tool.SandboxAction;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,7 +18,7 @@ import java.util.Map;
  * 内置 Tool {@code write_file}（FR-2）：写入文件内容——execute 首行 {@code sandbox.enforce(FILE_WRITE, path)} 先于
  * IO（坑十）；覆盖已存在文件；父目录不存在 → 明确报错、不递归建目录（参数规格表）。路径白名单规则本体归 23/24 节。纯类交付无组件注解（G4-C1）。
  */
-public class WriteFileTool implements OryxTool {
+public class WriteFileTool implements AxionTool {
 
   private final Sandbox sandbox;
 

@@ -1,12 +1,12 @@
-package com.oryxos.tool;
+package com.axion.tool;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.oryxos.core.OryxTool;
-import com.oryxos.core.Profile;
+import com.axion.core.AxionTool;
+import com.axion.core.Profile;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ class ToolRegistryTest {
   private final ToolRegistry registry = new ToolRegistry();
 
   @Test
-  @DisplayName("三来源工具统一以 OryxTool 身份注册：contains/all 正确")
+  @DisplayName("三来源工具统一以 AxionTool 身份注册：contains/all 正确")
   void registersToolsFromAllSources() {
     registry.register(tool("read_file"));
     registry.register(tool("github_pr_list")); // 方式二 MCP 来源
@@ -29,7 +29,7 @@ class ToolRegistryTest {
     assertThat(registry.contains("read_file")).isTrue();
     assertThat(registry.contains("no_such")).isFalse();
     assertThat(registry.all())
-        .extracting(OryxTool::getName)
+        .extracting(AxionTool::getName)
         .containsExactlyInAnyOrder("read_file", "github_pr_list", "echo");
   }
 
@@ -41,10 +41,10 @@ class ToolRegistryTest {
     registry.register(tool("notify"));
     Profile profile = profileWithTools("read_file", "notify");
 
-    List<OryxTool> filtered = registry.filter(profile);
+    List<AxionTool> filtered = registry.filter(profile);
 
     assertThat(filtered)
-        .extracting(OryxTool::getName)
+        .extracting(AxionTool::getName)
         .containsExactlyInAnyOrder("read_file", "notify");
     assertThat(filtered).hasSize(2); // 少一个（过滤过头）也是错
   }
@@ -52,8 +52,8 @@ class ToolRegistryTest {
   @Test
   @DisplayName("重名注册：明确拒绝不静默覆盖（保留先注册者）")
   void duplicateNameRejected() {
-    OryxTool first = tool("read_file");
-    OryxTool shadowing = tool("read_file");
+    AxionTool first = tool("read_file");
+    AxionTool shadowing = tool("read_file");
     registry.register(first);
 
     registry.register(shadowing);
@@ -83,8 +83,8 @@ class ToolRegistryTest {
     assertThat(registry.filter(profileWithTools())).isEmpty();
   }
 
-  private OryxTool tool(String name) {
-    OryxTool tool = mock(OryxTool.class);
+  private AxionTool tool(String name) {
+    AxionTool tool = mock(AxionTool.class);
     when(tool.getName()).thenReturn(name);
     return tool;
   }

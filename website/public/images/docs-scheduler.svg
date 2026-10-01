@@ -11,7 +11,7 @@
   <!-- Three triggers -->
   <rect x="30" y="55" width="230" height="50" rx="6" fill="#10203f" stroke="#3b82f6" stroke-width="1.2" filter="url(#sh)"/>
   <text x="145" y="76" text-anchor="middle" font-size="11" font-weight="bold" fill="#93c5fd">💻 CLI Channel</text>
-  <text x="145" y="94" text-anchor="middle" font-size="9" fill="#3b82f6">oryxos chat · 人推</text>
+  <text x="145" y="94" text-anchor="middle" font-size="9" fill="#3b82f6">axion chat · 人推</text>
 
   <rect x="295" y="55" width="230" height="50" rx="6" fill="#10203f" stroke="#3b82f6" stroke-width="1.2" filter="url(#sh)"/>
   <text x="410" y="76" text-anchor="middle" font-size="11" font-weight="bold" fill="#93c5fd">🌐 Web Service</text>

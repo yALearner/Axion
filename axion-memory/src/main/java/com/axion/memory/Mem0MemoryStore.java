@@ -1,7 +1,7 @@
-package com.oryxos.memory;
+package com.axion.memory;
 
-import com.oryxos.core.LongTermMemoryStore;
-import com.oryxos.core.MemoryScope;
+import com.axion.core.LongTermMemoryStore;
+import com.axion.core.MemoryScope;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,8 +26,8 @@ import org.springframework.web.client.RestClientException;
  */
 public class Mem0MemoryStore implements LongTermMemoryStore {
 
-  /** OryxOS 底座单一租户标识：接口契约无 user 概念（append/load/recall 不带用户），mem0 按 user_id 分库——固定租户收口。 */
-  private static final String USER_ID = "oryxos";
+  /** Axion 底座单一租户标识：接口契约无 user 概念（append/load/recall 不带用户），mem0 按 user_id 分库——固定租户收口。 */
+  private static final String USER_ID = "axion";
 
   /** 归档区客户端截断阈值（字符数）——与 markdown 档同口径（坑十六）。 */
   private static final int MAX_ARCHIVE_CHARS = 4000;

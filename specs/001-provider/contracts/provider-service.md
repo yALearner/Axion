@@ -33,13 +33,13 @@ Response chat(String sessionId, Profile profile, Prompt prompt)
 
 1. **路由**：按 `provider name → ChatModel` 显式映射表精确命中；禁止扫描容器 Bean 集合区分 Provider
 2. **审计**：成功与失败都落 `llm_calls`（失败先落账再上抛）；记录 provider/model/token/耗时/success/error_message/session_id
-3. **工具**：`OryxTool` 只翻译为 schema、不执行；Spring AI 自动 tool 执行**必须关闭**（回归测试钉死）
+3. **工具**：`AxionTool` 只翻译为 schema、不执行；Spring AI 自动 tool 执行**必须关闭**（回归测试钉死）
 4. **同步**：全程同步阻塞，无异步模型（虚拟线程承载并发）
 5. **失败降级**：核心阶段无 fallback/hedge/circuit breaker——失败即报错
 
 ## 配置契约
 
-全局层 `oryxos.providers`（name + `${ENV_VAR}` api-key + 可选 base-url）声明"连不连得上"；
+全局层 `axion.providers`（name + `${ENV_VAR}` api-key + 可选 base-url）声明"连不连得上"；
 Profile 层 `provider`（name/model/temperature）声明"怎么用"。Profile 引用的 name 必须命中全局层。
 
 ## 消费方

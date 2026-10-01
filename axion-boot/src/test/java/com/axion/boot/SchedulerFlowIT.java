@@ -1,15 +1,15 @@
-package com.oryxos.boot;
+package com.axion.boot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import com.oryxos.core.AgentScheduler;
-import com.oryxos.core.SessionManager;
-import com.oryxos.storage.LlmCallRepository;
-import com.oryxos.storage.ScheduledTaskStore;
-import com.oryxos.storage.TaskExecutionView;
-import com.oryxos.storage.ToolInvocation;
-import com.oryxos.storage.ToolInvocationRepository;
+import com.axion.core.AgentScheduler;
+import com.axion.core.SessionManager;
+import com.axion.storage.LlmCallRepository;
+import com.axion.storage.ScheduledTaskStore;
+import com.axion.storage.TaskExecutionView;
+import com.axion.storage.ToolInvocation;
+import com.axion.storage.ToolInvocationRepository;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -29,16 +29,16 @@ import org.springframework.test.context.DynamicPropertySource;
  * success=false、调度器没死。webhook 真收到由人工复验（真实 webhook 地址不进 gate）。
  */
 @Tag("integration")
-@SpringBootTest(classes = OryxOsApplication.class)
+@SpringBootTest(classes = AxionApplication.class)
 class SchedulerFlowIT {
 
-  private static final String DEMO_AGENT_DIR = ".oryxos/agents/weather-demo";
-  private static final String BAD_AGENT_DIR = ".oryxos/agents/bad-agent";
-  private static final String DB_FILE = ".oryxos/flow-test.db"; // 类专属库
+  private static final String DEMO_AGENT_DIR = ".axion/agents/weather-demo";
+  private static final String BAD_AGENT_DIR = ".axion/agents/bad-agent";
+  private static final String DB_FILE = ".axion/flow-test.db"; // 类专属库
 
   static {
     try {
-      deleteRecursively(Path.of(".oryxos", "agents"));
+      deleteRecursively(Path.of(".axion", "agents"));
       Files.createDirectories(Path.of(DEMO_AGENT_DIR));
       Files.createDirectories(Path.of(BAD_AGENT_DIR));
       Files.deleteIfExists(Path.of(DB_FILE));
@@ -99,14 +99,14 @@ class SchedulerFlowIT {
   @DynamicPropertySource
   static void providerProperties(DynamicPropertyRegistry registry) {
     registry.add("spring.datasource.url", () -> "jdbc:sqlite:" + DB_FILE);
-    registry.add("oryxos.providers[0].name", () -> "deepseek");
+    registry.add("axion.providers[0].name", () -> "deepseek");
     registry.add(
-        "oryxos.providers[0].api-key",
+        "axion.providers[0].api-key",
         () -> System.getenv().getOrDefault("DEEPSEEK_API_KEY", "dummy"));
-    registry.add("oryxos.providers[0].base-url", () -> "https://api.deepseek.com");
-    registry.add("oryxos.providers[1].name", () -> "kimi");
-    registry.add("oryxos.providers[1].api-key", () -> "dummy");
-    registry.add("oryxos.providers[1].base-url", () -> "http://127.0.0.1:9");
+    registry.add("axion.providers[0].base-url", () -> "https://api.deepseek.com");
+    registry.add("axion.providers[1].name", () -> "kimi");
+    registry.add("axion.providers[1].api-key", () -> "dummy");
+    registry.add("axion.providers[1].base-url", () -> "http://127.0.0.1:9");
   }
 
   @Autowired private AgentScheduler scheduler;

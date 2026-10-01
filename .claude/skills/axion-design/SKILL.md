@@ -1,7 +1,7 @@
 ---
-name: oryx-design
+name: axion-design
 description: >-
-  生成 OryxOS 模块设计文档（docs/requirements/NNN-slug.md）：输入目标模块（US-n 或能力名），
+  生成 Axion 模块设计文档（docs/requirements/NNN-slug.md）：输入目标模块（US-n 或能力名），
   以 docs/ 四份文档（AiProgrammingGuide / DemandAnalysis / IndustryResearch / TechnicalSolution）
   为权威设计源、课程课件（现行版 PDF 在 `D:\项目\`，可指定路径）为实施级事实源，按六段架构成文——
   背景与价值 → 用户场景 → 功能需求（FR/NFR 表，交付物列即白名单）→ 明确不做 → 验收标准
@@ -15,10 +15,10 @@ user-invocable: true
 disable-model-invocation: false
 ---
 
-# oryx-design：设计文档生成
+# axion-design：设计文档生成
 
-OryxOS 主体开发每节课（一个核心能力）开工前的上游步骤：把四份 docs 文档转成该模块的
-设计文档，作为 `/oryx-spec` 的需求输入。已产出的两份——`docs/requirements/001-provider.md`
+Axion 主体开发每节课（一个核心能力）开工前的上游步骤：把四份 docs 文档转成该模块的
+设计文档，作为 `/axion-spec` 的需求输入。已产出的两份——`docs/requirements/001-provider.md`
 （US-1）、`docs/requirements/002-react.md`（US-2）——是本 skill 的**事实模板**，
 后续 US-3/4/5 沿用同一约定。
 
@@ -28,12 +28,12 @@ OryxOS 主体开发每节课（一个核心能力）开工前的上游步骤：�
 
 - **目标模块**：`US-n`（n=1..5）或能力名（如"Memory""Web Service"）。
 - **NNN-slug**：NNN = `docs/requirements/` 下**新序列**下一个可用序号（新序列从
-  `001-provider` 起，历史产物 `specs/001-react-runtime` 不计入，见 oryx-spec 的
+  `001-provider` 起，历史产物 `specs/001-react-runtime` 不计入，见 axion-spec 的
   `references/requirements-convention.md`）；slug = 能力短名（小写连字符），
-  与 `/oryx-spec` 的 `specs/NNN-slug/` 一一对应。机械可判，不猜。
+  与 `/axion-spec` 的 `specs/NNN-slug/` 一一对应。机械可判，不猜。
 - **四文档章节索引**：按 `references/template.md` 的映射表定位。映射只是索引，
   正文永远以**实读四文档**为准（单一真相源，杜绝双份漂移）。
-- **课件定位**：课程课件（现行版 PDF 在 `D:\项目\`；旧版 .md 在 `D:\code\oryxos\docs\class\` 已过时，仅第 21 节等 PDF 未覆盖的内容可回查；用户指定其他路径则用之）是**实施级事实源**——
+- **课件定位**：课程课件（现行版 PDF 在 `D:\项目\`；旧版 .md 在 `D:\code\axion\docs\class\` 已过时，仅第 21 节等 PDF 未覆盖的内容可回查；用户指定其他路径则用之）是**实施级事实源**——
   代码骨架、已定文案、测试类清单、约定条目、分节归属；四文档是**权威设计源**。课件不是
   四文档的替代，而是"实际踩过坑的落地方案"。
 - **新版 PDF 中文提取（2026-09-06 实录）**：23/24 节新版 PDF 用 pdftotext 提取 0 中文字（嵌入字体无 Unicode 映射），用 **PyMuPDF 可完整提取**（`pymupdf.open(path)` + `page.get_text()`）。本机 Python 需先 `pip install msvc-runtime` 修复缺失 msvcp140.dll（否则 `import pymupdf` 报 DLL load failed）。注意新版 PDF 章节号与旧 .md 不同（23 节旧编号自九起整体 +2），引用一律用新版 PDF 编号。
@@ -44,7 +44,7 @@ OryxOS 主体开发每节课（一个核心能力）开工前的上游步骤：�
 ## 1. 生成流程（六步）
 
 1. **解析与简报**：确定 NNN-slug + 对应 US + 章节索引，**落笔前向用户简报一次**
-   （编号、范围、章节索引），确认后继续——文件名与编号是后续 /oryx-spec 的契约，不静默定。
+   （编号、范围、章节索引），确认后继续——文件名与编号是后续 /axion-spec 的契约，不静默定。
 2. **读事实模板**：`docs/requirements/001-provider.md`（结构/表格/文风基准），
    `docs/requirements/002-react.md` 作第二个示例。
 3. **读四文档相关章节全文 + 对应课件节全文**（如存在）：四文档是权威设计源，课件提供
@@ -58,7 +58,7 @@ OryxOS 主体开发每节课（一个核心能力）开工前的上游步骤：�
    template.md「流程图约定」）。
 6. **完成报告**：产物路径（含流程图两版本文件路径）+ 「为实现级明确」决策清单 + 超出四文档的
    新增对外概念（如有）+ 冲突拍板记录（课件 vs 四文档，如有）+ 前序缺口（H0 依赖检查发现，如有）
-   + 下一步 `/oryx-spec NNN-slug`。
+   + 下一步 `/axion-spec NNN-slug`。
 
 ## 2. 判断权与停止清单
 
@@ -78,11 +78,11 @@ OryxOS 主体开发每节课（一个核心能力）开工前的上游步骤：�
   3. 前序交付物实测与文档描述不符
   4. 用户已明确的结构要求与本模板冲突
 
-## 3. 与 oryx-spec 的衔接
+## 3. 与 axion-spec 的衔接
 
-产出的 `docs/requirements/NNN-slug.md` 是 `/oryx-spec NNN-slug` 的需求输入（oryx-spec
+产出的 `docs/requirements/NNN-slug.md` 是 `/axion-spec NNN-slug` 的需求输入（axion-spec
 编号解析的第一形态）。两份文档的对应关系：
 
-- 设计文档的**交付物列** = oryx-spec 交付清单白名单（停止清单第 1 条的判断基准）
-- 设计文档的**验收标准** = oryx-spec S4 tasks 的 acceptance criteria 来源
-- 设计文档的**依赖与假设（跨节契约）** = oryx-spec 停止清单第 4 条"前序公共接口"的判断依据
+- 设计文档的**交付物列** = axion-spec 交付清单白名单（停止清单第 1 条的判断基准）
+- 设计文档的**验收标准** = axion-spec S4 tasks 的 acceptance criteria 来源
+- 设计文档的**依赖与假设（跨节契约）** = axion-spec 停止清单第 4 条"前序公共接口"的判断依据

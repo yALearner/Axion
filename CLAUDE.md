@@ -1,6 +1,6 @@
-# OryxOS — Claude Code 项目指南
+# Axion — Claude Code 项目指南
 
-OryxOS 是用 Java 实现的面向企业场景的 **Agent OS**（Agent 统一底座）。装在企业自己的 K8s 或服务器上，作为统一底座运行多个业务 Agent，共享渠道接入、模型路由、工具调用、记忆系统、沙箱执行能力。数据完全留在企业自己的基础设施，不锁任何云生态。Agent 在 OryxOS 上是**配置出来的，不是写代码写出来的**。
+Axion 是用 Java 实现的面向企业场景的 **Agent OS**（Agent 统一底座）。装在企业自己的 K8s 或服务器上，作为统一底座运行多个业务 Agent，共享渠道接入、模型路由、工具调用、记忆系统、沙箱执行能力。数据完全留在企业自己的基础设施，不锁任何云生态。Agent 在 Axion 上是**配置出来的，不是写代码写出来的**。
 
 > 详细背景：`docs/IndustryResearch.md`（业界调研）、`docs/DemandAnalysis.md`（需求）、`docs/TechnicalSolution.md`（技术方案）、`docs/AiProgrammingGuide.md`（AI 编程指南）
 
@@ -9,17 +9,17 @@ OryxOS 是用 Java 实现的面向企业场景的 **Agent OS**（Agent 统一底
 ## 核心定位：做运行时，不做编排
 
 ```
-编排层（Dify / Coze）→ 可视化 Workflow    ← OryxOS 不做
+编排层（Dify / Coze）→ 可视化 Workflow    ← Axion 不做
 ────────────────────────────────────────
-OryxOS · Agent 运行时                    ← 我们在这一层
+Axion · Agent 运行时                    ← 我们在这一层
 Agent 配置 | Channel | Memory | Tool | 审计
 ────────────────────────────────────────
-框架层（Spring AI / LangChain）→ LLM 调用 ← OryxOS 复用
+框架层（Spring AI / LangChain）→ LLM 调用 ← Axion 复用
 ```
 
-- OryxOS **复用** Spring AI / Spring AI Alibaba 做 LLM 调用
-- OryxOS **托管** Dify / Coze 等编排平台（编排平台作为客户端调 OryxOS API）
-- OryxOS **专注** 运行时：让 Agent 能常驻、可治理、可审计地跑起来
+- Axion **复用** Spring AI / Spring AI Alibaba 做 LLM 调用
+- Axion **托管** Dify / Coze 等编排平台（编排平台作为客户端调 Axion API）
+- Axion **专注** 运行时：让 Agent 能常驻、可治理、可审计地跑起来
 
 **目标场景**：银行、政府、电信、能源、医疗等严监管行业——核心业务数据不能出企业、系统必须完全可审计、技术栈要跟现有 Java 体系对齐。
 
@@ -44,29 +44,29 @@ Agent 配置 | Channel | Memory | Tool | 审计
 ## 模块结构（9 个）
 
 ```
-oryxos/
-├── oryxos-core          # 核心抽象：OryxTool 接口、Session、Profile、ContextLoader、
+axion/
+├── axion-core          # 核心抽象：AxionTool 接口、Session、Profile、ContextLoader、
 │                        #   AgentLoader、ReActLoop、PromptBuilder、ToolExecutor、AgentService、
 │                        #   ProfileContext、SessionManager、AgentScheduler、ToolSchemaAdapter、
 │                        #   LlmGateway（依赖倒置端口）
-├── oryxos-provider      # 能力一：ProviderService、
+├── axion-provider      # 能力一：ProviderService、
 │                        #   多 Provider 显式映射（provider name → ChatModel）
-├── oryxos-memory        # 能力三：MemoryService 统一门面、LongTermMemory 可插拔后端、
+├── axion-memory        # 能力三：MemoryService 统一门面、LongTermMemory 可插拔后端、
 │                        #   MemoryTools（save_memory / recall_memory）
-├── oryxos-tool          # 能力四：内置 Tool（FileTools / ShellTools / HttpTools / NotifyTools）、
+├── axion-tool          # 能力四：内置 Tool（FileTools / ShellTools / HttpTools / NotifyTools）、
 │                        #   McpClientService、McpToolAdapter、ToolRegistry、
 │                        #   Sandbox 接口 + WhitelistSandbox、NotifyChannelAdapter + WebhookNotifyAdapter
-├── oryxos-channel-cli   # CLI Channel：CliChannel、oryxos chat 命令实现
-├── oryxos-web           # 能力五：WebServer、6 个 ApiController、GlobalExceptionHandler、OpenAPI
-├── oryxos-storage       # 持久化：SQLite、SessionRepository、
+├── axion-channel-cli   # CLI Channel：CliChannel、axion chat 命令实现
+├── axion-web           # 能力五：WebServer、6 个 ApiController、GlobalExceptionHandler、OpenAPI
+├── axion-storage       # 持久化：SQLite、SessionRepository、
 │                        #   ToolInvocationRepository、LlmCallRepository
-├── oryxos-cli           # 命令行入口：Picocli 主入口、12 个子命令、ConfigLoader
-└── oryxos-boot          # Spring Boot 启动模块：主类、自动配置、依赖聚合
+├── axion-cli           # 命令行入口：Picocli 主入口、12 个子命令、ConfigLoader
+└── axion-boot          # Spring Boot 启动模块：主类、自动配置、依赖聚合
 ```
 
-模块之间通过接口解耦。新增 Channel 或 Tool 只加新模块，不改 `oryxos-core`。
+模块之间通过接口解耦。新增 Channel 或 Tool 只加新模块，不改 `axion-core`。
 
-**依赖方向**：`oryxos-storage` 被 core 和能力层依赖；`oryxos-provider` / `oryxos-memory` / `oryxos-tool` 依赖 core；`oryxos-web` / `oryxos-channel-cli` 依赖所有能力层；`oryxos-cli` 组装所有模块；`oryxos-boot` 做依赖聚合。
+**依赖方向**：`axion-storage` 被 core 和能力层依赖；`axion-provider` / `axion-memory` / `axion-tool` 依赖 core；`axion-web` / `axion-channel-cli` 依赖所有能力层；`axion-cli` 组装所有模块；`axion-boot` 做依赖聚合。
 
 ---
 
@@ -80,7 +80,7 @@ oryxos/
 
 ### 原则二：Spring AI 只用两件事 ⚠️
 
-Spring AI 在 OryxOS 里只做：
+Spring AI 在 Axion 里只做：
 
 1. LLM Provider 协议转换（OpenAI / Anthropic / Gemini 等各家格式差异由它吸收）
 2. `@Tool` 注解的 JSON Schema 生成
@@ -111,17 +111,17 @@ Map<String, ChatModel> providerMap = Map.of(
 
 ### 原则四：一个目录 = 一个 Agent；Skill 以本地软连接绑定并渐进披露
 
-**一个目录 = 一个 Agent**：`.oryxos/agents/<name>/` 里 `AGENT.md` = frontmatter（运行配置）+ 正文（任务指令），外加可选 `skills/`（Skill 绑定视图）、`scripts/`、`REFERENCE.md`。`AgentLoader.deriveProfile(agentDir)` 把 frontmatter 派生成底座认识的 `Profile`。
+**一个目录 = 一个 Agent**：`.axion/agents/<name>/` 里 `AGENT.md` = frontmatter（运行配置）+ 正文（任务指令），外加可选 `skills/`（Skill 绑定视图）、`scripts/`、`REFERENCE.md`。`AgentLoader.deriveProfile(agentDir)` 把 frontmatter 派生成底座认识的 `Profile`。
 
 **底座 vs Agent 分清楚**：底座 = Provider、ReAct、内置 Tool、Memory、Sandbox、定时、Web（第 1~10 章），所有 Agent 共享。Agent = 一个目录，决定自己的运行配置和可见资源。
 
-公共 Skill 实体统一存放在 `.oryxos/skills/<name>/`。Agent 可见的 Skill 只由 `.oryxos/agents/<agent>/skills/<name>` 下指向公共实体的**相对软连接**表达；软连接集合是唯一绑定真相源，`AGENT.md` frontmatter 不再声明 `skills:`。
+公共 Skill 实体统一存放在 `.axion/skills/<name>/`。Agent 可见的 Skill 只由 `.axion/agents/<agent>/skills/<name>` 下指向公共实体的**相对软连接**表达；软连接集合是唯一绑定真相源，`AGENT.md` frontmatter 不再声明 `skills:`。
 
 加载走三层渐进式披露：每轮 prompt 只注入当前 Agent 已绑定 Skill 的 `name + description + 本地绝对读取路径`；模型命中后用 `read_file` 读取 `SKILL.md` 正文；Skill 附属参考/脚本继续按需读取或运行。不得预载正文、不得新增 `use_skill`、Skill 不进 `ToolRegistry`。
 
 ### 原则五：审计表 Day One 写入
 
-`tool_invocations` 和 `llm_calls` 两张审计表**核心阶段就必须写入**（不需要查询接口，但写入不能省）。不得以"日志够了"为由跳过落库，可审计是 OryxOS 的核心差异化能力。
+`tool_invocations` 和 `llm_calls` 两张审计表**核心阶段就必须写入**（不需要查询接口，但写入不能省）。不得以"日志够了"为由跳过落库，可审计是 Axion 的核心差异化能力。
 
 ### 原则六：不使用 Java SecurityManager
 
@@ -142,16 +142,16 @@ CLI（人推）、Web Service（人推）、`AgentScheduler`（钟推）三个�
 
 ### 原则九：Tool 模块三合一
 
-内置 Tool、MCP Client、Sandbox、NotifyTools 合并在一个 `oryxos-tool` 模块，**不拆成多个模块**。`AGENT.md` 正文加载归 `oryxos-core` 的 `ContextLoader`（Agent 目录不是 Tool）。
+内置 Tool、MCP Client、Sandbox、NotifyTools 合并在一个 `axion-tool` 模块，**不拆成多个模块**。`AGENT.md` 正文加载归 `axion-core` 的 `ContextLoader`（Agent 目录不是 Tool）。
 
 ---
 
 ## 工作区结构（运行时）
 
-OryxOS 启动后在当前目录创建 `.oryxos/` 工作区：
+Axion 启动后在当前目录创建 `.axion/` 工作区：
 
 ```
-.oryxos/
+.axion/
 ├── agents/             # 每个子目录 = 一个 Agent（AGENT.md + skills/软连接 + scripts/ REFERENCE.md）
 ├── skills/             # 公共 Skill 实体库：每个子目录 = 一个 Skill（SKILL.md + 可选附属资源）
 ├── memory/
@@ -159,21 +159,21 @@ OryxOS 启动后在当前目录创建 `.oryxos/` 工作区：
 ├── sessions/           # 会话数据（已迁入 SQLite，此目录备用）
 ├── logs/               # 结构化日志
 ├── mcp_servers.yaml    # MCP server 配置
-├── oryxos.db           # SQLite 数据库
+├── axion.db           # SQLite 数据库
 ├── AGENTS.md           # Bootstrap：项目级 agent 行为说明
 ├── SOUL.md             # Bootstrap：agent 人格定义
 └── USER.md             # Bootstrap：用户偏好（只读，agent 不写）
 ```
 
 **`MEMORY.md` vs `USER.md` 区别**：
-- `USER.md`：用户手写的初始设定，OryxOS 只读不写
-- `MEMORY.md`：Agent 通过 `save_memory` Tool 写入的成长记录，OryxOS 读写
+- `USER.md`：用户手写的初始设定，Axion 只读不写
+- `MEMORY.md`：Agent 通过 `save_memory` Tool 写入的成长记录，Axion 读写
 
 ---
 
 ## 核心数据模型
 
-### AGENT.md（`.oryxos/agents/<name>/AGENT.md`）
+### AGENT.md（`.axion/agents/<name>/AGENT.md`）
 
 一个 Agent 目录里 `AGENT.md` = frontmatter（这个 Agent 自己的 profile）+ 正文（任务指令）。`AgentLoader.deriveProfile(agentDir)` 把 frontmatter 派生成底座认识的 `Profile`。
 
@@ -290,10 +290,10 @@ schedules:                # 可选定时触发（AgentScheduler 钟推）
 
 ## Tool 体系
 
-### OryxTool 接口（所有 Tool 的统一抽象）
+### AxionTool 接口（所有 Tool 的统一抽象）
 
 ```java
-interface OryxTool {
+interface AxionTool {
     String getName();
     String getDescription();
     JsonSchema getInputSchema();
@@ -322,7 +322,7 @@ interface OryxTool {
 | 方式 | 门槛 | 推荐 | 实现 |
 |------|------|------|------|
 | 零代码 | 最低 | ⭐ 主推 | 写 Agent 目录（AGENT.md）+ 复用社区 MCP server，`mcp_servers.yaml` 里配置 |
-| 轻代码 | 中 | ⭐⭐ | 任意语言写 MCP server（JSON-RPC over stdio），OryxOS 作为 MCP Client 连接 |
+| 轻代码 | 中 | ⭐⭐ | 任意语言写 MCP server（JSON-RPC over stdio），Axion 作为 MCP Client 连接 |
 | 重代码 | 高 | ⭐⭐⭐ | Java `@Tool` 注解 Spring Bean，进程内直接调用，性能最好 |
 
 > 选择原则：能用方式一就不用方式二，能用方式二就不用方式三。
@@ -354,22 +354,22 @@ interface OryxTool {
 
 ```bash
 # 启动和状态
-oryxos init                      # 初始化 .oryxos/ 工作区（幂等）
-oryxos status                    # 查看配置和运行状态
-oryxos chat [--profile <name>]   # 交互式多轮对话（--message "xxx" 发单条后退出）
-oryxos serve [--port 8080]       # 启动 HTTP API 服务（定时任务随 serve/gateway 常驻）
-oryxos gateway                   # 守护进程模式（多 Channel）
+axion init                      # 初始化 .axion/ 工作区（幂等）
+axion status                    # 查看配置和运行状态
+axion chat [--profile <name>]   # 交互式多轮对话（--message "xxx" 发单条后退出）
+axion serve [--port 8080]       # 启动 HTTP API 服务（定时任务随 serve/gateway 常驻）
+axion gateway                   # 守护进程模式（多 Channel）
 
-# Agent 管理（命令组名沿用 profile，操作的是 .oryxos/agents/ 下目录）
-oryxos profile list
-oryxos profile create <name>
-oryxos profile show <name>
-oryxos profile delete <name>
+# Agent 管理（命令组名沿用 profile，操作的是 .axion/agents/ 下目录）
+axion profile list
+axion profile create <name>
+axion profile show <name>
+axion profile delete <name>
 
 # 查询
-oryxos provider list
-oryxos tool list
-oryxos session list
+axion provider list
+axion tool list
+axion session list
 ```
 
 三种模式（chat / serve / gateway）共享同一份 Profile 配置和 Session 存储。
@@ -396,7 +396,7 @@ provider:
 
 | 后端 | 存储 | 特点 |
 |------|------|------|
-| `MarkdownMemoryStore`（默认） | `.oryxos/memory/MEMORY.md` 文件，核心区+归档区 | 零依赖、人可读、git 可跟踪 |
+| `MarkdownMemoryStore`（默认） | `.axion/memory/MEMORY.md` 文件，核心区+归档区 | 零依赖、人可读、git 可跟踪 |
 | `SqliteMemoryStore` | `memory_entries` 表 | 复用已有 SQLite，结构化查询 |
 | `Mem0MemoryStore` | 自托管 Mem0（数据不出域） | 语义检索、自动提炼、冲突消解 |
 
@@ -422,9 +422,9 @@ provider:
 
 | 周次 | 核心任务 | 涉及模块 | 验收 Demo |
 |------|---------|---------|----------|
-| 第一周 | Provider 抽象 + ReAct Loop | `oryxos-core` `oryxos-provider` `oryxos-channel-cli` `oryxos-cli` | `oryxos chat` 多轮对话，Agent 调 HTTP Tool |
-| 第二周 | Memory + Tool 体系 | `oryxos-memory` `oryxos-tool` | Agent 跨对话记偏好；调本地文件和外部 MCP server |
-| 第三周 | Web Service | `oryxos-web` `oryxos-storage` | 10 个 REST 端点完整调用 |
+| 第一周 | Provider 抽象 + ReAct Loop | `axion-core` `axion-provider` `axion-channel-cli` `axion-cli` | `axion chat` 多轮对话，Agent 调 HTTP Tool |
+| 第二周 | Memory + Tool 体系 | `axion-memory` `axion-tool` | Agent 跨对话记偏好；调本地文件和外部 MCP server |
+| 第三周 | Web Service | `axion-web` `axion-storage` | 10 个 REST 端点完整调用 |
 | 第四周 | 多 Agent 演示 + 工程化收尾 | 所有模块 | 多 Agent 并存；Session 跨重启恢复；定时任务到点触发；项目主页可访问 |
 
 ---
@@ -440,7 +440,7 @@ provider:
 | 用 `hibernate.ddl-auto=update` 迁移 SQLite 表结构 | SQLite ALTER TABLE 报错 | 手动维护建表脚本或引入 Flyway |
 | 在 ReAct Loop 里用异步 | 复杂度激增，Virtual Thread 优势消失 | 保持同步阻塞，Virtual Thread 自动处理 IO 等待 |
 | `MEMORY.md` 超过阈值不截断 | 注入 system prompt 超 context window | 核心区永远完整不截断，只截断归档区 |
-| Tool 模块拆成多个 | 模块间依赖混乱 | 内置 Tool + MCP Client + Sandbox + NotifyTools 合并为 `oryxos-tool` |
+| Tool 模块拆成多个 | 模块间依赖混乱 | 内置 Tool + MCP Client + Sandbox + NotifyTools 合并为 `axion-tool` |
 | Sandbox 接口带了实现细节 | 换隔离方案时要改接口+所有调用方 | 接口只表达 `enforce(SandboxAction)`，不出现白名单/容器/VM 字样 |
 | Memory 跟 Session 合并成一个概念 | ReAct 循环要分别问两个地方拿上下文 | `MemoryService` 统一门面收口，内部委托 SessionManager + LongTermMemory |
 | 安装带脚本的 Agent 后忽略信任边界 | 脚本绕过 HTTP 域名白名单直接发网络请求 | `shell` 跑脚本 = 信任 Agent 作者；白名单只管解释器+脚本目录 |
@@ -448,7 +448,7 @@ provider:
 | javadoc 注释里写 `*/` 序列（如 `last_*/run_count`） | 注释被提前终结，编译报「非法字符/找不到符号」且报错行号错位 | 用顿号或空格拆开：`last_*、run_count`（010 实录） |
 | `mvn -pl 单模块` 不带 `-am` | 依赖模块取本地仓库旧 jar → NoClassDefFoundError/找不到符号（新类不可见） | 加 `-am` 或直接跑全 reactor（010 实录） |
 | IDE 自动构建污染 `target/` | 运行时报 `Unresolved compilation problem`（JDT 产物，javac 增量跳过重编译） | `mvn clean` 后重跑（010 实录） |
-| 同模块多个 @SpringBootTest 共用测试工作区 `.oryxos` | 测试类互踩：删除已打开中的 db 文件 Windows 报错、断言被污染 | 每个测试类专属 db 文件（@DynamicPropertySource 覆盖 url）+ agents 目录整体重建（010 实录） |
+| 同模块多个 @SpringBootTest 共用测试工作区 `.axion` | 测试类互踩：删除已打开中的 db 文件 Windows 报错、断言被污染 | 每个测试类专属 db 文件（@DynamicPropertySource 覆盖 url）+ agents 目录整体重建（010 实录） |
 | 前端 `npm ci/build` 报 -4048 | `esbuild.exe` 被残留 vite/杀软进程占用，删不掉装不进 | 先 `Get-Process node` 强杀，再删 node_modules 重装（009/010 实录） |
 | Spring `CronExpression.parse/next` 的 @Nullable 契约不判空 | SpotBugs NP 门禁拦（NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE），verify 红 | 两处显式判空抛 IllegalStateException（010 实录） |
 | `Set.of(集合变量)` 编译报 `Set<List<String>>` 构造不匹配 | `Set.of` 只有元素重载，没有 Collection 重载——传一个 List 参数被解析成单元素泛型 | 集合入参用 `Set.copyOf(collection)`（011 实录） |
@@ -470,4 +470,4 @@ provider:
 - **分阶段克制**：先构建最小完整的运行时内核（五大核心能力）；治理和分布式基础设施在真实使用数据验证后再做
 - **锚在需求上，不锚在概念上**：不锚在"Agent OS 这个词"上，锚在"严监管企业需要一个自己能完全掌控的 Agent 底座"这个不变的刚需上
 - **手写样板，不引 Lombok**（2026-09-05 拍板）：实体手写 getter，不引入 Lombok——收益仅覆盖极少数实体、DTO/值对象已由 record 原生解决；且阿里规约"谨慎使用 Lombok"、SpotBugs/ErrorProne 兼容成本高、实体"无 setter 收口修改路径"是刻意设计
-- **模块即层，子包按领域**（2026-09-05 拍板）：9 模块本身就是 controller/service/dao 分层边界，模块内不再按层分包；子包只按**领域**拆分且仅在类数多的模块（如 oryxos-tool 的 notify/builtin），小模块保持单包 flat
+- **模块即层，子包按领域**（2026-09-05 拍板）：9 模块本身就是 controller/service/dao 分层边界，模块内不再按层分包；子包只按**领域**拆分且仅在类数多的模块（如 axion-tool 的 notify/builtin），小模块保持单包 flat

@@ -1,6 +1,6 @@
 # Contract: AgentScheduler 钟推行为契约
 
-> 本节对外概念 = `AgentScheduler`（技术方案 §8.5 点名，oryxos-core）+ 一处装配改造（003 交付物）。契约测试承载：`AgentSchedulerTest`（四坑 + 两最值钱 + 三元组 + ⑦b）+ `CliAgentConfigurationTest` 增补（⑦a poolSize）。
+> 本节对外概念 = `AgentScheduler`（技术方案 §8.5 点名，axion-core）+ 一处装配改造（003 交付物）。契约测试承载：`AgentSchedulerTest`（四坑 + 两最值钱 + 三元组 + ⑦b）+ `CliAgentConfigurationTest` 增补（⑦a poolSize）。
 
 ## ① 注册契约（registerAll）
 

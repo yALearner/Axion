@@ -1,4 +1,4 @@
-package com.oryxos.storage;
+package com.axion.storage;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

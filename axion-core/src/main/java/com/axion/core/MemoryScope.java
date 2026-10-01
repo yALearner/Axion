@@ -1,4 +1,4 @@
-package com.oryxos.core;
+package com.axion.core;
 
 /**
  * 长期记忆分区（坑十七：写哪区由 Agent 显式声明，系统不猜）。

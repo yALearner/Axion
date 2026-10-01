@@ -1,9 +1,9 @@
-package com.oryxos.web.api;
+package com.axion.web.api;
 
-import com.oryxos.core.AgentService;
-import com.oryxos.core.ProfileRegistry;
-import com.oryxos.core.Session;
-import com.oryxos.core.SessionManager;
+import com.axion.core.AgentService;
+import com.axion.core.ProfileRegistry;
+import com.axion.core.Session;
+import com.axion.core.SessionManager;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;

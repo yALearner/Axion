@@ -1,17 +1,17 @@
-package com.oryxos.tool;
+package com.axion.tool;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-import com.oryxos.core.OryxTool;
-import com.oryxos.tool.builtin.HttpGetTool;
-import com.oryxos.tool.builtin.HttpPostTool;
-import com.oryxos.tool.builtin.ListDirTool;
-import com.oryxos.tool.builtin.NotifyTools;
-import com.oryxos.tool.builtin.ReadFileTool;
-import com.oryxos.tool.builtin.ShellTools;
-import com.oryxos.tool.builtin.WriteFileTool;
-import com.oryxos.tool.notify.NotifyChannelRegistry;
+import com.axion.core.AxionTool;
+import com.axion.tool.builtin.HttpGetTool;
+import com.axion.tool.builtin.HttpPostTool;
+import com.axion.tool.builtin.ListDirTool;
+import com.axion.tool.builtin.NotifyTools;
+import com.axion.tool.builtin.ReadFileTool;
+import com.axion.tool.builtin.ShellTools;
+import com.axion.tool.builtin.WriteFileTool;
+import com.axion.tool.notify.NotifyChannelRegistry;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
@@ -25,19 +25,19 @@ import org.springframework.web.client.RestClient;
  * 坑十二：工具契约三件套参数化测试（课件 §四最值钱测试之一）——遍历 ToolRegistry 每个工具断言 name/description/inputSchema 非空：任何一个工具漏实现
  * getInputSchema()，Provider 翻译 Function Calling 时直接卡死，这里立刻红。新工具自动纳入（注册进下方 registry 即被检查）。
  */
-class OryxToolContractTest {
+class AxionToolContractTest {
 
   @ParameterizedTest(name = "契约三件套：{0}")
   @MethodSource("allRegisteredTools")
   @DisplayName("每个工具的契约三件套都不能缺（坑十二）")
-  void everyToolHasCompleteContract(OryxTool tool) {
+  void everyToolHasCompleteContract(AxionTool tool) {
     assertThat(tool.getName()).isNotBlank();
     assertThat(tool.getDescription()).isNotBlank();
     assertThat(tool.getInputSchema()).isNotNull(); // 缺了它，Provider 翻译 Function Calling 时直接卡死
   }
 
   /** 契约样本注册表：真实工具全部注册——新工具在此注册即自动纳入坑十二检查。 */
-  private static Stream<OryxTool> allRegisteredTools() {
+  private static Stream<AxionTool> allRegisteredTools() {
     Sandbox sandbox = mock(Sandbox.class);
     RestClient restClient = RestClient.builder().build();
     ToolRegistry registry = new ToolRegistry();
@@ -50,7 +50,7 @@ class OryxToolContractTest {
     registry.register(
         new NotifyTools(
             sandbox,
-            Map.of("webhook", mock(com.oryxos.tool.notify.NotifyChannelAdapter.class)),
+            Map.of("webhook", mock(com.axion.tool.notify.NotifyChannelAdapter.class)),
             mock(NotifyChannelRegistry.class)));
     return registry.all().stream();
   }

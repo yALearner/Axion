@@ -1,6 +1,6 @@
 # 系统架构
 
-OryxOS 由 **9 个 Maven 模块**组成，分四层，依赖方向清晰：
+Axion 由 **9 个 Maven 模块**组成，分四层，依赖方向清晰：
 
 ```
 storage ← core ← provider / memory / tool ← channel-cli / web ← cli ← boot
@@ -10,19 +10,19 @@ storage ← core ← provider / memory / tool ← channel-cli / web ← cli ← 
 
 | 模块 | 层次 | 职责 |
 |------|------|------|
-| `oryxos-core` | 内核 | 核心抽象：`ReActLoop`、`PromptBuilder`、`ToolExecutor`、`AgentService`、`AgentScheduler` |
-| `oryxos-storage` | 内核 | SQLite 持久化、`SessionRepository`、`ToolInvocationRepository`、`LlmCallRepository` |
-| `oryxos-provider` | 能力 | `ProviderService`、多 Provider 显式映射、Function Calling 适配 |
-| `oryxos-memory` | 能力 | `MemoryService` 统一门面、`LongTermMemory` 可插拔后端、`MemoryTools` |
-| `oryxos-tool` | 能力 | 9 个内置 Tool、MCP Client、`ToolRegistry`、`Sandbox` 接口、`NotifyTools` |
-| `oryxos-channel-cli` | 通道 | CLI 交互式对话 Channel |
-| `oryxos-web` | 通道 | REST API（10 个端点）、`GlobalExceptionHandler`、OpenAPI 文档 |
-| `oryxos-cli` | 启动 | Picocli 命令行入口（12 个子命令）、`ConfigLoader` |
-| `oryxos-boot` | 启动 | Spring Boot 主类、自动配置、依赖聚合 |
+| `axion-core` | 内核 | 核心抽象：`ReActLoop`、`PromptBuilder`、`ToolExecutor`、`AgentService`、`AgentScheduler` |
+| `axion-storage` | 内核 | SQLite 持久化、`SessionRepository`、`ToolInvocationRepository`、`LlmCallRepository` |
+| `axion-provider` | 能力 | `ProviderService`、多 Provider 显式映射、Function Calling 适配 |
+| `axion-memory` | 能力 | `MemoryService` 统一门面、`LongTermMemory` 可插拔后端、`MemoryTools` |
+| `axion-tool` | 能力 | 9 个内置 Tool、MCP Client、`ToolRegistry`、`Sandbox` 接口、`NotifyTools` |
+| `axion-channel-cli` | 通道 | CLI 交互式对话 Channel |
+| `axion-web` | 通道 | REST API（10 个端点）、`GlobalExceptionHandler`、OpenAPI 文档 |
+| `axion-cli` | 启动 | Picocli 命令行入口（12 个子命令）、`ConfigLoader` |
+| `axion-boot` | 启动 | Spring Boot 主类、自动配置、依赖聚合 |
 
 ## ReAct 循环
 
-核心引擎是 **ReAct Loop**——OryxOS 自己实现，不依赖 Spring AI 的 Agent 抽象：
+核心引擎是 **ReAct Loop**——Axion 自己实现，不依赖 Spring AI 的 Agent 抽象：
 
 ```
 用户消息（从 CLI / HTTP / AgentScheduler 进来）

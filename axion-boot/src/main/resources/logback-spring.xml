@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  OryxOS 结构化日志配置（工程地基，由 java-spring-init skill 生成）。
+  Axion 结构化日志配置（工程地基，由 java-spring-init skill 生成）。
 
   约定（详见 skill references/logging.md）：
   - 默认 / dev / CLI 环境：彩色 console pattern，人类可读
   - 生产（spring.profiles.active=prod）：console 与文件均为 JSON（LogstashEncoder）
-  - JSON 滚动文件 logs/oryxos.jsonl 常开（不区分 profile），供审计采集
+  - JSON 滚动文件 logs/axion.jsonl 常开（不区分 profile），供审计采集
   - MDC 键：traceId（请求链路）、session_id（会话级，由业务写入）
   - 全部日志统一走 SLF4J；禁止 System.out 打日志
 -->
@@ -13,7 +13,7 @@
     <property name="CONSOLE_PATTERN"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%5level) [%thread] %cyan(%logger{36}) - %msg%n"/>
     <property name="LOG_DIR" value="${LOG_DIR:-logs}"/>
-    <property name="APP_NAME" value="oryxos"/>
+    <property name="APP_NAME" value="axion"/>
 
     <!-- JSON 滚动文件：所有 profile 常开 -->
     <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">

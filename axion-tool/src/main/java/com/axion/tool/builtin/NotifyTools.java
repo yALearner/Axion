@@ -1,15 +1,15 @@
-package com.oryxos.tool.builtin;
+package com.axion.tool.builtin;
 
+import com.axion.core.AxionTool;
+import com.axion.core.JsonSchema;
+import com.axion.core.ToolResult;
+import com.axion.tool.ActionType;
+import com.axion.tool.Sandbox;
+import com.axion.tool.SandboxAction;
+import com.axion.tool.notify.NotifyChannelAdapter;
+import com.axion.tool.notify.NotifyChannelRegistry;
+import com.axion.tool.notify.NotifyTarget;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.oryxos.core.JsonSchema;
-import com.oryxos.core.OryxTool;
-import com.oryxos.core.ToolResult;
-import com.oryxos.tool.ActionType;
-import com.oryxos.tool.Sandbox;
-import com.oryxos.tool.SandboxAction;
-import com.oryxos.tool.notify.NotifyChannelAdapter;
-import com.oryxos.tool.notify.NotifyChannelRegistry;
-import com.oryxos.tool.notify.NotifyTarget;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +27,7 @@ import java.util.Map;
  * ToolRegistry（003 FR-10 口径）；不加 {@code @Component} （G4-C1 钉死：Sandbox/Map/Registry bean 均未就位，第 20
  * 节装配处显式 {@code @Bean}）。
  */
-public class NotifyTools implements OryxTool {
+public class NotifyTools implements AxionTool {
 
   private final Sandbox sandbox;
   private final Map<String, NotifyChannelAdapter> adapters;

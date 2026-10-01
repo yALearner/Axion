@@ -31,11 +31,11 @@ Provider、ReAct、CLI、Notify、Tool、Memory、Sandbox 都交付了——Agen
 
 | 编号 | 需求 | 交付物（落位模块） | 来源 |
 |------|------|-------------------|------|
-| FR-1 | **`AgentScheduler`（oryxos-core，无组件注解纯类）**：`registerAll()` 扫 `ProfileRegistry.list()` 的每个 Profile 的 `schedules` 逐条 `taskScheduler.schedule(() -> runOnce(profile, sc), new CronTrigger(cron, zone))` 动态注册——**不用静态 `@Scheduled`**（cron 写死在注解里改一次就要重编译，不符合"配置即 Agent"，坑一）；zone 为空 → 单参 `CronTrigger(cron)` 按系统时区（Profile javadoc 口径「zone 缺省按系统时区」）；**zone 非空先校验**——`ZoneId.of(zone)` 非法抛 ZoneRulesException → 包装成带 profile/zone 的启动报错（⑦b：001 纪律「非法配置不静默」，杜绝 `TimeZone.getTimeZone` 静默回退 GMT 的「到点不触发」）；**`schedule` 返回值存 `Map<String, ScheduledFuture<?>>`**（⑦c 预留：28 节启用停用/扩展阶段重调度的 cancel 句柄，一行纯预留） | `AgentScheduler`（oryxos-core，com.oryxos.core）+ 装配改造（见 FR-5） | 课件 §三 坑一；技术方案 §8.5；⑦b/⑦c |
+| FR-1 | **`AgentScheduler`（axion-core，无组件注解纯类）**：`registerAll()` 扫 `ProfileRegistry.list()` 的每个 Profile 的 `schedules` 逐条 `taskScheduler.schedule(() -> runOnce(profile, sc), new CronTrigger(cron, zone))` 动态注册——**不用静态 `@Scheduled`**（cron 写死在注解里改一次就要重编译，不符合"配置即 Agent"，坑一）；zone 为空 → 单参 `CronTrigger(cron)` 按系统时区（Profile javadoc 口径「zone 缺省按系统时区」）；**zone 非空先校验**——`ZoneId.of(zone)` 非法抛 ZoneRulesException → 包装成带 profile/zone 的启动报错（⑦b：001 纪律「非法配置不静默」，杜绝 `TimeZone.getTimeZone` 静默回退 GMT 的「到点不触发」）；**`schedule` 返回值存 `Map<String, ScheduledFuture<?>>`**（⑦c 预留：28 节启用停用/扩展阶段重调度的 cancel 句柄，一行纯预留） | `AgentScheduler`（axion-core，com.axion.core）+ 装配改造（见 FR-5） | 课件 §三 坑一；技术方案 §8.5；⑦b/⑦c |
 | FR-2 | **`runOnce` 重叠防护（坑二）**：按任务派生 key（`profileName\|cron\|message`，拍板 B）`computeIfAbsent` 每任务一把 `ReentrantLock`；`tryLock` 失败 → log 跳过本次返回（不排队、不并行跑两份）；`finally` 里 `unlock`——成功失败锁必须放掉，否则任务永久"卡住"（课件 §四最值钱之二） | `AgentScheduler.runOnce` | 课件 §三 坑二/§四；技术方案 §8.5 并发控制 |
 | FR-3 | **失败隔离（坑三）**：`runOnce` 内 `catch (Exception e)` → `log.error`（含任务派生 key + 异常栈，**不带 message 内容**——NFR-3 口径）→ 不外抛、调度器不崩、不影响其他任务；审计零新增——`agentService.process` 内部照常落 `llm_calls`/`tool_invocations`（007 FR-7 同款零新增） | `AgentScheduler.runOnce` | 课件 §三 坑三/§四；技术方案 §8.5 失败处理 |
 | FR-4 | **会话身份（宪法 VIII）**：`sessionManager.getOrCreate("scheduler", "scheduler", profileName)`——同一 Profile 历次定时触发复用同一 Session，对话历史自然累积、靠 `max_history_turns` 截断兜底，不为钟推新设任何概念 | `AgentScheduler.runOnce` | 技术方案 §8.5 会话身份；课件 §三 骨架 |
-| FR-5 | **装配（003 交付物改造点）**：`CliAgentConfiguration` 新增 `ThreadPoolTaskScheduler` @Bean（`new` + **`setPoolSize(4)`** + `initialize()`；容器关闭自动 shutdown——ExecutorConfigurationSupport 的 DisposableBean 语义）+ `AgentScheduler` @Bean（构造注入 taskScheduler/ProfileRegistry/SessionManager/AgentService）并在方法体内显式调 `registerAll()`（替代 @PostConstruct，②）；**`setPoolSize(4)` 是 ⑦a 修复**——默认单线程下同步阻塞的长 ReAct 会占住唯一调度线程、跨任务互相拖累（防重叠锁只管同任务，不管跨任务互斥）；池大小 2~4 即可（任务体同步、无需大池）；`ThreadPoolTaskScheduler` 是 CLAUDE.md 陷阱表点名组件，不属于「自建线程池」禁条——任务体 `runOnce` 内部全程同步阻塞（宪法 VII） | `CliAgentConfiguration`（oryxos-cli，003/007 交付物） | 课件 §三 骨架；CLAUDE.md 陷阱表；宪法 VII/VIII；⑦a |
+| FR-5 | **装配（003 交付物改造点）**：`CliAgentConfiguration` 新增 `ThreadPoolTaskScheduler` @Bean（`new` + **`setPoolSize(4)`** + `initialize()`；容器关闭自动 shutdown——ExecutorConfigurationSupport 的 DisposableBean 语义）+ `AgentScheduler` @Bean（构造注入 taskScheduler/ProfileRegistry/SessionManager/AgentService）并在方法体内显式调 `registerAll()`（替代 @PostConstruct，②）；**`setPoolSize(4)` 是 ⑦a 修复**——默认单线程下同步阻塞的长 ReAct 会占住唯一调度线程、跨任务互相拖累（防重叠锁只管同任务，不管跨任务互斥）；池大小 2~4 即可（任务体同步、无需大池）；`ThreadPoolTaskScheduler` 是 CLAUDE.md 陷阱表点名组件，不属于「自建线程池」禁条——任务体 `runOnce` 内部全程同步阻塞（宪法 VII） | `CliAgentConfiguration`（axion-cli，003/007 交付物） | 课件 §三 骨架；CLAUDE.md 陷阱表；宪法 VII/VIII；⑦a |
 | NFR-1 | 任务体全程同步阻塞调 `AgentService.process`，不引入 Reactor/CompletableFuture；调度线程池由 Spring `ThreadPoolTaskScheduler` 承担（宪法 VII + 陷阱表点名组件） | — | 宪法 VII；CLAUDE.md 陷阱表 |
 | NFR-2 | 单任务失败不得拖垮调度器、不得影响其他任务触发（坑三强化）——catch 边界 = runOnce 全方法 | — | 课件 §三 坑三 |
 | NFR-3 | 日志口径（002/005 先例，⑧ 澄清）：日志参数只带任务派生 key 与异常，不拼接任何**运行时用户可控值**（CRLF 口径只管运行时输入——聊天内容/工具参数）；派生 key 含 message 属 AGENT.md frontmatter 运营配置（Agent 作者可控、非运行时输入），随 key 进日志可接受 | — | 002 NFR 口径延续；⑧ |
@@ -43,7 +43,7 @@ Provider、ReAct、CLI、Notify、Tool、Memory、Sandbox 都交付了——Agen
 ### 核心代码骨架（课件 25 节骨架一致，形态机械适配：无组件注解 + 派生锁 key + 装配处注册）
 
 ```java
-// oryxos-core：com.oryxos.core —— 钟推入口（G4-C1 无组件注解，装配处显式 @Bean 并调 registerAll）
+// axion-core：com.axion.core —— 钟推入口（G4-C1 无组件注解，装配处显式 @Bean 并调 registerAll）
 public class AgentScheduler {
 
   private static final Logger LOG = LoggerFactory.getLogger(AgentScheduler.class);
@@ -109,9 +109,9 @@ public class AgentScheduler {
 }
 ```
 
-### 本节交付物清单（Spec-Kit 拆解锚点 / oryx-spec 交付清单比对基准）
+### 本节交付物清单（Spec-Kit 拆解锚点 / axion-spec 交付清单比对基准）
 
-- **代码**：`AgentScheduler`（oryxos-core）
+- **代码**：`AgentScheduler`（axion-core）
 - **测试**：`AgentSchedulerTest`（core，四坑 harness + 两个最值钱 + 会话身份）；`CliAgentConfigurationTest` 增补（AgentScheduler bean 存在 + registerAll 无异常装配断言）
 - **表**：无新增（scheduled_tasks/task_executions 归 28 节）
 - **配置**：无新配置键（`schedules` 字段 002/003 已交付；AGENT.md frontmatter 三键 cron/zone/message 已定）

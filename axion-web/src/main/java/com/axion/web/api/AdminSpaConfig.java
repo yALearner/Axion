@@ -1,4 +1,4 @@
-package com.oryxos.web.api;
+package com.axion.web.api;
 
 import java.io.IOException;
 import org.springframework.context.annotation.Configuration;

@@ -1,9 +1,9 @@
-package com.oryxos.web.api;
+package com.axion.web.api;
 
 import java.time.Instant;
 
 /**
- * 统一响应信封（OryxOS Web Service API 约定，见 CLAUDE.md「Web Service API」）。
+ * 统一响应信封（Axion Web Service API 约定，见 CLAUDE.md「Web Service API」）。
  *
  * <p>code 约定：{@code 0} 表示成功；非 0 为错误码，与 HTTP 状态码一致 （400 / 404 / 500 / 503），见 {@link ErrorCode}。
  *

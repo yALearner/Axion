@@ -1,14 +1,14 @@
-package com.oryxos.tool.builtin;
+package com.axion.tool.builtin;
 
+import com.axion.core.AxionTool;
+import com.axion.core.JsonSchema;
+import com.axion.core.Profile;
+import com.axion.core.ProfileContext;
+import com.axion.core.ToolResult;
+import com.axion.tool.ActionType;
+import com.axion.tool.Sandbox;
+import com.axion.tool.SandboxAction;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.oryxos.core.JsonSchema;
-import com.oryxos.core.OryxTool;
-import com.oryxos.core.Profile;
-import com.oryxos.core.ProfileContext;
-import com.oryxos.core.ToolResult;
-import com.oryxos.tool.ActionType;
-import com.oryxos.tool.Sandbox;
-import com.oryxos.tool.SandboxAction;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  * Git Bash 的 bash（PowerShell 终端 bash 不在 PATH 的实测修复，2026-09-05）；全部解析失败时保持 "bash" 并由 ProcessBuilder
  * 给出清晰报错。纯类交付无组件注解（G4-C1）。审计复用 ToolExecutor 既有路径。
  */
-public class ShellTools implements OryxTool {
+public class ShellTools implements AxionTool {
 
   private static final List<String> STANDARD_GIT_BASH =
       List.of(

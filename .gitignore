@@ -19,8 +19,8 @@ website/.vitepress/cache/
 .DS_Store
 Thumbs.db
 
-# OryxOS runtime
-.oryxos/
+# Axion runtime
+.axion/
 
 # App logs (JSON structured)
 logs/

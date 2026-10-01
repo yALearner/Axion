@@ -1,17 +1,17 @@
 # ============================================================
-# OryxOS — Agent OS 统一底座
+# Axion — Agent OS 统一底座
 # ============================================================
 # 核心阶段最小配置。Provider API key 等敏感配置通过环境变量注入。
 
 spring:
   application:
-    name: oryxos
+    name: axion
   threads:
     virtual:
       enabled: true
 
   # 宪法 II：禁用 Spring AI 的 eager 模型自动装配。deepseek 走 spring-ai-openai starter，OpenAi*AutoConfiguration
-  # 会急切实例化 ChatModel 并索要 spring.ai.openai.api-key——OryxOS 不用这些自动 Bean（Provider 由
+  # 会急切实例化 ChatModel 并索要 spring.ai.openai.api-key——Axion 不用这些自动 Bean（Provider 由
   # ProviderChatModelFactory 按宪法 III 显式构造）；不排除则 serve 逼运营方配两个 key、卡死 31 节干净部署。
   # H3 核实（009）：spring-ai 1.1.8 的类名是 org.springframework.ai.model.openai.autoconfigure.*
   # （课件旧写法 org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration 已过时）。
@@ -27,7 +27,7 @@ spring:
 
   # SQLite 数据源
   datasource:
-    url: jdbc:sqlite:.oryxos/oryxos.db
+    url: jdbc:sqlite:.axion/axion.db
     driver-class-name: org.sqlite.JDBC
 
   # JPA（SQLite 下禁用自动 DDL，手动维护建表脚本）
@@ -55,7 +55,7 @@ spring:
 # 全局层 Provider 声明（核心能力一）：这个实例接了哪些模型服务——"连不连得上"。
 # Agent 层在 AGENT.md frontmatter 的 provider.name 里引用这里的 name（"怎么用"）。
 # 凭证只允许 ${ENV_VAR} 占位；缺失或非法时启动校验报错，不静默失败。
-oryxos:
+axion:
   providers:
     - name: deepseek
       api-key: ${DEEPSEEK_API_KEY}
@@ -86,7 +86,7 @@ oryxos:
 # Agent 自有资源读取走 FILE_READ 动态白名单（当前 Agent 目录，运行时生效，非配置键）。
 file:
   allowed_paths:
-    - .oryxos/workspace
+    - .axion/workspace
     - /data/reports
 shell:
   allowed_commands:
@@ -109,7 +109,7 @@ http:
 # 日志
 logging:
   level:
-    com.oryxos: INFO
+    com.axion: INFO
 
 # 监控（Actuator + Prometheus）
 # Web Service（009-web-service FR-3）：HTTP 服务端口
@@ -127,4 +127,4 @@ management:
         enabled: true
   metrics:
     tags:
-      application: oryxos
+      application: axion

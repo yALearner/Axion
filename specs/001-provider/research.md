@@ -8,20 +8,20 @@
 > ③ **关闭自动执行的确切写法**：`ToolCallingChatOptions.setInternalToolExecutionEnabled(false)`（1.1.8 中该开关存在于 `org.springframework.ai.model.tool.ToolCallingChatOptions`，回归测试以 ArgumentCaptor 断言此值为 false）
 > ④ 工具翻译形态：适配器产出 `ToolDefinition`（`name()`/`description()`/`inputSchema()` String），经 `ToolCallbacks` 挂上请求；`ToolCallingManager.executeToolCalls` 是自动执行入口——**本模块不调用它**
 
-- **Decision**: 实施第一步先跑 `mvn dependency:tree`（oryxos-provider 模块）核实：① `ChatModel.call(...)` 在锁定版本中的签名与返回值结构；② 请求构造中关闭自动 tool 执行的确切写法（选项/标志名随版本变）；③ 目标 Provider（DeepSeek/Kimi）的 starter 依赖在 spring-ai-bom 1.1.8 中是否存在、能解析下载。核实结果写入任务日志后再动手写代码。
+- **Decision**: 实施第一步先跑 `mvn dependency:tree`（axion-provider 模块）核实：① `ChatModel.call(...)` 在锁定版本中的签名与返回值结构；② 请求构造中关闭自动 tool 执行的确切写法（选项/标志名随版本变）；③ 目标 Provider（DeepSeek/Kimi）的 starter 依赖在 spring-ai-bom 1.1.8 中是否存在、能解析下载。核实结果写入任务日志后再动手写代码。
 - **Rationale**: 技术方案 §1.1 决策四明确要求"研发前对当前版本核实"；课件第 16 节坑三记录过真实事故——某些 milestone BOM 未必包含每一家的独立 starter。
 - **Alternatives considered**: 照教程示例直接写 → 被否决（违反写前 H3 门禁，可能引入不存在的 API 或依赖）。
 
 ## R2: llm_calls 手工建表方案
 
-- **Decision**: `schema.sql` 手工建表脚本放 `oryxos-storage/src/main/resources/`，含 `success`/`error_message` 两列（对需求文档 §10 的已批准补充修订）；测试 `LlmCallRepositoryTest` 显式执行同一份 `schema.sql` 建表，不让 Hibernate 自动建。
+- **Decision**: `schema.sql` 手工建表脚本放 `axion-storage/src/main/resources/`，含 `success`/`error_message` 两列（对需求文档 §10 的已批准补充修订）；测试 `LlmCallRepositoryTest` 显式执行同一份 `schema.sql` 建表，不让 Hibernate 自动建。
 - **Rationale**: SQLite 的 ALTER TABLE 支持弱，`hibernate.ddl-auto=update` 不可依赖（技术方案 §9.2 工程风险提示）；测试与生产走同一份脚本，防止"测试绿了、生产列名对不上"。
 - **Alternatives considered**: 依赖 ddl-auto 自动建表 → 被否决（宪法技术约束）；引入 Flyway → 核心阶段不引入额外组件，后续表结构演进时再评估。
 
-## R3: Function Calling 翻译方案（OryxTool → Spring AI 工具格式）
+## R3: Function Calling 翻译方案（AxionTool → Spring AI 工具格式）
 
-- **Decision**: 适配器读取 `OryxTool.getInputSchema()`（JsonSchema 形态），映射为 Spring AI 锁定版本的工具描述对象；翻译产物只含 schema 说明，不含执行逻辑；模型返回的 toolCall 请求原样透传。
-- **Rationale**: Spring AI 已做各家协议转换，OryxOS 只复用格式转换（宪法 II）；"只翻译不执行"是本节最容易埋 bug 的边界，有回归测试钉死。
+- **Decision**: 适配器读取 `AxionTool.getInputSchema()`（JsonSchema 形态），映射为 Spring AI 锁定版本的工具描述对象；翻译产物只含 schema 说明，不含执行逻辑；模型返回的 toolCall 请求原样透传。
+- **Rationale**: Spring AI 已做各家协议转换，Axion 只复用格式转换（宪法 II）；"只翻译不执行"是本节最容易埋 bug 的边界，有回归测试钉死。
 - **Alternatives considered**: 自行实现各家协议格式 → 被否决（重复造轮子，违背复用决策）。
 
 ## R4: 审计字段补充（success / error_message）

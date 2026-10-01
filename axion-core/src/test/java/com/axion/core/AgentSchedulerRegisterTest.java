@@ -1,4 +1,4 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.oryxos.storage.ScheduledTaskStore;
+import com.axion.storage.ScheduledTaskStore;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.ScheduledFuture;
@@ -79,8 +79,8 @@ class AgentSchedulerRegisterTest {
     scheduler.registerProfile(profile);
 
     assertThat(scheduler.scheduledTaskCount()).isEqualTo(2); // ⑦c 句柄已登记
-    ArgumentCaptor<com.oryxos.storage.ScheduledTaskView> captor =
-        ArgumentCaptor.forClass(com.oryxos.storage.ScheduledTaskView.class);
+    ArgumentCaptor<com.axion.storage.ScheduledTaskView> captor =
+        ArgumentCaptor.forClass(com.axion.storage.ScheduledTaskView.class);
     verify(store, org.mockito.Mockito.times(2)).register(captor.capture(), any());
     assertThat(captor.getAllValues().get(0).taskId()).isEqualTo("morning");
     assertThat(captor.getAllValues().get(0).profileName()).isEqualTo("daily-reconcile");

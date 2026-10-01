@@ -1,4 +1,4 @@
-package com.oryxos.memory;
+package com.axion.memory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -6,13 +6,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.axion.core.LongTermMemoryStore;
+import com.axion.core.MemoryScope;
+import com.axion.core.Message;
+import com.axion.core.Session;
+import com.axion.core.SessionManager;
+import com.axion.storage.SessionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.core.LongTermMemoryStore;
-import com.oryxos.core.MemoryScope;
-import com.oryxos.core.Message;
-import com.oryxos.core.Session;
-import com.oryxos.core.SessionManager;
-import com.oryxos.storage.SessionRepository;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

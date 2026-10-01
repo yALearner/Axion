@@ -1,4 +1,4 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -6,10 +6,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.axion.storage.ToolInvocation;
+import com.axion.storage.ToolInvocationRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.storage.ToolInvocation;
-import com.oryxos.storage.ToolInvocationRepository;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ class ToolExecutorTest {
   private final ToolInvocationRepository audit = mock(ToolInvocationRepository.class);
   private final ObjectMapper mapper = new ObjectMapper();
 
-  private final OryxTool httpGet = mock(OryxTool.class);
+  private final AxionTool httpGet = mock(AxionTool.class);
 
   private ToolExecutor executor() {
     return new ToolExecutor(Map.of("http_get", httpGet), audit, mapper);

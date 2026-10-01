@@ -1,11 +1,11 @@
-package com.oryxos.tool.mcp;
+package com.axion.tool.mcp;
 
+import com.axion.core.AxionTool;
+import com.axion.core.JsonSchema;
+import com.axion.core.ToolResult;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.core.JsonSchema;
-import com.oryxos.core.OryxTool;
-import com.oryxos.core.ToolResult;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * MCP 工具适配器（FR-5）：把 MCP server 暴露的工具包装成 {@link OryxTool}——getName/getDescription/getInputSchema 映射
+ * MCP 工具适配器（FR-5）：把 MCP server 暴露的工具包装成 {@link AxionTool}——getName/getDescription/getInputSchema 映射
  * {@code tools/list} 返回；execute 经 JSON-RPC（sync 门面）原样转发参数、结果包 {@link ToolResult} （失败 {@code
  * retryable=true}，重试与否由 LLM 下一轮判断）。纯类交付无组件注解（G4-C1）。
  */
-public class McpToolAdapter implements OryxTool {
+public class McpToolAdapter implements AxionTool {
 
   private final McpSyncClient client;
   private final McpSchema.Tool spec;

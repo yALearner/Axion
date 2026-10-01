@@ -1,11 +1,11 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import java.util.List;
 
 /**
  * 一次对话消息——供 Provider 调用与后续 ReAct 循环复用。
  *
- * <p>core 保持框架无关：工具调用请求/结果用轻量嵌套类型承载， 与 Spring AI 消息格式的转换在 oryxos-provider 适配层完成。
+ * <p>core 保持框架无关：工具调用请求/结果用轻量嵌套类型承载， 与 Spring AI 消息格式的转换在 axion-provider 适配层完成。
  */
 public record Message(
     MessageRole role,

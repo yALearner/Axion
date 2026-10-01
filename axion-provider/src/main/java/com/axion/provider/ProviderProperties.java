@@ -1,7 +1,7 @@
-package com.oryxos.provider;
+package com.axion.provider;
 
 /**
- * 全局层 Provider 声明（application.yaml 的 {@code oryxos.providers} 列表项）。
+ * 全局层 Provider 声明（application.yaml 的 {@code axion.providers} 列表项）。
  *
  * <p>由 {@code ProviderConfiguration} 通过 Spring Boot Binder 绑定为列表； 每个实例解决"连不连得上"：接的是谁、凭证从哪个环境变量来。
  */

@@ -1,4 +1,4 @@
-package com.oryxos.provider;
+package com.axion.provider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -9,9 +9,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.oryxos.core.Profile;
-import com.oryxos.storage.LlmCall;
-import com.oryxos.storage.LlmCallRepository;
+import com.axion.core.Profile;
+import com.axion.storage.LlmCall;
+import com.axion.storage.LlmCallRepository;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;

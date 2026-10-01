@@ -1,12 +1,12 @@
-package com.oryxos.tool.builtin;
+package com.axion.tool.builtin;
 
+import com.axion.core.AxionTool;
+import com.axion.core.JsonSchema;
+import com.axion.core.ToolResult;
+import com.axion.tool.ActionType;
+import com.axion.tool.Sandbox;
+import com.axion.tool.SandboxAction;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.oryxos.core.JsonSchema;
-import com.oryxos.core.OryxTool;
-import com.oryxos.core.ToolResult;
-import com.oryxos.tool.ActionType;
-import com.oryxos.tool.Sandbox;
-import com.oryxos.tool.SandboxAction;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.net.URI;
 import java.util.List;
@@ -17,7 +17,7 @@ import org.springframework.web.client.RestClient;
  * 内置 Tool {@code http_get}（FR-4）：发起 HTTP GET 请求——execute 首行 {@code sandbox.enforce(HTTP_REQUEST,
  * url)} 先于请求（坑十）；响应体上限 1MB（超限明确报错）；4xx/5xx 异常 上抛（坑十一口径）。域名白名单规则本体归 23/24 节。纯类交付无组件注解（G4-C1）。
  */
-public class HttpGetTool implements OryxTool {
+public class HttpGetTool implements AxionTool {
 
   static final int MAX_RESPONSE_BYTES = 1_048_576; // 1MB 上限（参数规格表）
 

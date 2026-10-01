@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
 
-// oryxos-admin-ui skill 工程约定：base '/admin/' + 产物落 static/admin（Spring 托管在 /admin 子路径）
+// axion-admin-ui skill 工程约定：base '/admin/' + 产物落 static/admin（Spring 托管在 /admin 子路径）
 export default defineConfig({
   base: '/admin/',
   plugins: [vue()],

@@ -1,12 +1,12 @@
-package com.oryxos.tool.builtin;
+package com.axion.tool.builtin;
 
+import com.axion.core.AxionTool;
+import com.axion.core.JsonSchema;
+import com.axion.core.ToolResult;
+import com.axion.tool.ActionType;
+import com.axion.tool.Sandbox;
+import com.axion.tool.SandboxAction;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.oryxos.core.JsonSchema;
-import com.oryxos.core.OryxTool;
-import com.oryxos.core.ToolResult;
-import com.oryxos.tool.ActionType;
-import com.oryxos.tool.Sandbox;
-import com.oryxos.tool.SandboxAction;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -20,7 +20,7 @@ import java.util.Map;
  *
  * <p>纯类交付无组件注解（G4-C1），装配处显式 {@code @Bean}；审计复用 ToolExecutor 既有路径。
  */
-public class ReadFileTool implements OryxTool {
+public class ReadFileTool implements AxionTool {
 
   private final Sandbox sandbox;
 

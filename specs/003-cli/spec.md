@@ -16,11 +16,11 @@
 
 **Why this priority**: 这是本节存在的意义（课件 §五：到这一步才能"在终端里真正跟自己搭的 Agent 说上话"）；chat 是三种运行模式里第一个落地的，也是 Demo 一对话版的入口。init（工作区）+ 装配（把 002 组件接成可运行整体）是它的前置，一并构成 MVP。
 
-**Independent Test**: 全 mock 单测验证 chat 循环行为（读输入→转交引擎→打印、`/quit` 退出、`--profile` 缺省值、`--message` 单条退出）；人工部分真跑 `oryxos init` → `oryxos chat` 多轮对话。不依赖第 20 节工具（无工具时纯聊天即可验证循环）。
+**Independent Test**: 全 mock 单测验证 chat 循环行为（读输入→转交引擎→打印、`/quit` 退出、`--profile` 缺省值、`--message` 单条退出）；人工部分真跑 `axion init` → `axion chat` 多轮对话。不依赖第 20 节工具（无工具时纯聊天即可验证循环）。
 
 **Acceptance Scenarios**:
 
-1. **Given** 一个已初始化的 OryxOS 工程且注册了至少一个 Agent，**When** 用户执行 chat 进入交互，**Then** 每行输入都转交给引擎处理并把最终答复打印回终端
+1. **Given** 一个已初始化的 Axion 工程且注册了至少一个 Agent，**When** 用户执行 chat 进入交互，**Then** 每行输入都转交给引擎处理并把最终答复打印回终端
 2. **Given** 用户在交互中输入 `/quit`，**When** 该行被读到，**Then** 循环退出、命令正常结束
 3. **Given** 用户未指定 `--profile`，**When** 启动 chat，**Then** 使用名为 default 的 Agent；指定 `--profile weather` 时使用 weather
 4. **Given** 用户带 `--message "xxx"` 启动 chat，**When** 引擎返回答复，**Then** 打印答复后立即退出（不进入交互循环）
@@ -89,7 +89,7 @@
 
 **Acceptance Scenarios**:
 
-1. **Given** 执行 `oryxos --help` 与各子命令 `--help`，**When** 查看输出，**Then** 12 个子命令全部列出且帮助信息可用
+1. **Given** 执行 `axion --help` 与各子命令 `--help`，**When** 查看输出，**Then** 12 个子命令全部列出且帮助信息可用
 2. **Given** 执行 serve 或 gateway，**When** 启动完成，**Then** 输出"Web Service 归第 26 节"的占位提示（本课不实现其本体）
 3. **Given** chat 与 session list 共用存储，**When** chat 对话后执行 session list，**Then** 能看到该会话——运行模式之间共享同一份会话数据
 

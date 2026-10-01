@@ -1,4 +1,4 @@
-package com.oryxos.web.api;
+package com.axion.web.api;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -34,7 +34,7 @@ class GlobalExceptionHandlerTest {
         case "provider" -> throw new ProviderUnavailableException("provider down");
         case "timeout" -> throw new AgentTimeoutException("too slow");
         case "illegal" ->
-            throw new IllegalStateException("jdbc:sqlite:/data/oryxos.db connect failed");
+            throw new IllegalStateException("jdbc:sqlite:/data/axion.db connect failed");
         default -> throw new RuntimeException("other");
       }
     }

@@ -16,7 +16,7 @@
 
 **Primary Dependencies**: 零新增——SnakeYAML（AgentLoader frontmatter 解析，既有）、JUnit 5 + Mockito + AssertJ（既有）、ThreadPoolTaskScheduler（既有）、Spring Boot ConfigurationProperties（ShellSandboxProperties 增字段）
 
-**Storage**: 无新表——SQLite 六表（sessions/tool_invocations/llm_calls/notify_channels/scheduled_tasks/task_executions）原样；示例 Agent 与技能实体是文件系统资源（测试 resources + 运行时 `.oryxos/` 工作区）
+**Storage**: 无新表——SQLite 六表（sessions/tool_invocations/llm_calls/notify_channels/scheduled_tasks/task_executions）原样；示例 Agent 与技能实体是文件系统资源（测试 resources + 运行时 `.axion/` 工作区）
 
 **Testing**: JUnit 5 + Mockito + AssertJ（既有）；临时目录 fixture + 程序建软连接/junction（ContextLoaderTest 既有模式）；真实 ThreadPoolTaskScheduler + mock store（AgentSchedulerTest 既有模式）；六 harness 测试类 + WhitelistSandboxTest 扩展
 
@@ -28,7 +28,7 @@
 
 **Constraints**: 全程同步阻塞（宪法 VII）；底座零重写（只改 Profile 来源）；正文即时生效（无缓存）；解释器命令简单形态（坑九 + 脚本参数透传）；信任边界诚实标注；不新增配置键之外的对外概念；不改 9 模块结构
 
-**Scale/Scope**: 单实例；Agent 数 = `.oryxos/agents/` 子目录数（个位~几十）；每轮 prompt 组装多读 1 个 AGENT.md 文件；无新性能风险
+**Scale/Scope**: 单实例；Agent 数 = `.axion/agents/` 子目录数（个位~几十）；每轮 prompt 组装多读 1 个 AGENT.md 文件；无新性能风险
 
 ## Constitution Check
 
@@ -44,7 +44,7 @@
 | VI | 无 SecurityManager | Sandbox 接口 `enforce(SandboxAction)` 零改动；WhitelistSandbox 内部演进（workspaceRoot + 解释器双白名单 + FILE_READ 动态根） | ✅ |
 | VII | 同步执行模型 | 全程同步；无 Reactor/CompletableFuture 新增 | ✅ |
 | VIII | 三种触发源共用一个引擎 | schedules 从 Agent 目录 frontmatter 派生进 Profile → AgentScheduler 照旧注册（008 零改动）；到点走同一 process | ✅ |
-| IX | Tool 模块三合一 | AgentLoader/ContextLoader 在 core（Agent 目录不是 Tool）；沙箱改造在 oryxos-tool 内；不新增模块 | ✅ |
+| IX | Tool 模块三合一 | AgentLoader/ContextLoader 在 core（Agent 目录不是 Tool）；沙箱改造在 axion-tool 内；不新增模块 | ✅ |
 
 ## Project Structure
 
@@ -68,33 +68,33 @@ specs/011-plugin-agent/
 ### Source Code (repository root)
 
 ```text
-oryxos-core/src/main/java/com/oryxos/core/
+axion-core/src/main/java/com/axion/core/
 ├── AgentLoader.java        # ProfileLoader 更名 + 扩职责（split/loadBody/detectResources/deriveProfile/loadAll）
 ├── ContextLoader.java      # 正文注入 + 绑定路径元数据（002 演进）
 ├── ProfileRegistry.java    # 补 remove/exists（001 演进）
 └── AgentScheduler.java     # 抽 registerProfile（008/010 演进）
-oryxos-core/src/test/java/com/oryxos/core/
+axion-core/src/test/java/com/axion/core/
 ├── AgentLoaderTest.java    # ProfileLoaderTest 更名扩展
 ├── DeriveProfileTest.java
 ├── AgentScanRegisterTest.java
 ├── ProfileRegistryRuntimeTest.java
 └── AgentSchedulerRegisterTest.java
-oryxos-core/src/test/resources/
+axion-core/src/test/resources/
 ├── agents/daily-reconcile/   # 示例 Agent 四文件（AGENT.md/REFERENCE.md/scripts/skills 绑定）
 └── skills/report-format/     # 公共技能实体 SKILL.md
-oryxos-tool/src/main/java/com/oryxos/tool/
+axion-tool/src/main/java/com/axion/tool/
 ├── WhitelistSandbox.java     # workspaceRoot + 解释器双白名单 + FILE_READ 动态根（007 演进）
 ├── ShellSandboxProperties.java  # 增 allowedInterpreters 字段
 └── builtin/ShellTools.java   # 增解释器集合 + workspaceRoot + cwd=Agent 目录（005 演进）
-oryxos-tool/src/test/java/com/oryxos/tool/
+axion-tool/src/test/java/com/axion/tool/
 ├── WhitelistSandboxTest.java        # 双白名单/子集 WARN + FILE_READ 动态根（坑七）扩展
 ├── ShellToolsTest.java              # 解释器 cwd 回归（坑六，既有类扩展）
 └── ProgressiveDisclosureTest.java   # S5 F1 修正落位：正文/绑定路径/渐进披露守点（tool→core 依赖方向合法，消费 core 类 + tool 沙箱类）
-oryxos-cli/src/main/java/com/oryxos/cli/CliAgentConfiguration.java   # 装配适配
-oryxos-boot/src/main/resources/application.yaml                      # allowed_commands 增补 + allowed_interpreters 新键
+axion-cli/src/main/java/com/axion/cli/CliAgentConfiguration.java   # 装配适配
+axion-boot/src/main/resources/application.yaml                      # allowed_commands 增补 + allowed_interpreters 新键
 ```
 
-**Structure Decision**: 不新增模块/目录结构——全部改动落在既有 9 模块的既有包内（core 四类、tool 三类 + 三测试、cli 装配、boot 配置）；示例 Agent 与技能实体落 oryxos-core 测试资源（git 可提交；junction 无法提交，绑定由测试程序创建，ContextLoaderTest 既有模式）。ProgressiveDisclosureTest 落 oryxos-tool 测试（S5 F1 修正：内容需 WhitelistSandbox/ShellTools，core 不得反向依赖 tool）。
+**Structure Decision**: 不新增模块/目录结构——全部改动落在既有 9 模块的既有包内（core 四类、tool 三类 + 三测试、cli 装配、boot 配置）；示例 Agent 与技能实体落 axion-core 测试资源（git 可提交；junction 无法提交，绑定由测试程序创建，ContextLoaderTest 既有模式）。ProgressiveDisclosureTest 落 axion-tool 测试（S5 F1 修正：内容需 WhitelistSandbox/ShellTools，core 不得反向依赖 tool）。
 
 ## Complexity Tracking
 

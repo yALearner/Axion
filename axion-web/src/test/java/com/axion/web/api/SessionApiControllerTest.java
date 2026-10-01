@@ -1,4 +1,4 @@
-package com.oryxos.web.api;
+package com.axion.web.api;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,10 +10,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.axion.core.AgentService;
+import com.axion.core.Session;
+import com.axion.core.SessionManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.core.AgentService;
-import com.oryxos.core.Session;
-import com.oryxos.core.SessionManager;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
  * SessionApiController 验收 harness（课件 §四）——standalone MockMvc 只起 MVC 层、mock
- * AgentService/SessionManager，不碰模型不碰库 （oryxos-web 无主类，standalone 模式直接装配 Controller + 真实
+ * AgentService/SessionManager，不碰模型不碰库 （axion-web 无主类，standalone 模式直接装配 Controller + 真实
  * GlobalExceptionHandler，语义与 @WebMvcTest 切片等价）。 覆盖：超 32KB → 400；Session 不存在 → 404；正常请求
  * agentService.process 恰被调一次（薄 Controller 机器证据）。
  */

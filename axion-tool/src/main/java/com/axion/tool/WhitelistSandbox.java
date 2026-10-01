@@ -1,7 +1,7 @@
-package com.oryxos.tool;
+package com.axion.tool;
 
-import com.oryxos.core.Profile;
-import com.oryxos.core.ProfileContext;
+import com.axion.core.Profile;
+import com.axion.core.ProfileContext;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * </ul>
  *
  * <p>011-plugin-agent 演进：FILE_READ 动态白名单 = 静态白名单 ∪ 当前 Agent 目录（坑七：渐进式披露断链防线，未绑定实体路径在 {@code
- * .oryxos/skills/} 下、不在 Agent 目录下，天然不可读）；解释器命令 L3 校验——双白名单命中后按简单形态钉死（坑九： "解释器 + 单个 scripts/
+ * .axion/skills/} 下、不在 Agent 目录下，天然不可读）；解释器命令 L3 校验——双白名单命中后按简单形态钉死（坑九： "解释器 + 单个 scripts/
  * 下相对路径参数（+ 可选脚本参数）"，链式/引号/元字符/脚本路径前选项一律拒绝；无 Agent 上下文 fail-closed， 修订说明 ⑥）。FILE_WRITE
  * 不动（最小权限：Agent 不需要写自己的目录）。
  *

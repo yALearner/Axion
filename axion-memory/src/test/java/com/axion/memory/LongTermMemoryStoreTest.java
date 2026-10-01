@@ -1,11 +1,11 @@
-package com.oryxos.memory;
+package com.axion.memory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.axion.core.LongTermMemoryStore;
+import com.axion.core.MemoryScope;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.core.LongTermMemoryStore;
-import com.oryxos.core.MemoryScope;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;

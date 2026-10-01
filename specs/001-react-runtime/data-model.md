@@ -4,7 +4,7 @@
 
 ## 1. Profile（运行时配置对象）
 
-派生自 `.oryxos/agents/<name>/AGENT.md` frontmatter（`AgentLoader.deriveProfile`）。
+派生自 `.axion/agents/<name>/AGENT.md` frontmatter（`AgentLoader.deriveProfile`）。
 
 | 字段 | 类型 | 必填 | 说明 / 校验规则 |
 |------|------|------|----------------|
@@ -51,9 +51,9 @@ PromptBuilder 负责转换为 Spring AI 消息类型（仅 provider 调用层接
 
 `Map<String, ProviderSpec>`；`ProviderSpec` = {`name`, `baseUrl`（可选，OpenAI 兼容端点）, `apiKeyEnvVar`（`${VAR}` 占位，加载时解析）, 默认 `model`}。ProviderService 按 `provider.name` 取 ChatModel 实例（宪法原则三：不扫描容器 Bean 类型）。本里程碑注册 DeepSeek 或 Kimi 至少一个（FR-006）。
 
-## 4. OryxTool / ToolResult（统一 Tool 抽象，core 定义）
+## 4. AxionTool / ToolResult（统一 Tool 抽象，core 定义）
 
-| OryxTool | 说明 |
+| AxionTool | 说明 |
 |----------|------|
 | `getName(): String` | Tool 名（Function Calling 中的 name） |
 | `getDescription(): String` | 描述（注入 Tool 列表） |
@@ -102,7 +102,7 @@ PromptBuilder 负责转换为 Spring AI 消息类型（仅 provider 调用层接
 - 审计写入失败：记错误日志，不阻断对话主流程
 - 建表走手动 `schema.sql`（`CREATE TABLE IF NOT EXISTS`，幂等），不依赖 `hibernate.ddl-auto`
 
-## 6. 全局配置（`.oryxos/config.yaml`，Clarification Q2 引入）
+## 6. 全局配置（`.axion/config.yaml`，Clarification Q2 引入）
 
 ```yaml
 sandbox:

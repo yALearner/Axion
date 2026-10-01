@@ -1,11 +1,11 @@
-package com.oryxos.memory;
+package com.axion.memory;
 
+import com.axion.core.AxionTool;
+import com.axion.core.JsonSchema;
+import com.axion.core.MemoryScope;
+import com.axion.core.MemoryService;
+import com.axion.core.ToolResult;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.oryxos.core.JsonSchema;
-import com.oryxos.core.MemoryScope;
-import com.oryxos.core.MemoryService;
-import com.oryxos.core.OryxTool;
-import com.oryxos.core.ToolResult;
 import java.util.List;
 import java.util.Map;
 
@@ -13,10 +13,10 @@ import java.util.Map;
  * 内置 Tool {@code save_memory}（FR-7）：把一条长期记忆写入指定分区。scope 可选（core/archival，缺省 archival——坑十七：写哪区由
  * Agent 显式判断、工具层不猜）；非法值明确报错；成功返回"已记住"。
  *
- * <p>只依赖 {@link MemoryService} 接口（接口墙）；implements OryxTool 纯实现（005 机械适配：手写 JsonSchema、
+ * <p>只依赖 {@link MemoryService} 接口（接口墙）；implements AxionTool 纯实现（005 机械适配：手写 JsonSchema、
  * 无组件注解）；写入失败异常上抛由 ToolExecutor 审计 success=false（不静默"已记住"）。
  */
-public class SaveMemoryTool implements OryxTool {
+public class SaveMemoryTool implements AxionTool {
 
   private final MemoryService memoryService;
 

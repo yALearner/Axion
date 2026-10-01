@@ -1,4 +1,4 @@
-package com.oryxos.cli;
+package com.axion.cli;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,12 +14,12 @@ public class StatusCommand implements Runnable {
 
   @Override
   public void run() {
-    Path workspace = Path.of(".oryxos");
+    Path workspace = Path.of(".axion");
     System.out.println(
         "工作区: "
             + (Files.isDirectory(workspace)
                 ? "已初始化 " + workspace.toAbsolutePath()
-                : "未初始化（先执行 oryxos init）"));
+                : "未初始化（先执行 axion init）"));
 
     Path agentsRoot = workspace.resolve("agents");
     long agentCount = 0;
@@ -32,7 +32,7 @@ public class StatusCommand implements Runnable {
     }
     System.out.println("Agent 数: " + agentCount);
 
-    Path db = workspace.resolve("oryxos.db");
+    Path db = workspace.resolve("axion.db");
     System.out.println("数据库: " + db.toAbsolutePath());
     long sessionCount = -1;
     if (Files.exists(db)) {

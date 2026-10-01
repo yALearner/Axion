@@ -1,19 +1,19 @@
 ---
-name: oryx-spec
+name: axion-spec
 description: >-
-  按 OryxOS 规范流程开发一个需求：传入需求文档编号（docs/requirements/NNN-slug.md 或 US-n），
+  按 Axion 规范流程开发一个需求：传入需求文档编号（docs/requirements/NNN-slug.md 或 US-n），
   依次执行 speckit-specify → clarify → plan → tasks → analyze → implement 六阶段（含门禁与断点恢复），
   全程遵守 .specify/memory/constitution.md 宪法、CLAUDE.md 陷阱表与本 skill 执行纪律
   （判断权分配、停止并报告清单、不自动 commit / push / package.sh）。
-  当用户说「跑需求 / 按 Spec-Kit 流程开发 / oryx-spec」时使用。
+  当用户说「跑需求 / 按 Spec-Kit 流程开发 / axion-spec」时使用。
 argument-hint: "<需求编号> [--from <stage>] [--dry-run]"
 user-invocable: true
 disable-model-invocation: false
 ---
 
-# oryx-spec：需求开发全流程编排
+# axion-spec：需求开发全流程编排
 
-OryxOS 项目需求开发的统一入口。设计依据：`docs/SpecKitSkillDesign.md`。
+Axion 项目需求开发的统一入口。设计依据：`docs/SpecKitSkillDesign.md`。
 本文件只描述流程骨架；细则按需读取（渐进式披露）：
 门禁与纪律 → `references/gates.md`；编号规范 → `references/requirements-convention.md`；
 宪法注入映射 → `references/injection-map.md`。

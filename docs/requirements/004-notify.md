@@ -1,11 +1,11 @@
 # Notify 模块设计文档
 
 > 需求编号：004-notify | 对应主体阶段 US-4（Plugin Tool，核心能力四；课件第 19 节：Notify 模块）
-> 文档依据：`docs/TechnicalSolution.md` §6.7/§6.8/§8.4/§9.2、`docs/DemandAnalysis.md` §5.6/§13、`docs/AiProgrammingGuide.md` §4.4（权威设计源）；课件《第 19 节：Notify 模块 原理解析、实现与代码讲解》（course repo `D:\code\oryxos\docs\class\`，实施级事实源）
+> 文档依据：`docs/TechnicalSolution.md` §6.7/§6.8/§8.4/§9.2、`docs/DemandAnalysis.md` §5.6/§13、`docs/AiProgrammingGuide.md` §4.4（权威设计源）；课件《第 19 节：Notify 模块 原理解析、实现与代码讲解》（course repo `D:\code\axion\docs\class\`，实施级事实源）
 >
-> 修订说明（2026-09-03）：本版对齐课件第 19 节——① 冲突点经用户拍板（2026-09-03）：课件"`notify_channels` 是 `AGENT.md` frontmatter 字段、`NotifyTools` 经 `ProfileContext.resolveNotifyChannel` 解析"与技术方案 §6.8/§493"SQLite 全局注册表、frontmatter 不含此字段、Agent 正文按名引用"冲突 → **按技术方案 §6.8 全局注册表**（课程第 31 节已拍板过同一方向，技术方案是拍板后的新版，课件第 19 节为旧版；002-react"冲突一律参照课件"拍板不适用本次）；② `notify_channels` 的 CRUD REST 端点与 Web 管理页**归 Web Service 节**（用户拍板），本节只交表 + Repository + 解析服务；③ 时序适配：课件"`NotifyTools` 完整接线依赖 20/24 节"在 OryxOS-one 中对应——`OryxTool`/`ToolResult`/`Sandbox` 接口已由 001/002 交付，`NotifyTools` 类与单测本节即可实现；注册进工具集归第 20 节 ToolRegistry、`WhitelistSandbox` 实现归第 23/24 节（002 contracts/sandbox.md 既定契约）；④ 课件骨架的 `@Tool` 注解形态机械适配为 OryxOS-one 的 `OryxTool` 抽象（`io.oryxos` → `com.oryxos` 同款机械适配）；⑤ adapter 选择职责经用户拍板（2026-09-04，从长久稳定性角度）：`NotifyTools` 持装配处显式 `Map<channelType, NotifyChannelAdapter>` 按 type 选择，`NotifyChannelRegistry` 保持纯数据解析——与技术方案 §6.8 字面"注册表解析适配器和 URL"不完全一致，按拍板执行（跨节契约越小越稳、显式映射呼应宪法 III）；⑥ 默认渠道口径经用户拍板（2026-09-04）：**注册表恰好一条渠道才允许缺省，多条或为空时缺省明确报错**——与课件 §四测点"取第一个渠道"不一致，按拍板执行（推错群是不可见的错误，把出错窗口压到最小）。
+> 修订说明（2026-09-03）：本版对齐课件第 19 节——① 冲突点经用户拍板（2026-09-03）：课件"`notify_channels` 是 `AGENT.md` frontmatter 字段、`NotifyTools` 经 `ProfileContext.resolveNotifyChannel` 解析"与技术方案 §6.8/§493"SQLite 全局注册表、frontmatter 不含此字段、Agent 正文按名引用"冲突 → **按技术方案 §6.8 全局注册表**（课程第 31 节已拍板过同一方向，技术方案是拍板后的新版，课件第 19 节为旧版；002-react"冲突一律参照课件"拍板不适用本次）；② `notify_channels` 的 CRUD REST 端点与 Web 管理页**归 Web Service 节**（用户拍板），本节只交表 + Repository + 解析服务；③ 时序适配：课件"`NotifyTools` 完整接线依赖 20/24 节"在 Axion 中对应——`AxionTool`/`ToolResult`/`Sandbox` 接口已由 001/002 交付，`NotifyTools` 类与单测本节即可实现；注册进工具集归第 20 节 ToolRegistry、`WhitelistSandbox` 实现归第 23/24 节（002 contracts/sandbox.md 既定契约）；④ 课件骨架的 `@Tool` 注解形态机械适配为 Axion 的 `AxionTool` 抽象（`io.axion` → `com.axion` 同款机械适配）；⑤ adapter 选择职责经用户拍板（2026-09-04，从长久稳定性角度）：`NotifyTools` 持装配处显式 `Map<channelType, NotifyChannelAdapter>` 按 type 选择，`NotifyChannelRegistry` 保持纯数据解析——与技术方案 §6.8 字面"注册表解析适配器和 URL"不完全一致，按拍板执行（跨节契约越小越稳、显式映射呼应宪法 III）；⑥ 默认渠道口径经用户拍板（2026-09-04）：**注册表恰好一条渠道才允许缺省，多条或为空时缺省明确报错**——与课件 §四测点"取第一个渠道"不一致，按拍板执行（推错群是不可见的错误，把出错窗口压到最小）。
 >
-> 修订说明（2026-09-05，oryx-spec S3 补列）：oryxos-tool pom 实测现状仅 core + spring-ai-model——`NotifyChannelRegistry` 消费 `NotifyChannelRepository` 需增 `oryxos-storage`（compile，符合 CLAUDE.md 能力层依赖 storage 方向），模块首个测试需增 `spring-boot-starter-test`（test，core 同款先例）。两项均为机器可判结构件，经 G2 用户确认补列交付清单（003 父命令类先例）。
+> 修订说明（2026-09-05，axion-spec S3 补列）：axion-tool pom 实测现状仅 core + spring-ai-model——`NotifyChannelRegistry` 消费 `NotifyChannelRepository` 需增 `axion-storage`（compile，符合 CLAUDE.md 能力层依赖 storage 方向），模块首个测试需增 `spring-boot-starter-test`（test，core 同款先例）。两项均为机器可判结构件，经 G2 用户确认补列交付清单（003 父命令类先例）。
 >
 > 修订说明（2026-09-05，交付后复盘修复，用户拍板）：① `NotifyTarget` 增 config 键常量 `KEY_URL`/`KEY_NAME` + 便捷访问器 `url()`/`name()`（缺失/空串明确报错——键名不散落、空串防线内置，复盘 E1/S4）；② `NotifyTools.execute` 增 `content` 必填校验（缺失/JSON null/空串 → 明确失败不 NPE 不推"null"，复盘 S1）；③ 跨节契约 contracts/notify-channel.md 增补不变量第 9 条（装配处 MUST 用 Boot 自动配置 RestClient.Builder + connect/read timeout，复盘 S2）。全量门禁重跑全绿。
 >
@@ -21,7 +21,7 @@ CLI（003）和 Web Service 都是"人推"：有人发起一次调用，Agent �
 
 动手前定死四件事（课件 §二）：① **先定接口，别先定实现**——接口表达"把一条内容送到某个通知目标"的意图，不出现"企业微信""飞书"这类某一档实现特有的词，核心阶段只在接口后面挂一档实现，以后加新渠道只新增实现类；② **核心阶段只做通用 webhook，不逐家接专用 API**——企业微信、飞书、钉钉的群机器人都提供 webhook 地址，签名算法、AccessToken 刷新留给扩展阶段；③ **安全校验先占位**——`notify` 发出去的是一次 HTTP 请求，理应跟 `http_post` 一样过域名白名单，不能因为它是"往外推"就绕过去，白名单怎么校验归 23/24 节 Sandbox 展开；④ **具体推到哪是配置，不暴露在对话里**——经拍板适配为技术方案 §6.8 版：webhook 地址存 SQLite 全局注册表（`notify_channels` 表），LLM 调用时只传 `content` 与可选 `channel` 名。
 
-前序关系：002 已交付 `ToolExecutor`（按名调度 + 审计 day one）、`OryxTool` 抽象、`Sandbox` 接口墙——本课是 **Sandbox 接口的第一个消费方**（002 contracts/sandbox.md 明列"第 19/20 节 `NotifyTools`（HTTP_REQUEST 校验）"），也是"接口先行"从图纸变实物的第一站（技术方案 §6.8"跟 6.7 Sandbox 同样的思路"）。
+前序关系：002 已交付 `ToolExecutor`（按名调度 + 审计 day one）、`AxionTool` 抽象、`Sandbox` 接口墙——本课是 **Sandbox 接口的第一个消费方**（002 contracts/sandbox.md 明列"第 19/20 节 `NotifyTools`（HTTP_REQUEST 校验）"），也是"接口先行"从图纸变实物的第一站（技术方案 §6.8"跟 6.7 Sandbox 同样的思路"）。
 
 ## 用户场景
 
@@ -43,23 +43,23 @@ CLI（003）和 Web Service 都是"人推"：有人发起一次调用，Agent �
 
 | 编号 | 需求 | 交付物（落位模块） | 来源 |
 |------|------|-------------------|------|
-| FR-1 | **`NotifyChannelAdapter` 接口（接口先行）**：唯一方法 `send(NotifyTarget target, String content)`，表达"把一条内容送到某个通知目标"的意图——签名不出现"webhook""企业微信""飞书"等任何一档实现特有的词；核心阶段只在接口后面挂一档实现，以后加新渠道只新增实现类、不改接口、不改调用方 | `NotifyChannelAdapter` 接口（oryxos-tool） | 课件 §二第一/§三骨架；技术方案 §6.8 |
-| FR-2 | **`NotifyTarget`**：record，两个字段 `channelType` + `config: Map<String, String>`；具体是 webhook 地址还是别的认证信息由实现类自己解释，接口层不携带任何实现细节。**键约定（2026-09-05 拍板补强）**：config 键常量 `KEY_URL`/`KEY_NAME` + 便捷访问器 `url()`/`name()`（缺失或为空明确报错）——键名不散落调用方、空串防线内置 | `NotifyTarget`（oryxos-tool） | 课件 §三骨架；技术方案 §6.8；复盘 S1/E1 修复 |
-| FR-3 | **`WebhookNotifyAdapter`（核心阶段唯一实现）**：用 `RestClient` 对 `target.config` 里的 `url` 发 POST，`contentType` 为 JSON、body 为通用 text 格式 `{"msgtype":"text","text":{"content": content}}`（**2026-09-05 人工验收 40008 实锤修正**：课件骨架的 `{"content": content}` 被企业微信判 invalid message type——企业微信与钉钉共用 msgtype/text/content 形态，飞书 text 格式不同归扩展阶段专用 Adapter）；URL 只从 `NotifyTarget.config` 取、**不得硬编码**；**坑十一：webhook 返回 5xx 或网络失败时异常原样上抛，不静默吞掉**（吞掉 = Agent 以为发出去了）；核心阶段不接各家签名算法、AccessToken 刷新 | `WebhookNotifyAdapter`（oryxos-tool） | 课件 §二第二/§三骨架/§四第一批测试点；技术方案 §6.8；2026-09-05 人工验收实测 |
-| FR-4 | **`notify_channels` 全局注册表（拍板：技术方案 §6.8 版）**：SQLite 新增 `notify_channels` 表——`name`（TEXT PK，注册名）、`type`（TEXT，渠道类型）、`url`（TEXT）、`description`（TEXT 可空），手工 schema.sql 增量追加（坑八口径：不依赖 `ddl-auto=update`）；JPA 实体 + Repository（storage 模式机械延伸，`SessionEntity`/`SessionRepository` 先例）；**`AGENT.md` frontmatter 不含 `notify_channels` 字段**（课件版 Profile 字段方案经拍板否决——技术方案 §493"`notify_channels` 不属于 Profile 或 frontmatter；通知渠道由 SQLite 全局注册表管理，Agent 只在正文中按名称引用"）；webhook 地址不进对话、不进配置键 | `NotifyChannelEntity` + `NotifyChannelRepository` + schema.sql 增量（oryxos-storage） | 技术方案 §6.8/§493；拍板结论（2026-09-03）；002 坑八口径 |
-| FR-5 | **注册表解析服务（纯数据，拍板）**：按渠道名解析出 `NotifyTarget`（`channelType` = 表 `type` 列，`config` 含 `url` 与渠道 `name`——name 供审计结果带渠道名用，实现级明确）；查不到 → 明确报错，不静默、Agent 不会以为发出去了；**`channel` 缺省口径（拍板 2026-09-04）：注册表恰好一条渠道才允许缺省取它，多条或为空时缺省 → 明确报错要求显式指定 channel**（课件"取第一个渠道"口径经拍板否决——推错群是不可见的错误）；adapter 选择不在本类（拍板：本类纯数据，选择归 `NotifyTools`） | `NotifyChannelRegistry`（oryxos-tool；类名为实现级明确——技术方案 §6.8"从注册表解析"的落位） | 技术方案 §6.8；课件 §四"未配置 → 明确报错"；拍板结论（2026-09-04） |
-| FR-6 | **`NotifyTools`（`notify` 内置 Tool）**：implements `OryxTool`（`getName` = `"notify"`；schema 两参数——`content` 必填、`channel` 可选；课件 `@Tool` 注解骨架机械适配为 OryxOS-one 的 `OryxTool` 抽象）；**`content` 必填校验（2026-09-05 拍板补强，复盘 S1）**：缺失/JSON null/空串 → `ToolResult.failure`（明确报错、不 NPE、不推送字面 "null"，失败走 ToolExecutor 审计 success=false）；`execute` 四步顺序钉死：① 从注册表按 `channel` 名解析 `NotifyTarget`（缺省口径见 FR-5）② 按 `target.channelType()` 从**装配处显式 `Map<channelType, NotifyChannelAdapter>`** 选 adapter——**显式映射不靠容器扫描（宪法 III 同一哲学）**，未知 type → 明确报错 ③ **`sandbox.enforce(new SandboxAction(HTTP_REQUEST, url))` 先于 `send`（坑十）**——`enforce` 是涉外 IO 的工具在 `execute` 首行自执行（002 contracts/sandbox.md 行为不变量三），违反顺序 = 白名单被"往外推"绕过 ④ `adapter.send(target, content)`。成功返回 **`"已推送到 <渠道名>"`（审计带渠道名**——`tool_invocations.result_json` 可查出推给了谁，不裸记"已推送"）。审计复用 `ToolExecutor` 既有成功/失败路径（`tool_invocations`），不新增审计逻辑（技术方案 §6.8）；Sandbox 注入接口（本节测试 mock，`WhitelistSandbox` 归 23/24 节） | `NotifyTools`（oryxos-tool，implements `OryxTool`） | 课件 §三骨架/§四 InOrder 测试点；技术方案 §6.8；002 contracts/sandbox.md；拍板结论（2026-09-04/09-05） |
-| FR-7 | **模块依赖与装配**：oryxos-tool pom 增加 `oryxos-storage`（compile，Registry 消费 Repository 所需，2026-09-05 补列）+ `spring-web`（`RestClient`）+ `spring-boot-starter-test`（test，模块首个测试所需，2026-09-05 补列）+ 测试依赖 `com.squareup.okhttp3:mockwebserver`（全仓首次引入，机械）；`WebhookNotifyAdapter` 构造注入 `RestClient`（课件签名逐字），bean 装配由装配处用 Boot 自动配置的 `RestClient.Builder` 构建，**设 connect/read timeout**（实现级明确——慢 webhook 不得拖死 ReAct 轮次）；**adapter 显式映射装配（拍板）**：装配处构建 `Map.of("webhook", webhookAdapter)` 注入 `NotifyTools`，加新渠道 = 新增实现类 + 映射表加一行，已验收代码零改动；**`NotifyTools` 注册进工具集归第 20 节 ToolRegistry**（`ToolExecutor` 现注入空 Map——003 FR-10 口径，本节交付类 + mock 单测） | oryxos-tool pom + `RestClient` bean 装配 + adapter 显式映射（实现级明确） | 课件 §三；003 FR-10；CLAUDE.md 模块结构；宪法 III 显式映射哲学；拍板结论（2026-09-04） |
+| FR-1 | **`NotifyChannelAdapter` 接口（接口先行）**：唯一方法 `send(NotifyTarget target, String content)`，表达"把一条内容送到某个通知目标"的意图——签名不出现"webhook""企业微信""飞书"等任何一档实现特有的词；核心阶段只在接口后面挂一档实现，以后加新渠道只新增实现类、不改接口、不改调用方 | `NotifyChannelAdapter` 接口（axion-tool） | 课件 §二第一/§三骨架；技术方案 §6.8 |
+| FR-2 | **`NotifyTarget`**：record，两个字段 `channelType` + `config: Map<String, String>`；具体是 webhook 地址还是别的认证信息由实现类自己解释，接口层不携带任何实现细节。**键约定（2026-09-05 拍板补强）**：config 键常量 `KEY_URL`/`KEY_NAME` + 便捷访问器 `url()`/`name()`（缺失或为空明确报错）——键名不散落调用方、空串防线内置 | `NotifyTarget`（axion-tool） | 课件 §三骨架；技术方案 §6.8；复盘 S1/E1 修复 |
+| FR-3 | **`WebhookNotifyAdapter`（核心阶段唯一实现）**：用 `RestClient` 对 `target.config` 里的 `url` 发 POST，`contentType` 为 JSON、body 为通用 text 格式 `{"msgtype":"text","text":{"content": content}}`（**2026-09-05 人工验收 40008 实锤修正**：课件骨架的 `{"content": content}` 被企业微信判 invalid message type——企业微信与钉钉共用 msgtype/text/content 形态，飞书 text 格式不同归扩展阶段专用 Adapter）；URL 只从 `NotifyTarget.config` 取、**不得硬编码**；**坑十一：webhook 返回 5xx 或网络失败时异常原样上抛，不静默吞掉**（吞掉 = Agent 以为发出去了）；核心阶段不接各家签名算法、AccessToken 刷新 | `WebhookNotifyAdapter`（axion-tool） | 课件 §二第二/§三骨架/§四第一批测试点；技术方案 §6.8；2026-09-05 人工验收实测 |
+| FR-4 | **`notify_channels` 全局注册表（拍板：技术方案 §6.8 版）**：SQLite 新增 `notify_channels` 表——`name`（TEXT PK，注册名）、`type`（TEXT，渠道类型）、`url`（TEXT）、`description`（TEXT 可空），手工 schema.sql 增量追加（坑八口径：不依赖 `ddl-auto=update`）；JPA 实体 + Repository（storage 模式机械延伸，`SessionEntity`/`SessionRepository` 先例）；**`AGENT.md` frontmatter 不含 `notify_channels` 字段**（课件版 Profile 字段方案经拍板否决——技术方案 §493"`notify_channels` 不属于 Profile 或 frontmatter；通知渠道由 SQLite 全局注册表管理，Agent 只在正文中按名称引用"）；webhook 地址不进对话、不进配置键 | `NotifyChannelEntity` + `NotifyChannelRepository` + schema.sql 增量（axion-storage） | 技术方案 §6.8/§493；拍板结论（2026-09-03）；002 坑八口径 |
+| FR-5 | **注册表解析服务（纯数据，拍板）**：按渠道名解析出 `NotifyTarget`（`channelType` = 表 `type` 列，`config` 含 `url` 与渠道 `name`——name 供审计结果带渠道名用，实现级明确）；查不到 → 明确报错，不静默、Agent 不会以为发出去了；**`channel` 缺省口径（拍板 2026-09-04）：注册表恰好一条渠道才允许缺省取它，多条或为空时缺省 → 明确报错要求显式指定 channel**（课件"取第一个渠道"口径经拍板否决——推错群是不可见的错误）；adapter 选择不在本类（拍板：本类纯数据，选择归 `NotifyTools`） | `NotifyChannelRegistry`（axion-tool；类名为实现级明确——技术方案 §6.8"从注册表解析"的落位） | 技术方案 §6.8；课件 §四"未配置 → 明确报错"；拍板结论（2026-09-04） |
+| FR-6 | **`NotifyTools`（`notify` 内置 Tool）**：implements `AxionTool`（`getName` = `"notify"`；schema 两参数——`content` 必填、`channel` 可选；课件 `@Tool` 注解骨架机械适配为 Axion 的 `AxionTool` 抽象）；**`content` 必填校验（2026-09-05 拍板补强，复盘 S1）**：缺失/JSON null/空串 → `ToolResult.failure`（明确报错、不 NPE、不推送字面 "null"，失败走 ToolExecutor 审计 success=false）；`execute` 四步顺序钉死：① 从注册表按 `channel` 名解析 `NotifyTarget`（缺省口径见 FR-5）② 按 `target.channelType()` 从**装配处显式 `Map<channelType, NotifyChannelAdapter>`** 选 adapter——**显式映射不靠容器扫描（宪法 III 同一哲学）**，未知 type → 明确报错 ③ **`sandbox.enforce(new SandboxAction(HTTP_REQUEST, url))` 先于 `send`（坑十）**——`enforce` 是涉外 IO 的工具在 `execute` 首行自执行（002 contracts/sandbox.md 行为不变量三），违反顺序 = 白名单被"往外推"绕过 ④ `adapter.send(target, content)`。成功返回 **`"已推送到 <渠道名>"`（审计带渠道名**——`tool_invocations.result_json` 可查出推给了谁，不裸记"已推送"）。审计复用 `ToolExecutor` 既有成功/失败路径（`tool_invocations`），不新增审计逻辑（技术方案 §6.8）；Sandbox 注入接口（本节测试 mock，`WhitelistSandbox` 归 23/24 节） | `NotifyTools`（axion-tool，implements `AxionTool`） | 课件 §三骨架/§四 InOrder 测试点；技术方案 §6.8；002 contracts/sandbox.md；拍板结论（2026-09-04/09-05） |
+| FR-7 | **模块依赖与装配**：axion-tool pom 增加 `axion-storage`（compile，Registry 消费 Repository 所需，2026-09-05 补列）+ `spring-web`（`RestClient`）+ `spring-boot-starter-test`（test，模块首个测试所需，2026-09-05 补列）+ 测试依赖 `com.squareup.okhttp3:mockwebserver`（全仓首次引入，机械）；`WebhookNotifyAdapter` 构造注入 `RestClient`（课件签名逐字），bean 装配由装配处用 Boot 自动配置的 `RestClient.Builder` 构建，**设 connect/read timeout**（实现级明确——慢 webhook 不得拖死 ReAct 轮次）；**adapter 显式映射装配（拍板）**：装配处构建 `Map.of("webhook", webhookAdapter)` 注入 `NotifyTools`，加新渠道 = 新增实现类 + 映射表加一行，已验收代码零改动；**`NotifyTools` 注册进工具集归第 20 节 ToolRegistry**（`ToolExecutor` 现注入空 Map——003 FR-10 口径，本节交付类 + mock 单测） | axion-tool pom + `RestClient` bean 装配 + adapter 显式映射（实现级明确） | 课件 §三；003 FR-10；CLAUDE.md 模块结构；宪法 III 显式映射哲学；拍板结论（2026-09-04） |
 | NFR-1 | 全程同步阻塞，不引入异步模型；并发由 Java 21 虚拟线程承担 | — | 宪法 VII；002 NFR-1 延续 |
 | NFR-2 | 结构化 JSON 日志沿用既有地基；webhook URL 等渠道配置不进日志参数（002 CRLF 口径延续） | — | 002 NFR-2 延续 |
 | NFR-3 | 审计 day one：`notify` 成功与失败都进 `tool_invocations`——复用 `ToolExecutor` 既有路径即满足，不新增审计逻辑 | — | 技术方案 §6.8；宪法 V |
 
 ![notify 工具执行链路：四步顺序钉死（resolve → 显式映射选 adapter → enforce 先于 send → send），失败不静默，扩展只加不改](../../website/public/images/docs-notify-flow.svg)
 
-### 核心代码骨架（与课件第 19 节一致，包名机械适配 com.oryxos）
+### 核心代码骨架（与课件第 19 节一致，包名机械适配 com.axion）
 
 ```java
-// oryxos-tool：com.oryxos.tool.notify —— 接口先行：签名零渠道词（课件 §三逐字）
+// axion-tool：com.axion.tool.notify —— 接口先行：签名零渠道词（课件 §三逐字）
 public interface NotifyChannelAdapter {
     void send(NotifyTarget target, String content);   // 唯一方法：表达"送到某个通知目标"的意图
 }
@@ -70,7 +70,7 @@ public record NotifyTarget(String channelType, Map<String, String> config) {
 ```
 
 ```java
-// oryxos-tool：com.oryxos.tool.notify —— 核心阶段唯一实现（课件 §三骨架）
+// axion-tool：com.axion.tool.notify —— 核心阶段唯一实现（课件 §三骨架）
 @Component
 public class WebhookNotifyAdapter implements NotifyChannelAdapter {
 
@@ -95,9 +95,9 @@ public class WebhookNotifyAdapter implements NotifyChannelAdapter {
 ```
 
 ```java
-// oryxos-tool：com.oryxos.tool.builtin —— NotifyTools（课件 §三骨架，@Tool → OryxTool 机械适配）
+// axion-tool：com.axion.tool.builtin —— NotifyTools（课件 §三骨架，@Tool → AxionTool 机械适配）
 @Component
-public class NotifyTools implements OryxTool {
+public class NotifyTools implements AxionTool {
 
     private final Sandbox sandbox;                              // 注入接口：本节测试 mock，WhitelistSandbox 归 23/24 节
     private final Map<String, NotifyChannelAdapter> adapters;   // 拍板：装配处显式映射 channelType→adapter（宪法 III 哲学）
@@ -125,7 +125,7 @@ public class NotifyTools implements OryxTool {
 ```
 
 ```java
-// oryxos-storage：schema.sql 增量（坑八口径：手工建表脚本，测试执行同一份）
+// axion-storage：schema.sql 增量（坑八口径：手工建表脚本，测试执行同一份）
 CREATE TABLE IF NOT EXISTS notify_channels (
     name        TEXT PRIMARY KEY,   -- 注册名：Agent 正文按此名引用渠道
     type        TEXT NOT NULL,      -- 渠道类型（核心阶段均为 webhook）
@@ -134,9 +134,9 @@ CREATE TABLE IF NOT EXISTS notify_channels (
 );
 ```
 
-### 本节交付物清单（Spec-Kit 拆解锚点 / oryx-spec 交付清单比对基准）
+### 本节交付物清单（Spec-Kit 拆解锚点 / axion-spec 交付清单比对基准）
 
-- **代码**：`NotifyChannelAdapter` 接口、`NotifyTarget`、`WebhookNotifyAdapter`、`NotifyChannelRegistry`（类名实现级明确）、`NotifyTools`（implements `OryxTool`）——以上落 oryxos-tool（包结构建议：`com.oryxos.tool.notify` 子包放接口+Target+WebhookAdapter+Registry，`NotifyTools` 落 `com.oryxos.tool.builtin`，课件 `io.oryxos` 机械翻译，实现级明确）；`NotifyChannelEntity` + `NotifyChannelRepository`（oryxos-storage，storage 模式机械延伸结构件）；oryxos-tool pom 增加 `oryxos-storage`（compile，Registry 消费 Repository 所需，2026-09-05 补列）+ `spring-web`（RestClient）+ `spring-boot-starter-test`（test，模块首个测试所需，2026-09-05 补列）+ `mockwebserver`（测试）+ `spotbugs-annotations`（provided，编译期门禁配套——RestClient 第三方可变接口的 EI_EXPOSE_REP2 抑制注解，001-provider 同款先例，2026-09-05 补列）
+- **代码**：`NotifyChannelAdapter` 接口、`NotifyTarget`、`WebhookNotifyAdapter`、`NotifyChannelRegistry`（类名实现级明确）、`NotifyTools`（implements `AxionTool`）——以上落 axion-tool（包结构建议：`com.axion.tool.notify` 子包放接口+Target+WebhookAdapter+Registry，`NotifyTools` 落 `com.axion.tool.builtin`，课件 `io.axion` 机械翻译，实现级明确）；`NotifyChannelEntity` + `NotifyChannelRepository`（axion-storage，storage 模式机械延伸结构件）；axion-tool pom 增加 `axion-storage`（compile，Registry 消费 Repository 所需，2026-09-05 补列）+ `spring-web`（RestClient）+ `spring-boot-starter-test`（test，模块首个测试所需，2026-09-05 补列）+ `mockwebserver`（测试）+ `spotbugs-annotations`（provided，编译期门禁配套——RestClient 第三方可变接口的 EI_EXPOSE_REP2 抑制注解，001-provider 同款先例，2026-09-05 补列）
 - **测试**：`WebhookNotifyAdapterTest`（第一批，MockWebServer 假 webhook）、`NotifyToolsTest`（第二批，mock Sandbox/adapter Map/Registry）、`NotifyChannelRegistryTest`、`NotifyChannelRepositoryTest`（坑八口径）
 - **表**：`notify_channels`（`name` PK、`type`、`url`、`description`；schema.sql 增量追加）
 - **约定**：接口先行（签名零渠道词）；`enforce` 先于 `send`（坑十）；webhook 失败异常上抛不吞（坑十一）；`AGENT.md` frontmatter 不含 `notify_channels`（拍板）；渠道 CRUD REST 归 Web Service 节（拍板）；adapter 显式映射按 channelType 选择、Registry 纯数据（拍板，宪法 III 哲学）；`channel` 缺省 = 注册表恰好一条渠道才允许（拍板）；审计结果带渠道名；`NotifyTools` 注册进工具集归第 20 节；MockWebServer 属单测层、不算外网依赖（课件 §四）
@@ -200,7 +200,7 @@ void 发送前必须先过白名单校验() {
 
 - **真实 webhook 收到消息**：构造 `WebhookNotifyAdapter` + 指向真实群 webhook 的 `NotifyTarget` 直接调 `send`，群里收到——假 webhook 测的是协议，真 webhook 验的是配置（课件 §五；可直接用测试类临时 main 或 jshell 完成，完整"LLM 在对话里调 `notify`"的端到端版在 20 节工具注册后补验）
 - **接口中立性自查（思维练习，测不出来）**：换成企业微信官方 SDK 的实现，`NotifyChannelAdapter.send(NotifyTarget, String)` 这个签名需要改吗？答案应该是不需要（课件 §五）
-- **落库核对**：打开 `.oryxos/oryxos.db` 核对 `notify_channels` 表 4 列结构与插入数据；推送成功后 `tool_invocations` 里 notify 的 `result_json` **带渠道名**（"已推送到 team-lark"，不裸记"已推送"）
+- **落库核对**：打开 `.axion/axion.db` 核对 `notify_channels` 表 4 列结构与插入数据；推送成功后 `tool_invocations` 里 notify 的 `result_json` **带渠道名**（"已推送到 team-lark"，不裸记"已推送"）
 - **errcode 陷阱留意**：真实 webhook 验证时留意"HTTP 200 但群里没收到"——企业微信/飞书/钉钉业务失败时 HTTP 层仍是 200（核心阶段不解析 body errcode，明确不做），遇到即记入已知留白
 - **反例验证**：注册表里没有该渠道名时调 `notify` → 明确报错、`tool_invocations` 落一条 `success=false`（不静默、Agent 不会以为发出去了）；注册表多条渠道且不传 `channel` → 同样明确报错（拍板口径）
 - **人工 review 关键代码**：`WebhookNotifyAdapter.send` 的异常上抛路径（坑十一）；`NotifyTools.execute` 执行顺序——adapter 按 channelType 显式映射选取、`enforce` 在 `send` 之前（坑十，最该盯的一段）
@@ -210,12 +210,12 @@ void 发送前必须先过白名单校验() {
 
 ### 前序交付物（已就位，本节直接依赖）
 
-- **001-provider**：`OryxTool` 接口（`getName`/`getDescription`/`getInputSchema`/`execute`）、`ToolResult`（success/content/errorMessage/retryable）、`JsonSchema`、`ObjectMapper` 装配先例
-- **002-react**：`ToolExecutor`（按 `Map<String, OryxTool>` 调度、审计 day one、**不持 Sandbox**——涉外工具 `execute` 首行自 enforce）、`Sandbox` 接口墙四件套（`Sandbox`/`SandboxAction`/`ActionType`（含 `HTTP_REQUEST`）/`SandboxViolationException`）、`ProfileContext`、`contracts/sandbox.md`（行为不变量三：接线约定；消费方明列"第 19/20 节 `NotifyTools`"）
+- **001-provider**：`AxionTool` 接口（`getName`/`getDescription`/`getInputSchema`/`execute`）、`ToolResult`（success/content/errorMessage/retryable）、`JsonSchema`、`ObjectMapper` 装配先例
+- **002-react**：`ToolExecutor`（按 `Map<String, AxionTool>` 调度、审计 day one、**不持 Sandbox**——涉外工具 `execute` 首行自 enforce）、`Sandbox` 接口墙四件套（`Sandbox`/`SandboxAction`/`ActionType`（含 `HTTP_REQUEST`）/`SandboxViolationException`）、`ProfileContext`、`contracts/sandbox.md`（行为不变量三：接线约定；消费方明列"第 19/20 节 `NotifyTools`"）
 - **003-cli**：JPA 实体 + Repository + schema.sql 手工增量模式（`SessionEntity`/`SessionRepository` 先例）、`CliAgentConfiguration` 装配先例（工具集空 Map，第 20 节替换口径）、坑八/坑九回归先例
 - **storage 口径**：`InstantTextConverter`（ISO-8601 TEXT）、`schema.sql` 三表（`llm_calls`/`tool_invocations`/`sessions`）、`ToolInvocationRepository`（审计落账路径）
 
-**现状确认（2026-09-03 实测）**：`oryxos-tool` 仅 `Sandbox` 接口四件套（Notify 零代码空壳）；`ToolExecutor` 注入空 Map；`Profile` 无 `notify_channels` 字段；`schema.sql` 三表无 `notify_channels`；oryxos-tool pom 仅依赖 core + spring-ai-model（无 spring-web）。与文档描述一致，无缺口。
+**现状确认（2026-09-03 实测）**：`axion-tool` 仅 `Sandbox` 接口四件套（Notify 零代码空壳）；`ToolExecutor` 注入空 Map；`Profile` 无 `notify_channels` 字段；`schema.sql` 三表无 `notify_channels`；axion-tool pom 仅依赖 core + spring-ai-model（无 spring-web）。与文档描述一致，无缺口。
 
 ### 前序缺口（H0 依赖检查）
 
@@ -223,7 +223,7 @@ void 发送前必须先过白名单校验() {
 
 ### 改造点（经拍板允许修改的前序公共接口）
 
-无前序公共接口改造——`Profile` 不动（课件版 `notify_channels` 字段方案拍板否决）、`ToolExecutor`/`OryxTool`/`Sandbox` 原样使用。前序产物上的变化仅为：schema.sql 增量追加 `notify_channels` 表、oryxos-tool pom 增加依赖（均为增量，不改既有结构）。
+无前序公共接口改造——`Profile` 不动（课件版 `notify_channels` 字段方案拍板否决）、`ToolExecutor`/`AxionTool`/`Sandbox` 原样使用。前序产物上的变化仅为：schema.sql 增量追加 `notify_channels` 表、axion-tool pom 增加依赖（均为增量，不改既有结构）。
 
 ### 外部依赖与假设
 

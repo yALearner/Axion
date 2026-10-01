@@ -21,13 +21,13 @@ WARNING 记录: （累计 1/3）
 人工验收待办（机器已判卷之外的部分，跑法见 quickstart.md 人工验证）:
 - [x] 真 webhook 收到消息（2026-09-05：企业微信真实群机器人收到「人工验证消息：004-notify 工具链路」，中文正常；首次验证踩中 errcode 40008 → 方案 A 修复后 errcode 0）
 - [x] 临时 harness NotifyManualIT（成功落账带渠道名 + 反例二条 + JPA 映射回读断言，3/3 全绿；已按方法论删除）
-- [x] 落库核对（notify_channels 4 列；tool_invocations success/result_json/duration_ms 核对通过；harness 期间发现并修复两坑：① surefire 工作目录实测 = 模块目录 → .oryxos 父目录先建 ② 数据源必须 @DynamicPropertySource 隔离 target/manual-it，避免 deleteAll 碰共享库）
+- [x] 落库核对（notify_channels 4 列；tool_invocations success/result_json/duration_ms 核对通过；harness 期间发现并修复两坑：① surefire 工作目录实测 = 模块目录 → .axion 父目录先建 ② 数据源必须 @DynamicPropertySource 隔离 target/manual-it，避免 deleteAll 碰共享库）
 - [ ] 接口中立性自查（步骤四思维练习：换企业微信官方 SDK 实现，send(NotifyTarget, String) 签名需要改吗？答案应是不需要——留给用户 1 分钟自查）
 - [x] 已知待办：LLM 对话内自动调 notify 端到端 → 第 20 节（005-tool）已补验（2026-09-05：chat 里自动调 notify 推送成功，企业微信群收到，完整 ReAct 日志铁证）
 
 停止清单触发记录:
 - （2026-09-05 S0）分支检查：hook 未配置、当前在已合并的 003-cli → 按项目既有 {NNN}-{slug} 约定自 main 新建 004-notify（用户确认）；未提交的 docs 改动随工作区带入新分支
-- （2026-09-05 S3）停止清单第 1 条：oryxos-tool pom 迫使新增 oryxos-storage + spring-boot-starter-test 两项依赖（机器可判结构件，超出交付清单字面）→ 已补列需求文档交付清单与 FR-7（用户确认，003 父命令类先例）
+- （2026-09-05 S3）停止清单第 1 条：axion-tool pom 迫使新增 axion-storage + spring-boot-starter-test 两项依赖（机器可判结构件，超出交付清单字面）→ 已补列需求文档交付清单与 FR-7（用户确认，003 父命令类先例）
 - （2026-09-05 S6）停止清单第 6 条：SpotBugs EI_EXPOSE_REP2 拦截 RestClient 注入（第三方可变接口无法防御拷贝）→ 新增 spotbugs-annotations（provided）依赖 + 抑制注解，已补列需求文档交付清单（用户确认，001-provider 同款先例）；Map 类 3 处用 Map.copyOf 防御拷贝（ProviderService/JsonSchema 先例，无新依赖）
 - （2026-09-05 交付后复盘修复）用户拍板修复 review-analysis.md S1/S2/S4/E1：① content 必填校验（不 NPE 不推"null"，+3 测试）② NotifyTarget 键常量+访问器（空串防线）③ 契约不变量 9（timeout 跨节钉死）——需求文档 FR-2/FR-6/骨架/修订说明已同步
 - （2026-09-05 人工验收修复）停止清单第 2/3 条：真实企业微信对课件骨架 body `{"content":...}` 返回 errcode 40008（HTTP 200 收不到）→ 用户拍板方案 A：body 改通用 text 格式 `{"msgtype":"text","text":{"content":...}}`（企微+钉钉共用，飞书归扩展）；需求文档 FR-3/骨架/修订说明、spec/contracts/tasks/quickstart/review-analysis 已同步

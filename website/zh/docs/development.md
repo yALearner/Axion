@@ -1,6 +1,6 @@
 # 网站开发与部署
 
-本文档涵盖 OryxOS 文档网站的本地开发和部署流程。
+本文档涵盖 Axion 文档网站的本地开发和部署流程。
 
 ## 技术栈
 
@@ -13,7 +13,7 @@
 ## 项目结构
 
 ```
-oryxos/
+axion/
 ├── package.json                    # npm 配置、构建脚本
 ├── website/
 │   ├── index.md                    # 英文首页（渲染 <Home /> 组件）
@@ -48,7 +48,7 @@ oryxos/
 
 ```bash
 # 在项目根目录下：
-cd oryxos
+cd axion
 
 # 安装依赖（仅首次）
 npm install
@@ -111,7 +111,7 @@ description: SEO 描述
 
 ### 生产地址
 
-`https://oryxos.dev`（确定正式域名后需更新 `config.mts` 和 index.md 文件中的域名）。
+`https://axion.dev`（确定正式域名后需更新 `config.mts` 和 index.md 文件中的域名）。
 
 ### 方式一：GitHub Pages（推荐）
 
@@ -156,22 +156,22 @@ npm run docs:build
 # - 任意 S3 存储桶 + CDN
 ```
 
-### 方式三：集成到 oryxos-web
+### 方式三：集成到 axion-web
 
-OryxOS 的 `oryxos-web` 模块启动时会暴露一个 REST API 服务。可以将构建好的静态文件放入 `oryxos-web/src/main/resources/static/`，让 Spring Boot 直接服务网站：
+Axion 的 `axion-web` 模块启动时会暴露一个 REST API 服务。可以将构建好的静态文件放入 `axion-web/src/main/resources/static/`，让 Spring Boot 直接服务网站：
 
 ```bash
 # 1. 构建网站
 npm run docs:build
 
 # 2. 复制到 Spring Boot 静态资源目录
-cp -r website/.vitepress/dist/* oryxos-web/src/main/resources/static/
+cp -r website/.vitepress/dist/* axion-web/src/main/resources/static/
 
 # 3. 重新打包
 mvn clean package -DskipTests
 
 # 4. 启动——网站和 API 在同一个端口
-java -jar oryxos-boot/target/oryxos-boot-*.jar serve --port 8080
+java -jar axion-boot/target/axion-boot-*.jar serve --port 8080
 # 网站: http://localhost:8080/
 # API:  http://localhost:8080/api/v1/health
 ```
@@ -192,9 +192,9 @@ java -jar oryxos-boot/target/oryxos-boot-*.jar serve --port 8080
 品牌 tokens 在 `website/.vitepress/theme/custom.css` 的 `:root` 中定义：
 
 ```css
---oryx-teal: #2dd4bf;
---oryx-indigo: #818cf8;
---oryx-cyan: #22d3ee;
+--axion-teal: #2dd4bf;
+--axion-indigo: #818cf8;
+--axion-cyan: #22d3ee;
 ```
 
 首页样式**隔离**在 `Home.vue` 的 `<style scoped>` 中——不会影响其他页面。

@@ -1,4 +1,4 @@
-package com.oryxos.web.api;
+package com.axion.web.api;
 
 /** 全局错误码。code 与 HTTP 状态码一致，保证客户端可依据状态码直接处理。 */
 public enum ErrorCode {

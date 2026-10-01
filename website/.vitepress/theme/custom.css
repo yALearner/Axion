@@ -29,10 +29,10 @@
   --vp-code-tab-bg: #0e1420;
   --vp-code-tab-active-bar-color: #2dd4bf;
 
-  /* OryxOS brand accent */
-  --oryx-teal: #2dd4bf;
-  --oryx-indigo: #818cf8;
-  --oryx-cyan: #22d3ee;
+  /* Axion brand accent */
+  --axion-teal: #2dd4bf;
+  --axion-indigo: #818cf8;
+  --axion-cyan: #22d3ee;
 }
 
 /* ─── Hide dark mode toggle（恒深色）──────────────────────────── */

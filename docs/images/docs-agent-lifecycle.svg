@@ -13,14 +13,14 @@
   <text x="210" y="72" text-anchor="middle" font-size="11" font-weight="bold" fill="#1d4ed8">路径一：API 上传 (扩展阶段)</text>
   <line x1="45" y1="80" x2="375" y2="80" stroke="#bfdbfe" stroke-width="0.5"/>
   <text x="45" y="98" font-size="9" fill="#1e40af">POST /agents/generate → 一句话生成 AGENT.md 草稿</text>
-  <text x="45" y="114" font-size="9" fill="#1e40af">POST /agents → 写 Agent 目录到 .oryxos/agents/</text>
+  <text x="45" y="114" font-size="9" fill="#1e40af">POST /agents → 写 Agent 目录到 .axion/agents/</text>
   <text x="45" y="130" font-size="9" fill="#1e40af">PUT /agents/{name} · DELETE /agents/{name} → 归档</text>
 
   <!-- Path 2: Manual -->
   <rect x="430" y="50" width="360" height="80" rx="7" fill="#dcfce7" stroke="#10b981" stroke-width="1.5" filter="url(#sh)"/>
   <text x="610" y="72" text-anchor="middle" font-size="11" font-weight="bold" fill="#15803d">路径二：手工丢目录 (核心阶段)</text>
   <line x1="445" y1="80" x2="775" y2="80" stroke="#bbf7d0" stroke-width="0.5"/>
-  <text x="445" y="98" font-size="9" fill="#166534">mkdir .oryxos/agents/my-agent/</text>
+  <text x="445" y="98" font-size="9" fill="#166534">mkdir .axion/agents/my-agent/</text>
   <text x="445" y="114" font-size="9" fill="#166534">vim AGENT.md + 可选 skills/scripts/REFERENCE.md</text>
   <text x="445" y="130" font-size="9" fill="#166534">WorkspaceWatcher 实时监听变更</text>
 

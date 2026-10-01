@@ -1,13 +1,13 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * OryxTool 接口——所有 Tool 的统一抽象（内置 Tool 与 MCP Tool 都汇入此接口）。
+ * AxionTool 接口——所有 Tool 的统一抽象（内置 Tool 与 MCP Tool 都汇入此接口）。
  *
- * <p>本节只交付抽象与 schema 生成；内置实现归 US-4（核心能力四，oryxos-tool 模块）。
+ * <p>本节只交付抽象与 schema 生成；内置实现归 US-4（核心能力四，axion-tool 模块）。
  */
-public interface OryxTool {
+public interface AxionTool {
 
   /** 工具名（Function Calling 中模型可见的唯一标识）。 */
   String getName();

@@ -16,7 +16,7 @@ core 新增。对话历史累积容器，内存版（sessions 表与 JPA 持久�
 
 ## ToolInvocation（工具调用审计记录，新表 `tool_invocations`）
 
-oryxos-storage 新增 JPA 实体。手工 schema.sql 增量建表（与 001 `llm_calls` 同口径）。
+axion-storage 新增 JPA 实体。手工 schema.sql 增量建表（与 001 `llm_calls` 同口径）。
 
 | 字段 | 列 | 类型 | 说明 |
 |------|------|------|------|
@@ -30,7 +30,7 @@ oryxos-storage 新增 JPA 实体。手工 schema.sql 增量建表（与 001 `llm
 | `durationMs` | `duration_ms` | BIGINT | 执行耗时 |
 | `createdAt` | `created_at` | TEXT（ISO-8601） | 调用时间（复用 001 `InstantTextConverter`，SQLite 无原生 TIMESTAMP） |
 
-## SandboxAction / ActionType（沙箱校验请求，oryxos-tool）
+## SandboxAction / ActionType（沙箱校验请求，axion-tool）
 
 纯接口墙（本节零实现、无人调用；接线从第 20 节起）。
 
@@ -49,11 +49,11 @@ oryxos-storage 新增 JPA 实体。手工 schema.sql 增量建表（与 001 `llm
 | ① system | `Profile.identity.prompt`（角色设定）+ Bootstrap 文件内容 + 已绑定 Skill 元数据（name/description/读取路径），**末尾附当前日期时间** | ContextLoader（每次现读） |
 | ② 长期记忆 | 跨会话记忆——**Memory 模块未就绪（第 21/22 节），本节跳过留拼接位** | MemoryService（后续节） |
 | ③ 对话历史 | 最近 N 轮（默认 20，超出截断；TOOL 消息跟随所属响应成组保留，不切断一轮内 tool 调用链） | Session.messages |
-| ④ 工具列表 | Function Calling 格式（OryxTool 集合 → 工具定义；注入的工具集，ToolRegistry 归第 20 节） | ToolSchemaAdapter 契约（落位见 research.md R3 拍板） |
+| ④ 工具列表 | Function Calling 格式（AxionTool 集合 → 工具定义；注入的工具集，ToolRegistry 归第 20 节） | ToolSchemaAdapter 契约（落位见 research.md R3 拍板） |
 
 ## ProfileContext（当前 Agent 上下文，core）
 
-ThreadLocal\<Profile>（虚拟线程每请求独立）。`AgentService.process` 设置、`finally` 清理（坑四）；工具执行时经它读取当前 Agent 配置（`OryxTool.execute` 签名不带 Profile，不改工具接口）。
+ThreadLocal\<Profile>（虚拟线程每请求独立）。`AgentService.process` 设置、`finally` 清理（坑四）；工具执行时经它读取当前 Agent 配置（`AxionTool.execute` 签名不带 Profile，不改工具接口）。
 
 ## 关系图
 
@@ -63,6 +63,6 @@ Profile（001）
            └─1:N─ Message（001，累积历史）
   └─运行配置─ ReActLoop 每轮调 ProviderService（001，llm_calls 审计）
 Session ─1:N─ ToolInvocation（本节，tool_invocations 审计）
-OryxTool（001）─执行─ ToolResult（001）─回填─ Session
-SandboxAction（本节，oryxos-tool）─校验─ 各工具 execute 首行（第 20 节起接线）
+AxionTool（001）─执行─ ToolResult（001）─回填─ Session
+SandboxAction（本节，axion-tool）─校验─ 各工具 execute 首行（第 20 节起接线）
 ```

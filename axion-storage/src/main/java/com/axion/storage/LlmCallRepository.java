@@ -1,4 +1,4 @@
-package com.oryxos.storage;
+package com.axion.storage;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

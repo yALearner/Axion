@@ -1,8 +1,8 @@
-package com.oryxos.web.api;
+package com.axion.web.api;
 
-import com.oryxos.core.AgentService;
-import com.oryxos.core.Session;
-import com.oryxos.core.SessionManager;
+import com.axion.core.AgentService;
+import com.axion.core.Session;
+import com.axion.core.SessionManager;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -73,8 +73,8 @@ public class SessionApiController {
   @GetMapping(path = "/{id}")
   public ApiResponse<SessionHistoryResponse> history(@PathVariable String id) {
     Session session = sessionManager.get(id).orElseThrow(() -> new SessionNotFoundException(id));
-    List<com.oryxos.core.Message> messages = session.messages();
-    List<com.oryxos.core.Message> recent =
+    List<com.axion.core.Message> messages = session.messages();
+    List<com.axion.core.Message> recent =
         messages.size() > MAX_HISTORY_MESSAGES
             ? messages.subList(messages.size() - MAX_HISTORY_MESSAGES, messages.size())
             : messages;
@@ -129,7 +129,7 @@ public class SessionApiController {
   public record MessageResponse(String reply) {}
 
   /** 历史响应。 */
-  public record SessionHistoryResponse(String sessionId, List<com.oryxos.core.Message> messages) {
+  public record SessionHistoryResponse(String sessionId, List<com.axion.core.Message> messages) {
     public SessionHistoryResponse {
       // 防御性拷贝（007 先例）：不暴露可变列表的内部表示——Jackson 序列化读 accessor 不受影响
       messages = messages == null ? java.util.List.of() : java.util.List.copyOf(messages);

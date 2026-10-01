@@ -1,4 +1,4 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -38,7 +38,7 @@ public final class PromptBuilder {
 
   private final ContextLoader contextLoader;
   private final ToolSchemaAdapter toolSchemaAdapter;
-  private final Map<String, OryxTool> tools;
+  private final Map<String, AxionTool> tools;
   private final MemoryService memoryService;
 
   /**
@@ -48,7 +48,7 @@ public final class PromptBuilder {
   public PromptBuilder(
       ContextLoader contextLoader,
       ToolSchemaAdapter toolSchemaAdapter,
-      Map<String, OryxTool> tools,
+      Map<String, AxionTool> tools,
       MemoryService memoryService) {
     this.contextLoader = contextLoader;
     this.toolSchemaAdapter = toolSchemaAdapter;
@@ -68,7 +68,7 @@ public final class PromptBuilder {
             + LocalDateTime.now(ZoneId.systemDefault());
     instructions.add(new SystemMessage(system));
     // ③ 会话历史：最近 N 轮（坑二截断语义）
-    for (com.oryxos.core.Message m : historyOf(session, profile.settings().maxHistoryTurns())) {
+    for (com.axion.core.Message m : historyOf(session, profile.settings().maxHistoryTurns())) {
       instructions.add(toSpringMessage(m));
     }
     // ④ 可用工具列表：按 Profile.tools 过滤 → Function Calling 格式
@@ -104,14 +104,14 @@ public final class PromptBuilder {
   }
 
   /** 按 Profile.tools 名字过滤注入的工具集；未知工具名记 WARN 跳过（注册校验归第 20 节 ToolRegistry）。 */
-  private List<OryxTool> selectTools(Profile profile) {
+  private List<AxionTool> selectTools(Profile profile) {
     List<String> allowed = profile.tools();
     if (allowed == null || allowed.isEmpty()) {
       return List.of();
     }
-    List<OryxTool> selected = new ArrayList<>();
+    List<AxionTool> selected = new ArrayList<>();
     for (String name : allowed) {
-      OryxTool tool = tools.get(name);
+      AxionTool tool = tools.get(name);
       if (tool == null) {
         // profile/工具名为用户可控值，不入日志参数（防 CRLF 注入）
         LOG.warn("Profile 引用的工具未在注入的工具集中");
@@ -126,11 +126,11 @@ public final class PromptBuilder {
    * 坑二截断语义：从尾部回数，保留最近 N 轮；一轮 = 一条 USER 消息 + 随后的 ASSISTANT 响应 + 其全部 TOOL 结果——TOOL
    * 消息跟随所属轮成组保留，绝不把一轮内的 tool 调用链拦腰切断。
    */
-  private List<com.oryxos.core.Message> historyOf(Session session, int maxTurns) {
-    List<com.oryxos.core.Message> all = session.messages();
+  private List<com.axion.core.Message> historyOf(Session session, int maxTurns) {
+    List<com.axion.core.Message> all = session.messages();
     int keptTurns = 0;
     for (int i = all.size() - 1; i >= 0; i--) {
-      if (all.get(i).role() == com.oryxos.core.Message.MessageRole.USER) {
+      if (all.get(i).role() == com.axion.core.Message.MessageRole.USER) {
         keptTurns++;
         if (keptTurns == maxTurns) {
           return all.subList(i, all.size());
@@ -141,7 +141,7 @@ public final class PromptBuilder {
   }
 
   /** core Message → Spring AI 消息（Session 历史保持框架无关，只在组装边界转换）。 */
-  private Message toSpringMessage(com.oryxos.core.Message m) {
+  private Message toSpringMessage(com.axion.core.Message m) {
     return switch (m.role()) {
       case USER -> new UserMessage(text(m.content()));
       case ASSISTANT -> {

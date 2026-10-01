@@ -2,7 +2,7 @@
 
 ## Provider 声明（全局配置）
 
-`application.yaml` 的 `oryxos.providers` 列表项。名字是全局唯一标识。
+`application.yaml` 的 `axion.providers` 列表项。名字是全局唯一标识。
 
 | 字段 | 类型 | 说明 | 校验 |
 |------|------|------|------|
@@ -43,7 +43,7 @@
 | `toolCalls` | 模型请求的工具调用（透传用，不执行） |
 | `toolResults` | 工具执行结果（后续节回填） |
 
-## OryxTool（工具抽象，本节只交付接口与 schema）
+## AxionTool（工具抽象，本节只交付接口与 schema）
 
 | 字段 | 说明 |
 |------|------|

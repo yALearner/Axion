@@ -5,27 +5,27 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.oryxos</groupId>
-        <artifactId>oryxos</artifactId>
+        <groupId>com.axion</groupId>
+        <artifactId>axion</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>oryxos-tool</artifactId>
-    <name>OryxOS :: Tool</name>
+    <artifactId>axion-tool</artifactId>
+    <name>Axion :: Tool</name>
     <description>核心能力四：内置 Tool（FileTools / ShellTools / HttpTools / NotifyTools）、McpClientService、McpToolAdapter、ToolRegistry、Sandbox 接口 + WhitelistSandbox、NotifyChannelAdapter + WebhookNotifyAdapter</description>
 
     <dependencies>
         <!-- Internal -->
         <dependency>
-            <groupId>com.oryxos</groupId>
-            <artifactId>oryxos-core</artifactId>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-core</artifactId>
         </dependency>
 
         <!-- Internal：NotifyChannelRegistry 消费 NotifyChannelRepository（004-notify；能力层依赖 storage，CLAUDE.md 依赖方向） -->
         <dependency>
-            <groupId>com.oryxos</groupId>
-            <artifactId>oryxos-storage</artifactId>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-storage</artifactId>
         </dependency>
 
         <!-- Spring AI Model（@Tool 注解 schema 生成；1.1.x 起 spring-ai-core 拆分为 model/commons/client-chat） -->
@@ -40,7 +40,7 @@
             <artifactId>spring-web</artifactId>
         </dependency>
 
-        <!-- 测试栈（004-notify：模块首个测试；JUnit 5 + Mockito + AssertJ，oryxos-core 同款先例） -->
+        <!-- 测试栈（004-notify：模块首个测试；JUnit 5 + Mockito + AssertJ，axion-core 同款先例） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

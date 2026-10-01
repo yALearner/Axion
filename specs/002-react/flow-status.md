@@ -19,11 +19,11 @@ WARNING 记录: （累计 1/3）C1 结构化日志无显式任务（MEDIUM）→
 停止清单触发记录:
 - （2026-09-01 S0）分支检查：当前在 001-provider（前序 feature 分支）→ 按用户已记录决策「从 001-provider 拉 002-react 分支」执行，未再询问
 - （2026-09-01 S3）停止清单第 1/4 条：ReActLoop/PromptBuilder（core）需消费 001 交付物（ProviderService/ToolSchemaAdapter）但依赖方向禁止反向依赖 → 用户拍板「LlmGateway 端口接口 + ToolSchemaAdapter 迁 core」；需求文档交付清单补 LlmGateway、新增改造点节，CLAUDE.md/TechnicalSolution §10 同步
-- （2026-09-02 人工验收）发现工程缺口：OryxOsApplication 的 scanBasePackages 不作用于 JPA 仓储/实体扫描（AutoConfigurationPackages 仍为 com.oryxos.boot），com.oryxos.storage 的 Repository/实体在真实启动时不会被注册——临时 harness 以 @EnableJpaRepositories/@EntityScan 绕过 → **用户拍板「现在修」**：OryxOsApplication 已补两注解（fix 提交随 PR #2），harness 已删除
+- （2026-09-02 人工验收）发现工程缺口：AxionApplication 的 scanBasePackages 不作用于 JPA 仓储/实体扫描（AutoConfigurationPackages 仍为 com.axion.boot），com.axion.storage 的 Repository/实体在真实启动时不会被注册——临时 harness 以 @EnableJpaRepositories/@EntityScan 绕过 → **用户拍板「现在修」**：AxionApplication 已补两注解（fix 提交随 PR #2），harness 已删除
 
 人工验收待办（机器已判卷之外的部分）:
-- [x] Demo 一（每日天气）对话版真模型跑通：2026-09-02 真实调用通过——3 轮 LLM 思考 + 2 次 http_get（临时工具，wttr.in）+ 中文穿搭建议；llm_calls=3 / tool_invocations=2 真实落库（oryxos-boot/.oryxos/oryxos.db，测试工作目录所致；生产 java -jar 从仓库根启动时落根目录 .oryxos/）
+- [x] Demo 一（每日天气）对话版真模型跑通：2026-09-02 真实调用通过——3 轮 LLM 思考 + 2 次 http_get（临时工具，wttr.in）+ 中文穿搭建议；llm_calls=3 / tool_invocations=2 真实落库（axion-boot/.axion/axion.db，测试工作目录所致；生产 java -jar 从仓库根启动时落根目录 .axion/）
 - [x] code review：循环自实现确认——core/boot 主代码 grep 无 ChatClient/ToolCallingManager/executeToolCalls；ReActLoop 96 行
-- [x] oryxos.db 审计核对：3 条 llm_calls（success=true、session 关联正确、durationMs 记录）+ 2 条 tool_invocations（success=true、result 真实内容）
+- [x] axion.db 审计核对：3 条 llm_calls（success=true、session 关联正确、durationMs 记录）+ 2 条 tool_invocations（success=true、result 真实内容）
 - [ ] 第 20 节 HttpTools 就位后按 quickstart 补跑完整 Demo（临时工具替身退役）；临时 harness ReActDemoManualIT 已删（2026-09-02 用户拍板）
 

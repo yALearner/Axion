@@ -14,13 +14,13 @@
 
 **Primary Dependencies**: 既有——SnakeYAML（003）、spring-web/RestClient（004）、spring-boot-starter-test + mockwebserver + spotbugs-annotations（004）；**新增** `org.springframework.ai:spring-ai-starter-mcp-client`（版本随 spring-ai-bom 1.1.8；本地实测 spring-ai-mcp 仅协议壳无 client 类，实施时 H3 核实 McpSyncClient/stdio transport 实际 API）
 
-**Storage**: 无新表——MCP 配置走 `.oryxos/mcp_servers.yaml`（003 init 已建模板）；审计复用 `tool_invocations`
+**Storage**: 无新表——MCP 配置走 `.axion/mcp_servers.yaml`（003 init 已建模板）；审计复用 `tool_invocations`
 
 **Testing**: JUnit 5 + Mockito + MockWebServer（004 已有）；MCP 测试 mock client；`mvn clean verify` 全绿 + 既有静态门禁
 
 **Target Platform**: JVM 21 服务器；生产 Linux/K8s（bash 可用）；Windows 本机测试经 Git Bash 的 bash（003 同款口径）
 
-**Project Type**: Maven 多模块增量——oryxos-tool（ToolRegistry/builtin 六件/mcp 子包/方式三包装器/PermissiveSandbox）+ oryxos-cli（CliAgentConfiguration 改造）；**无新模块**
+**Project Type**: Maven 多模块增量——axion-tool（ToolRegistry/builtin 六件/mcp 子包/方式三包装器/PermissiveSandbox）+ axion-cli（CliAgentConfiguration 改造）；**无新模块**
 
 **Performance Goals**: 工具执行同步阻塞（虚拟线程承载）；shell 超时默认 30s（超时强制销毁）；http 响应体上限 1MB；MCP stdio 每次调用进程间通信（可接受，虚拟线程挂起等待）
 
@@ -42,7 +42,7 @@
 | VI 不用 SecurityManager / Sandbox 接口先行 | ✅ 合规 | 六个工具 execute 首行 enforce（坑十）；PermissiveSandbox 临时实现（拍板方案 A），24 节替换 WhitelistSandbox；接口签名零实现词 |
 | VII 同步执行模型 | ✅ 合规 | 同步阻塞；McpSyncClient 同步门面（业务层零 Reactor 代码） |
 | VIII 三种触发源共用一个引擎 | ✅ 合规 | Tool 不感知触发源 |
-| IX Tool 模块三合一 | ✅ 合规 | 全部落 oryxos-tool（builtin/mcp 子包），不拆新模块 |
+| IX Tool 模块三合一 | ✅ 合规 | 全部落 axion-tool（builtin/mcp 子包），不拆新模块 |
 | 技术约束 | ✅ 合规 | 无新表/无新配置键（mcp_servers.yaml 是工作区文件，003 已建模板）；凭证 `${ENV_VAR}` 占位；入参不进日志参数；核心阶段不做清单遵守（无 Tool Policy/SSE/容器沙箱/并行调用） |
 
 **GATE: PASS**（Phase 1 设计后复查同表，无变化）
@@ -65,10 +65,10 @@ specs/005-tool/
 ### Source Code (repository root)
 
 ```text
-oryxos-tool/                                    # 现有模块，增量
+axion-tool/                                    # 现有模块，增量
 ├── pom.xml                                     # + spring-ai-starter-mcp-client
 └── src/
-    ├── main/java/com/oryxos/tool/
+    ├── main/java/com/axion/tool/
     │   ├── ToolRegistry.java                   # FR-1：统一注册 + 过滤 + 重名拒绝
     │   ├── PermissiveSandbox.java              # FR-7：临时全放行（24 节替换）
     │   ├── AnnotatedMethodToolAdapter.java     # FR-6：方式三包装器
@@ -83,8 +83,8 @@ oryxos-tool/                                    # 现有模块，增量
     │       ├── McpClientService.java
     │       ├── McpToolAdapter.java
     │       └── McpServerConfig.java
-    └── test/java/com/oryxos/tool/
-        ├── OryxToolContractTest.java           # 坑十二参数化
+    └── test/java/com/axion/tool/
+        ├── AxionToolContractTest.java           # 坑十二参数化
         ├── ToolRegistryTest.java               # 坑十四 + 重名 + 未知名
         ├── builtin/FileToolsTest.java（ReadFileToolTest/WriteFileToolTest/ListDirToolTest，实现级明确）
         ├── builtin/ShellToolsTest.java
@@ -92,13 +92,13 @@ oryxos-tool/                                    # 现有模块，增量
         ├── AnnotatedMethodToolAdapterTest.java
         └── mcp/McpClientServiceTest.java、McpToolAdapterTest.java
 
-oryxos-cli/                                     # 003 交付物改造
-└── src/main/java/com/oryxos/cli/CliAgentConfiguration.java
+axion-cli/                                     # 003 交付物改造
+└── src/main/java/com/axion/cli/CliAgentConfiguration.java
     # FR-7：工具集空 Map → ToolRegistry；RestClient（不变量 9）+ NotifyTools/Registry 显式 @Bean；
     #       PermissiveSandbox @Bean（javadoc 标注 24 节替换）
 ```
 
-**Structure Decision**: 无新模块——CLAUDE.md 9 模块结构不变。oryxos-tool 内部按领域子包（builtin/mcp，004 notify 先例 + 2026-09-05 拍板"模块即层、子包按领域"口径）。唯一前序改造点 CliAgentConfiguration（003 FR-10 既定"第 20 节替换"口径）。
+**Structure Decision**: 无新模块——CLAUDE.md 9 模块结构不变。axion-tool 内部按领域子包（builtin/mcp，004 notify 先例 + 2026-09-05 拍板"模块即层、子包按领域"口径）。唯一前序改造点 CliAgentConfiguration（003 FR-10 既定"第 20 节替换"口径）。
 
 ## Complexity Tracking
 

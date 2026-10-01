@@ -9,7 +9,7 @@
 ## 机器判卷：harness 全绿
 
 ```bash
-mvn test -pl oryxos-core -am                    # 日常全跑（AgentSchedulerTest 四坑 + 两最值钱 + 三元组 + ⑦b）
+mvn test -pl axion-core -am                    # 日常全跑（AgentSchedulerTest 四坑 + 两最值钱 + 三元组 + ⑦b）
 mvn clean verify                                # 收尾全量门禁（全绿，不写死用例数——007 ⑦e 口径）
 ```
 

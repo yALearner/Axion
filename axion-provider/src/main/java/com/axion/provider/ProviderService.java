@@ -1,9 +1,9 @@
-package com.oryxos.provider;
+package com.axion.provider;
 
-import com.oryxos.core.LlmGateway;
-import com.oryxos.core.Profile;
-import com.oryxos.storage.LlmCall;
-import com.oryxos.storage.LlmCallRepository;
+import com.axion.core.LlmGateway;
+import com.axion.core.Profile;
+import com.axion.storage.LlmCall;
+import com.axion.storage.LlmCallRepository;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.Instant;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.oryxos.cli;
+package com.axion.cli;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;

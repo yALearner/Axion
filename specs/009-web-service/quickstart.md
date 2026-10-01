@@ -5,13 +5,13 @@
 ## 前置
 
 - Java 21 + Maven + Node（前端构建，frontend-maven-plugin 首次构建会下载 node/npm 依赖）
-- 前序交付物就位（实测 2026-09-08）：AgentService.process / SessionManager（getOrCreate）/ ProfileRegistry.list / ToolRegistry / LongTermMemoryStore.load；oryxos-web 地基 5 件；ServeCommand 占位
+- 前序交付物就位（实测 2026-09-08）：AgentService.process / SessionManager（getOrCreate）/ ProfileRegistry.list / ToolRegistry / LongTermMemoryStore.load；axion-web 地基 5 件；ServeCommand 占位
 - **⑨b/⑨d 实施前核实**：SessionManager 持久化时机（findById 一致性）+ Session 并发面（三触发源同场）
 
 ## 机器判卷：harness 全绿
 
 ```bash
-mvn test -pl oryxos-web -am                          # 日常全跑（@WebMvcTest 切片 + GlobalExceptionHandlerTest）
+mvn test -pl axion-web -am                          # 日常全跑（@WebMvcTest 切片 + GlobalExceptionHandlerTest）
 mvn clean verify                                     # 收尾全量门禁（全绿，不写死用例数——007 ⑦e 口径；含 WebSmokeIT）
 mvn -Dskip.npm package                               # 后端迭代打包跳过前端构建（拍板 B skip 开关）
 ```
@@ -31,7 +31,7 @@ mvn -Dskip.npm package                               # 后端迭代打包跳过�
 @Test
 void 内部异常细节_绝不能出现在500响应里() {
     when(agentService.process(any(), any()))
-        .thenThrow(new IllegalStateException("jdbc:sqlite:/data/oryxos.db connect failed"));
+        .thenThrow(new IllegalStateException("jdbc:sqlite:/data/axion.db connect failed"));
     mockMvc.perform(post("/api/v1/sessions/s-1/messages").contentType(JSON).content(body))
         .andExpect(status().isInternalServerError())
         .andExpect(jsonPath("$.errorCode").value(500))                          // 拍板 B：错误走 ErrorResponse 信封
@@ -43,7 +43,7 @@ void 内部异常细节_绝不能出现在500响应里() {
 ## 人工项（做完怎么验）
 
 ```bash
-oryxos serve                                          # 启动，默认 8080（只配 DEEPSEEK_API_KEY 一个 key 就起得来——eager 装配已排除）
+axion serve                                          # 启动，默认 8080（只配 DEEPSEEK_API_KEY 一个 key 就起得来——eager 装配已排除）
 curl -X POST localhost:8080/api/v1/sessions           # 建会话
 curl -X POST localhost:8080/api/v1/sessions/{id}/messages \
      -H 'Content-Type: application/json' -d '{"content":"今天北京天气怎么样"}'   # 完整 ReAct 返回答复

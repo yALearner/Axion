@@ -9,7 +9,7 @@
   <rect x="0" y="16" width="860" height="16" fill="#d7e2f2"/>
   <text x="430" y="21" text-anchor="middle" fill="#10203f" font-size="12" font-weight="bold">插件化 Agent — 一个目录 = 一个 Agent · 扫描→派生→注册→到点自己跑 · 资源按需加载（宪法 IV 软连接）</text>
   <rect x="30" y="55" width="530" height="66" rx="6" fill="#2a2110" stroke="#f59e0b" stroke-width="1.2" filter="url(#sh)"/>
-  <text x="295.0" y="72" text-anchor="middle" font-size="10" font-weight="bold" fill="#fbbf24">入口：运营方丢目录 → .oryxos/agents/daily-reconcile/（一个目录 = 一个 Agent）</text>
+  <text x="295.0" y="72" text-anchor="middle" font-size="10" font-weight="bold" fill="#fbbf24">入口：运营方丢目录 → .axion/agents/daily-reconcile/（一个目录 = 一个 Agent）</text>
   <text x="295.0" y="87" text-anchor="middle" font-size="8" fill="#fcd34d">AGENT.md（frontmatter 配置 + 正文指令）· REFERENCE.md · skills/ 绑定 · scripts/reconcile.py</text>
   <text x="295.0" y="101" text-anchor="middle" font-size="8" fill="#fcd34d">无 notify_channels（004 拍板）· 无 skills 字段（宪法 IV）</text>
   <rect x="30" y="155" width="530" height="66" rx="6" fill="#0d2b21" stroke="#10b981" stroke-width="1.2" filter="url(#sh)"/>
@@ -41,7 +41,7 @@
   <text x="715.0" y="101" text-anchor="middle" font-size="8" fill="#93c5fd">frontmatter 不含（不翻案）</text>
   <rect x="600" y="155" width="230" height="66" rx="6" fill="#10203f" stroke="#3b82f6" stroke-width="1.2" filter="url(#sh)"/>
   <text x="715.0" y="172" text-anchor="middle" font-size="10" font-weight="bold" fill="#93c5fd">公共 Skill 实体（宪法 IV 拍板）</text>
-  <text x="715.0" y="187" text-anchor="middle" font-size="8" fill="#93c5fd">.oryxos/skills/report-format/SKILL.md</text>
+  <text x="715.0" y="187" text-anchor="middle" font-size="8" fill="#93c5fd">.axion/skills/report-format/SKILL.md</text>
   <text x="715.0" y="201" text-anchor="middle" font-size="8" fill="#93c5fd">软连接/junction 绑定 = 唯一真相源</text>
   <rect x="600" y="255" width="230" height="66" rx="6" fill="#33151f" stroke="#fb7185" stroke-width="1.2" filter="url(#sh)"/>
   <text x="715.0" y="272" text-anchor="middle" font-size="10" font-weight="bold" fill="#fb7185">越界即拒（失败路径）</text>

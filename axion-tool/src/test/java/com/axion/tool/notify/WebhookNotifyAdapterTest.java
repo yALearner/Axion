@@ -1,4 +1,4 @@
-package com.oryxos.tool.notify;
+package com.axion.tool.notify;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

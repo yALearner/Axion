@@ -21,7 +21,7 @@ ActionType     = FILE_READ | FILE_WRITE | SHELL_COMMAND | HTTP_REQUEST
 
 1. **接口中立**：签名不出现"白名单/容器镜像/VM 配置"字样（技术方案 §6.7——用最重的 microVM 实现反向套此签名也应能干净套入）
 2. **本节状态**：纯接口墙，零实现、无白名单配置、无人调用（FR-7）
-3. **接线约定**：涉外 IO 的 `enforce` 由各工具在 `execute` 首行自行调用（技术方案 §6.7 原文），**ToolExecutor 不持 Sandbox 引用**（core 不反向依赖 oryxos-tool）
+3. **接线约定**：涉外 IO 的 `enforce` 由各工具在 `execute` 首行自行调用（技术方案 §6.7 原文），**ToolExecutor 不持 Sandbox 引用**（core 不反向依赖 axion-tool）
 4. **审计**：Sandbox 违规不新增审计逻辑——异常复用 `ToolExecutor` 既有失败审计路径（`success=false` + `error_message`，技术方案 §6.7）
 5. **演进**：`WhitelistSandbox`（第 23/24 节）→ 容器隔离 → microVM，接口不变
 

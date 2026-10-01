@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.oryxos</groupId>
-        <artifactId>oryxos</artifactId>
+        <groupId>com.axion</groupId>
+        <artifactId>axion</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>oryxos-web</artifactId>
-    <name>OryxOS :: Web</name>
+    <artifactId>axion-web</artifactId>
+    <name>Axion :: Web</name>
     <description>核心能力五：WebServer、6 个 ApiController、GlobalExceptionHandler、OpenAPI 文档</description>
 
     <properties>
@@ -23,24 +23,24 @@
     <dependencies>
         <!-- Internal -->
         <dependency>
-            <groupId>com.oryxos</groupId>
-            <artifactId>oryxos-core</artifactId>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.oryxos</groupId>
-            <artifactId>oryxos-provider</artifactId>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-provider</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.oryxos</groupId>
-            <artifactId>oryxos-memory</artifactId>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-memory</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.oryxos</groupId>
-            <artifactId>oryxos-tool</artifactId>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-tool</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.oryxos</groupId>
-            <artifactId>oryxos-storage</artifactId>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-storage</artifactId>
         </dependency>
 
         <!-- Spring Boot Web (Spring MVC + Virtual Thread) -->
@@ -54,8 +54,8 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <exclusions>
-                <!-- swagger-core 自带 snakeyaml 2.3 声明，与 oryxos-core 直接声明的 2.4 双路径
-                     触发 requireUpperBoundDeps 误报；运行时统一用 oryxos-core 的 2.4 -->
+                <!-- swagger-core 自带 snakeyaml 2.3 声明，与 axion-core 直接声明的 2.4 双路径
+                     触发 requireUpperBoundDeps 误报；运行时统一用 axion-core 的 2.4 -->
                 <exclusion>
                     <groupId>org.yaml</groupId>
                     <artifactId>snakeyaml</artifactId>

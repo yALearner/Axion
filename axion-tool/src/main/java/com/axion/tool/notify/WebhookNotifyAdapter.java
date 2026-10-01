@@ -1,4 +1,4 @@
-package com.oryxos.tool.notify;
+package com.axion.tool.notify;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.net.URI;
@@ -16,7 +16,7 @@ import org.springframework.web.client.RestClient;
  * <p>坑十一：webhook 返回 4xx/5xx 或网络失败时异常原样上抛、不静默吞掉——吞掉 = Agent 以为发出去了； 错误路径由 ToolExecutor 既有审计承接。URL 只从
  * config 取、不硬编码。
  *
- * <p>不加 {@code @Component}（G4-C1 钉死）：boot 扫描 com.oryxos 全树，RestClient bean 由第 20 节 装配处用 Boot 自动配置的
+ * <p>不加 {@code @Component}（G4-C1 钉死）：boot 扫描 com.axion 全树，RestClient bean 由第 20 节 装配处用 Boot 自动配置的
  * {@code RestClient.Builder} 构建（必设 connect/read timeout）后显式 {@code @Bean}。
  */
 public class WebhookNotifyAdapter implements NotifyChannelAdapter {

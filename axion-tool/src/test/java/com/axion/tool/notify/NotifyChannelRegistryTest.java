@@ -1,12 +1,12 @@
-package com.oryxos.tool.notify;
+package com.axion.tool.notify;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.oryxos.storage.NotifyChannelEntity;
-import com.oryxos.storage.NotifyChannelRepository;
+import com.axion.storage.NotifyChannelEntity;
+import com.axion.storage.NotifyChannelRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;

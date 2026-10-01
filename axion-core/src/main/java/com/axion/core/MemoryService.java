@@ -1,4 +1,4 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import java.util.List;
  * 记忆统一门面（FR-1，依赖倒置端口——001 {@link LlmGateway} 先例）。
  *
  * <p>对 ReAct 循环只暴露这一个接口：内部把会话记忆（{@link SessionManager}，SQLite 持久化）与长期记忆 （{@link
- * LongTermMemoryStore} 可插拔后端）收口成三层记忆，上层不需要分别问两个地方（技术方案 §5.1 架构调整说明）。实现落 oryxos-memory，core
+ * LongTermMemoryStore} 可插拔后端）收口成三层记忆，上层不需要分别问两个地方（技术方案 §5.1 架构调整说明）。实现落 axion-memory，core
  * 只承载接口——PromptBuilder 在 core 调用它，core←memory 反向依赖不成立。
  */
 public interface MemoryService {

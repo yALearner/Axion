@@ -1,4 +1,4 @@
-package com.oryxos.storage;
+package com.axion.storage;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;

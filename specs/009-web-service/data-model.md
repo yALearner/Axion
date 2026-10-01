@@ -22,7 +22,7 @@
 | SERVICE_UNAVAILABLE | 503 | **仅** ProviderUnavailableException + 地基 ServiceUnavailableException（⑨a：IllegalStateException 归 500） |
 | **GATEWAY_TIMEOUT（本节补）** | 504 | AgentTimeoutException（Agent 调用 60s 上限） |
 
-## 异常类（本节新增 5 个，落 oryxos-web/api）
+## 异常类（本节新增 5 个，落 axion-web/api）
 
 | 类 | 语义 | 映射 |
 |----|------|------|
@@ -55,5 +55,5 @@
 
 ## 前端数据流（管理台 v1 只读）
 
-- 五页 → 五个 GET 端点 → 统一请求封装（oryxos-admin-ui skill 内置）：成功解析 `ApiResponse.data`、错误解析 `ErrorResponse.errorCode/message`——页面不手写两套解析
+- 五页 → 五个 GET 端点 → 统一请求封装（axion-admin-ui skill 内置）：成功解析 `ApiResponse.data`、错误解析 `ErrorResponse.errorCode/message`——页面不手写两套解析
 - 产物 static/admin/（vite base '/admin/'）→ Spring 托管 /admin → SPA 回落 index.html（/api/v1/** 不受影响）

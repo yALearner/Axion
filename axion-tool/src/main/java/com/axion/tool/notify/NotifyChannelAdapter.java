@@ -1,4 +1,4 @@
-package com.oryxos.tool.notify;
+package com.axion.tool.notify;
 
 /**
  * 出站通知通道统一接口（接口先行，FR-1）。

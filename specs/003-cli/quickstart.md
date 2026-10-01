@@ -17,7 +17,7 @@ mvn test
 预期：会话层测试全绿——
 - `SessionManagerTest`（mock 版）：同三元组幂等（同一实例 + 同 id）、三元组任一不同则不同、id 拼接只此一处的架构断言、save 触发落库、get 反序列化重建
 - `SessionRepositoryTest`：手工 schema.sql 建表（坑八）、可存可读、messages_json 回读后消息完整（含 toolCall 嵌套）、模拟重启（新建 context 重查）历史还在
-- 坑九架构断言：启动类带 `@EnableJpaRepositories`/`@EntityScan` 且 basePackages 含 `com.oryxos.storage`
+- 坑九架构断言：启动类带 `@EnableJpaRepositories`/`@EntityScan` 且 basePackages 含 `com.axion.storage`
 
 ## 完成定义
 
@@ -42,18 +42,18 @@ $env:DEEPSEEK_API_KEY = "<有效 key>"   # 无效 key 会 401；可先直测：
 
 1. **轻命令链**（不启动 Spring，秒回）：
    ```powershell
-   java -jar oryxos-boot/target/oryxos-boot-0.1.0-SNAPSHOT.jar init        # 跑两遍验幂等
-   java -jar oryxos-boot/target/oryxos-boot-0.1.0-SNAPSHOT.jar profile list
-   java -jar oryxos-boot/target/oryxos-boot-0.1.0-SNAPSHOT.jar profile create weather   # 重复 create 提示不覆盖
-   java -jar oryxos-boot/target/oryxos-boot-0.1.0-SNAPSHOT.jar profile show weather     # api-key 必须显示占位 ${...} 而非明文
-   java -jar oryxos-boot/target/oryxos-boot-0.1.0-SNAPSHOT.jar provider list             # 同理：api-key 永不输出
-   java -jar oryxos-boot/target/oryxos-boot-0.1.0-SNAPSHOT.jar status
-   java -jar oryxos-boot/target/oryxos-boot-0.1.0-SNAPSHOT.jar --help                   # 9 命令组 12 叶命令
+   java -jar axion-boot/target/axion-boot-0.1.0-SNAPSHOT.jar init        # 跑两遍验幂等
+   java -jar axion-boot/target/axion-boot-0.1.0-SNAPSHOT.jar profile list
+   java -jar axion-boot/target/axion-boot-0.1.0-SNAPSHOT.jar profile create weather   # 重复 create 提示不覆盖
+   java -jar axion-boot/target/axion-boot-0.1.0-SNAPSHOT.jar profile show weather     # api-key 必须显示占位 ${...} 而非明文
+   java -jar axion-boot/target/axion-boot-0.1.0-SNAPSHOT.jar provider list             # 同理：api-key 永不输出
+   java -jar axion-boot/target/axion-boot-0.1.0-SNAPSHOT.jar status
+   java -jar axion-boot/target/axion-boot-0.1.0-SNAPSHOT.jar --help                   # 9 命令组 12 叶命令
    ```
    核对点：全部无 Spring 启动日志；`--help` 用 `sed 's/\x1b\[[0-9;]*m//g'` 剥 ANSI 后核对命令表
 2. **chat 多轮对话**：
    ```powershell
-   java -jar oryxos-boot/target/oryxos-boot-0.1.0-SNAPSHOT.jar chat --profile weather
+   java -jar axion-boot/target/axion-boot-0.1.0-SNAPSHOT.jar chat --profile weather
    > 查一下西安天气并告诉我穿什么     # 核对：中文不乱码（编码跟随终端）
    > 我们刚才聊了什么？               # 核对：模型能复述本轮内容（会话内历史累积）
    > /quit                            # 核对：Spring 上下文干净关闭

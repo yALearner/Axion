@@ -6,15 +6,15 @@
 
 ## Summary
 
-在工程地基之上，为 `oryxos-provider` / `oryxos-core` / `oryxos-storage` 三个空壳模块交付第一批业务代码：`ProviderService` 统一调用门面（provider name → ChatModel 显式映射、Function Calling 只翻译不执行、成败都落 `llm_calls` 审计）+ `Profile` 派生与注册 + `LlmCall` 落库。宪法原则 II（Spring AI 只用两件事）、III（显式映射）、V（审计 day one）、VII（同步执行）是四条硬约束，均有对应回归测试钉死。
+在工程地基之上，为 `axion-provider` / `axion-core` / `axion-storage` 三个空壳模块交付第一批业务代码：`ProviderService` 统一调用门面（provider name → ChatModel 显式映射、Function Calling 只翻译不执行、成败都落 `llm_calls` 审计）+ `Profile` 派生与注册 + `LlmCall` 落库。宪法原则 II（Spring AI 只用两件事）、III（显式映射）、V（审计 day one）、VII（同步执行）是四条硬约束，均有对应回归测试钉死。
 
 ## Technical Context
 
 **Language/Version**: Java 21 + Spring Boot 3.x，Maven 多模块（BOM 已锁定：spring-ai-bom 1.1.8、snakeyaml 2.4、sqlite-jdbc 3.53.4.0）
 
-**Primary Dependencies**: Spring AI Alibaba（只做协议转换 + `@Tool` schema 生成，禁用自动 tool 执行）、Spring Data JPA + SQLite、SnakeYAML（oryxos-core 已声明）、JUnit 5 + Mockito（工程地基测试栈，以模块 pom 实际锁定为准）
+**Primary Dependencies**: Spring AI Alibaba（只做协议转换 + `@Tool` schema 生成，禁用自动 tool 执行）、Spring Data JPA + SQLite、SnakeYAML（axion-core 已声明）、JUnit 5 + Mockito（工程地基测试栈，以模块 pom 实际锁定为准）
 
-**Storage**: SQLite `.oryxos/oryxos.db`；`llm_calls` 用手工 `schema.sql` 建表，不依赖 `hibernate.ddl-auto=update` 迁移（技术方案 §9.2 工程风险提示）
+**Storage**: SQLite `.axion/axion.db`；`llm_calls` 用手工 `schema.sql` 建表，不依赖 `hibernate.ddl-auto=update` 迁移（技术方案 §9.2 工程风险提示）
 
 **Testing**: 四个单测类 mock `ChatModel` 默认全跑；`ProviderSmokeIT` 打 `@Tag("integration")` 本地手动、CI 跳过；完成定义 = `mvn clean verify` 全绿
 
@@ -42,7 +42,7 @@
 | VI 不使用 SecurityManager | ✅ 不涉及（N/A） | 本节无沙箱 |
 | VII 同步执行模型 | ✅ PASS（硬约束） | 全程同步阻塞，无 Reactor/CompletableFuture（NFR-1） |
 | VIII 三种触发源共用一个引擎 | ✅ 不涉及（N/A） | Provider 不感知入口 |
-| IX Tool 模块三合一 | ✅ PASS | 不新建 Tool 模块；OryxTool 接口落 oryxos-core（US-4 在 oryxos-tool 填充实现） |
+| IX Tool 模块三合一 | ✅ PASS | 不新建 Tool 模块；AxionTool 接口落 axion-core（US-4 在 axion-tool 填充实现） |
 | 技术约束：建表/密钥/日志 | ✅ PASS | 手工 schema.sql；`${ENV_VAR}` 占位；结构化 JSON 日志（地基已有） |
 | 质量门：每模块端到端测试 | ✅ PASS | 5 个测试类覆盖三个模块（计划见需求文档验收 harness） |
 
@@ -60,27 +60,27 @@ specs/001-provider/
 ├── quickstart.md        # Phase 1 输出
 ├── contracts/           # Phase 1 输出（provider-service.md）
 ├── checklists/          # 质量清单
-├── flow-status.md       # oryx-spec 进度文件
+├── flow-status.md       # axion-spec 进度文件
 └── tasks.md             # Phase 2 输出（/speckit-tasks，本阶段不创建）
 ```
 
 ### Source Code (repository root)
 
 ```text
-oryxos-provider/
-└── src/main/java/com/oryxos/provider/   # ProviderProperties、ProviderService、显式映射、
+axion-provider/
+└── src/main/java/com/axion/provider/   # ProviderProperties、ProviderService、显式映射、
 │                                        #   Function Calling 适配器、ProviderNotFoundException
 ├── src/test/java/                       # ProviderServiceTest、ToolSchemaAdapterTest、ProviderSmokeIT
-oryxos-core/
-├── src/main/java/com/oryxos/core/       # Profile、ProfileLoader（基础版 deriveProfile）、
-│                                        #   ProfileRegistry、Message、OryxTool
+axion-core/
+├── src/main/java/com/axion/core/       # Profile、ProfileLoader（基础版 deriveProfile）、
+│                                        #   ProfileRegistry、Message、AxionTool
 └── src/test/java/                       # ProfileLoaderTest
-oryxos-storage/
-├── src/main/java/com/oryxos/storage/    # LlmCall 实体、LlmCallRepository
+axion-storage/
+├── src/main/java/com/axion/storage/    # LlmCall 实体、LlmCallRepository
 ├── src/main/resources/schema.sql        # 手工建表脚本
 └── src/test/java/                       # LlmCallRepositoryTest（执行 schema.sql 建表）
-oryxos-boot/
-└── src/main/resources/application.yaml  # oryxos.providers 全局层配置示例（${ENV} 占位）
+axion-boot/
+└── src/main/resources/application.yaml  # axion.providers 全局层配置示例（${ENV} 占位）
 ```
 
-**Structure Decision**: 沿用既有 9 模块 Maven 结构，本 feature 只触碰上述三个模块与 boot 配置示例。`oryxos-core` 当前为空壳，本节为其落地第一批抽象（Profile/Message/OryxTool），不修改任何既有接口（不存在）；新增能力一律加新模块的原则对本节不适用（本节是 core 的首批内容本身）。
+**Structure Decision**: 沿用既有 9 模块 Maven 结构，本 feature 只触碰上述三个模块与 boot 配置示例。`axion-core` 当前为空壳，本节为其落地第一批抽象（Profile/Message/AxionTool），不修改任何既有接口（不存在）；新增能力一律加新模块的原则对本节不适用（本节是 core 的首批内容本身）。

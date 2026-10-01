@@ -1,6 +1,6 @@
 # Architecture
 
-OryxOS is organized into **9 Maven modules** across 4 layers, with clear dependency direction:
+Axion is organized into **9 Maven modules** across 4 layers, with clear dependency direction:
 
 ```
 storage ← core ← provider / memory / tool ← channel-cli / web ← cli ← boot
@@ -10,19 +10,19 @@ storage ← core ← provider / memory / tool ← channel-cli / web ← cli ← 
 
 | Module | Layer | Responsibility |
 |--------|-------|---------------|
-| `oryxos-core` | Kernel | Core abstractions: `ReActLoop`, `PromptBuilder`, `ToolExecutor`, `AgentService`, `AgentScheduler` |
-| `oryxos-storage` | Kernel | SQLite persistence, `SessionRepository`, `ToolInvocationRepository`, `LlmCallRepository` |
-| `oryxos-provider` | Capability | `ProviderService`, multi-provider explicit mapping, Function Calling adapter |
-| `oryxos-memory` | Capability | `MemoryService` facade, `LongTermMemory` pluggable backends, `MemoryTools` |
-| `oryxos-tool` | Capability | 9 built-in Tools, MCP Client, `ToolRegistry`, `Sandbox` interface, `NotifyTools` |
-| `oryxos-channel-cli` | Channel | CLI interactive chat Channel |
-| `oryxos-web` | Channel | REST API (10 endpoints), `GlobalExceptionHandler`, OpenAPI docs |
-| `oryxos-cli` | Boot | Picocli entry point (12 subcommands), `ConfigLoader` |
-| `oryxos-boot` | Boot | Spring Boot main class, auto-configuration, dependency aggregation |
+| `axion-core` | Kernel | Core abstractions: `ReActLoop`, `PromptBuilder`, `ToolExecutor`, `AgentService`, `AgentScheduler` |
+| `axion-storage` | Kernel | SQLite persistence, `SessionRepository`, `ToolInvocationRepository`, `LlmCallRepository` |
+| `axion-provider` | Capability | `ProviderService`, multi-provider explicit mapping, Function Calling adapter |
+| `axion-memory` | Capability | `MemoryService` facade, `LongTermMemory` pluggable backends, `MemoryTools` |
+| `axion-tool` | Capability | 9 built-in Tools, MCP Client, `ToolRegistry`, `Sandbox` interface, `NotifyTools` |
+| `axion-channel-cli` | Channel | CLI interactive chat Channel |
+| `axion-web` | Channel | REST API (10 endpoints), `GlobalExceptionHandler`, OpenAPI docs |
+| `axion-cli` | Boot | Picocli entry point (12 subcommands), `ConfigLoader` |
+| `axion-boot` | Boot | Spring Boot main class, auto-configuration, dependency aggregation |
 
 ## ReAct Loop
 
-The core engine is the **ReAct Loop** — OryxOS implements this itself (does not delegate to Spring AI's Agent abstraction):
+The core engine is the **ReAct Loop** — Axion implements this itself (does not delegate to Spring AI's Agent abstraction):
 
 ```
 User Message (from CLI / HTTP / AgentScheduler)

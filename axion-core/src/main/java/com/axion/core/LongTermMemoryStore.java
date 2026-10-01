@@ -1,9 +1,9 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import java.util.List;
 
 /**
- * 长期记忆可插拔后端接口（FR-2）——长期记忆读写契约与具体存储解耦，换后端只改 {@code oryxos.memory.backend} 一行配置，本接口之上（PromptBuilder /
+ * 长期记忆可插拔后端接口（FR-2）——长期记忆读写契约与具体存储解耦，换后端只改 {@code axion.memory.backend} 一行配置，本接口之上（PromptBuilder /
  * MemoryTools / ReActLoop）零改动。
  *
  * <p><strong>四条行为契约（全实现共用，参数化契约测试钉死）：</strong>

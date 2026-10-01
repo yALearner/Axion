@@ -38,7 +38,7 @@ Agent 读 `/workspace/../../outside/secret.txt` 试图爬到白名单目录之�
 **Acceptance Scenarios**:
 
 1. **Given** 白名单根 `/workspace`，**When** enforce 收到 `/workspace/../../outside/secret.txt`，**Then** 抛 SandboxViolationException（normalize 吸收穿越——课件原文用例）
-2. **Given** 白名单根为相对路径 `.oryxos/workspace`，**When** enforce 收到该目录下任意绝对路径，**Then** 放行（构造期 toAbsolutePath 后 startsWith 命中——「根未绝对化」回归钉，⑦a）
+2. **Given** 白名单根为相对路径 `.axion/workspace`，**When** enforce 收到该目录下任意绝对路径，**Then** 放行（构造期 toAbsolutePath 后 startsWith 命中——「根未绝对化」回归钉，⑦a）
 3. **Given** 运行于 Windows 且白名单根/目标大小写不一致，**When** enforce 校验，**Then** 按 lower-case 归一后命中放行（⑦b 平台条件测试；Linux 维持大小写敏感）
 4. **Given** 目标在白名单外，**When** enforce 收到，**Then** 拒绝且真正的文件 IO 没有发生
 
@@ -100,7 +100,7 @@ Agent 读 `/workspace/../../outside/secret.txt` 试图爬到白名单目录之�
 - 大小写变体（`LS`）→ 精确匹配拒绝（Shell）；Windows 文件路径大小写变体 → lower-case 归一放行（文件）
 - `VAR=x cmd` 环境变量前缀 → 按首 token `VAR=x` 拒绝
 - host 解析不到（`URI.create(url).getHost()` 为 null）→ 拒绝，不 NPE 不漏放
-- 相对白名单根（`.oryxos/workspace`）→ 构造期 toAbsolutePath，相对根按启动目录解析
+- 相对白名单根（`.axion/workspace`）→ 构造期 toAbsolutePath，相对根按启动目录解析
 - Windows 上 `/workspace` 类 Unix 绝对路径解析为当前盘根——穿越测试断言结果不变，平台语义注记
 - 三块白名单全空 → 全拒绝（fail-closed）+ 构造期 WARN
 - 枚举四值全覆盖（FILE_READ/FILE_WRITE 同路由断言）
@@ -139,7 +139,7 @@ Agent 读 `/workspace/../../outside/secret.txt` 试图爬到白名单目录之�
 
 ## Assumptions
 
-- **前序交付物已实测就位**（2026-09-06）：接口墙四件 + PermissiveSandbox 在 `oryxos-tool` 全部就位；七工具 enforce 调用点全部存在（FILE_READ×2/FILE_WRITE×1/SHELL_COMMAND×1/HTTP_REQUEST×3）；`ToolExecutor` 两处 catch 已就位；`application.yaml` 无 allowed 配置键（本节新增）；`CliAgentConfiguration.sandbox()` 当前返回 PermissiveSandbox——本节为纯增量
+- **前序交付物已实测就位**（2026-09-06）：接口墙四件 + PermissiveSandbox 在 `axion-tool` 全部就位；七工具 enforce 调用点全部存在（FILE_READ×2/FILE_WRITE×1/SHELL_COMMAND×1/HTTP_REQUEST×3）；`ToolExecutor` 两处 catch 已就位；`application.yaml` 无 allowed 配置键（本节新增）；`CliAgentConfiguration.sandbox()` 当前返回 PermissiveSandbox——本节为纯增量
 - **零新第三方依赖**：`java.nio.file.Path`、`java.net.URI`、`String.split` 全部 JDK 原生
 - **课件口径**（用户拍板 2026-09-06）：以新版 PDF（PyMuPDF 提取）为准；修订说明 ①⑥ 列明差异清单、⑦ 列明实施前优化（a~i）——spec/plan/tasks 一律以文档修订后口径为准
 - **信任边界**：应用层白名单是劝阻级防线（防犯傻不防蓄意）；`shell` 跑脚本 = 信任 Agent 作者；核心阶段单实例 + 内网假设兜底

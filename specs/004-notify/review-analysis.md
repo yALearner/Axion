@@ -1,7 +1,7 @@
 # Review Analysis: 004-notify 实现复盘（偏差与不足）
 
 > 生成时间：2026-09-05（S6 交付后、人工验收前）。
-> 对象：oryxos-tool（notify/builtin 子包 5 类）+ oryxos-storage（实体/仓储/schema 增量）+ 4 个测试类。
+> 对象：axion-tool（notify/builtin 子包 5 类）+ axion-storage（实体/仓储/schema 增量）+ 4 个测试类。
 > 定位：交付后的偏差复盘与不足清单——结论供用户拍板是否修复；已修复项须回写本文档与需求文档。
 > 行号以 spotless 格式化后的定稿为准。
 
@@ -11,9 +11,9 @@
 |---|--------|------|------|------|
 | D1 | `.uri(URI.create(url))` 而非课件骨架的 `.uri(url)` | WebhookNotifyAdapter.java:38 | 防御性增强 | 骨架 `.uri(String)` 按 URI 模板解析，URL 含 `{`/`}` 会误展开；`URI.create` 更严格。功能零偏差，保留 |
 | D2 | `NotifyTarget` 紧凑构造器拷贝 + 访问器覆盖，非骨架纯 record | NotifyTarget.java | 防御性增强 | SpotBugs EI_EXPOSE_REP 门禁要求，JsonSchema 同款先例。零功能偏差 |
-| D3 | **无 `@Component`**（课件骨架有） | NotifyTools.java:30 / WebhookNotifyAdapter.java:19 | 拍板级主动偏差 | G4-C1 钉死（boot 扫描 com.oryxos 全树，误加启动即崩）；深析见 §三 |
+| D3 | **无 `@Component`**（课件骨架有） | NotifyTools.java:30 / WebhookNotifyAdapter.java:19 | 拍板级主动偏差 | G4-C1 钉死（boot 扫描 com.axion 全树，误加启动即崩）；深析见 §三 |
 | D4 | 未知 channelType 显式 null 检查（骨架无） | NotifyTools.java:76-79 | 实现补全需求 | FR-6 明写"未知 type → 明确报错"，补上骨架漏掉的检查 |
-| D5 | mockwebserver 显式 4.12.0（需求文档原称"Boot BOM 管理"） | oryxos-tool/pom.xml | 文档修正 | H3 实测修正（Boot 3.5 BOM 不管理 okhttp3），需求文档/研究文档已同步 |
+| D5 | mockwebserver 显式 4.12.0（需求文档原称"Boot BOM 管理"） | axion-tool/pom.xml | 文档修正 | H3 实测修正（Boot 3.5 BOM 不管理 okhttp3），需求文档/研究文档已同步 |
 | D6 | body 格式 `{"content":...}` → 通用 text 格式 `{"msgtype":"text","text":{"content":...}}` | WebhookNotifyAdapter.java send 方法 | **人工验收实锤的功能缺陷修正** | 2026-09-05 真实企业微信返回 `errcode: 40008 invalid message type`（HTTP 200、群里收不到）——课件骨架 body 格式三平台实际都不认；方案 A（用户拍板）：企微+钉钉共用 msgtype/text/content，飞书归扩展阶段专用 Adapter。接口签名与架构零改动 |
 
 **总结论：无功能性偏差**。2 处防御性增强 + 1 处拍板级主动偏差（D3）+ 1 处文档修正，全部已留痕（flow-status / tasks.md / javadoc）。
@@ -79,14 +79,14 @@ adapters.get(target.channelType())   // 找 "webhook"，但 Map 里只有 "webho
 | 前置契约 | @Component 方案的冲突 |
 |---------|---------------------|
 | 002 FR-7：Sandbox 纯接口、**零实现**（实现归 23/24 节） | NotifyTools 的 @Component 需要 Sandbox bean → 被迫提前造假 bean（放行 stub = 白名单形同虚设的安全漏洞）或推翻 002 契约 |
-| 裁决 7：RestClient/adapter Map 装配归第 20 节 | RestClient/Map bean 本节不存在 → 全树扫描立即拾取 → `UnsatisfiedDependencyException`，003 已验收的 chat/serve 启动即崩（boot 是 `scanBasePackages = "com.oryxos"` 全树扫描） |
+| 裁决 7：RestClient/adapter Map 装配归第 20 节 | RestClient/Map bean 本节不存在 → 全树扫描立即拾取 → `UnsatisfiedDependencyException`，003 已验收的 chat/serve 启动即崩（boot 是 `scanBasePackages = "com.axion"` 全树扫描） |
 | 003 FR-10：工具集空 Map、第 20 节替换 | 与"本节只交类、不交 bean"的既定节奏冲突 |
 
 ### 论证要点
 
 1. **D3 不是"删两个注解"的机械适配，而是拍板结论的必然推论**：拍板（2026-09-04）定死 adapter 显式 Map 按 channelType 选——Spring 的 `Map<String, X>` 自动注入按 bean name 键控，语义直接冲突。保留 @Component 会让 `adapters.get(target.channelType())` 恒失败，即骨架形态在拍板口径下是一段"看起来合法、跑起来必错"的代码。
 2. **三个前置契约交叉推出唯一解**：002 FR-7（Sandbox 零实现，本节无 bean 可注）+ 裁决 7（RestClient/Map 装配归 20 节）+ 003 FR-10（工具集空 Map、20 节替换）——三者都要求"本节只交类、不交 bean"，@Component 与之全部冲突。
-3. **防御面**：boot 启动类 `scanBasePackages = "com.oryxos"` 全树扫描（003 实测修复过的启动路径），任何 @Component 立即生效——后果是已验收的 chat/serve 回归崩溃，而不会等到 20 节才暴露。
+3. **防御面**：boot 启动类 `scanBasePackages = "com.axion"` 全树扫描（003 实测修复过的启动路径），任何 @Component 立即生效——后果是已验收的 chat/serve 回归崩溃，而不会等到 20 节才暴露。
 4. **唯一成本**：20 节装配处多写一个 `@Bean`（一行），换来"bean 存在 ⇔ 依赖就位"的时序不变量。已通过 javadoc（NotifyTools.java:27-28、WebhookNotifyAdapter.java:16-17）与 tasks.md T011/T012 把理由钉死，防止 20 节有人"顺手加回 @Component"。
 
 ### 防回退措施

@@ -1,5 +1,5 @@
 /**
- * OryxOS Memory — 核心能力三：长期记忆.
+ * Axion Memory — 核心能力三：长期记忆.
  *
  * <p>Memory 三层统一门面，包含：
  *
@@ -14,4 +14,4 @@
  *   <li>{@code MemoryTools} — save_memory / recall_memory 内置 Tool
  * </ul>
  */
-package com.oryxos.memory;
+package com.axion.memory;

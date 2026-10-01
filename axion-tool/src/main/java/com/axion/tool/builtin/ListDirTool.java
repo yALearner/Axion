@@ -1,12 +1,12 @@
-package com.oryxos.tool.builtin;
+package com.axion.tool.builtin;
 
+import com.axion.core.AxionTool;
+import com.axion.core.JsonSchema;
+import com.axion.core.ToolResult;
+import com.axion.tool.ActionType;
+import com.axion.tool.Sandbox;
+import com.axion.tool.SandboxAction;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.oryxos.core.JsonSchema;
-import com.oryxos.core.OryxTool;
-import com.oryxos.core.ToolResult;
-import com.oryxos.tool.ActionType;
-import com.oryxos.tool.Sandbox;
-import com.oryxos.tool.SandboxAction;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
  * 内置 Tool {@code list_dir}（FR-2）：列出目录条目——execute 首行 {@code sandbox.enforce(FILE_READ, path)} 先于
  * IO（坑十）；非目录 → 明确报错。条目按名排序、带类型标注（参数规格表）。纯类交付无组件注解（G4-C1）。
  */
-public class ListDirTool implements OryxTool {
+public class ListDirTool implements AxionTool {
 
   private final Sandbox sandbox;
 

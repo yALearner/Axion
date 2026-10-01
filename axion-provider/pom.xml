@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.oryxos</groupId>
-        <artifactId>oryxos</artifactId>
+        <groupId>com.axion</groupId>
+        <artifactId>axion</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>oryxos-provider</artifactId>
-    <name>OryxOS :: Provider</name>
+    <artifactId>axion-provider</artifactId>
+    <name>Axion :: Provider</name>
     <description>核心能力一：ProviderService、Function Calling 适配、多 Provider 显式映射</description>
 
     <properties>
@@ -24,8 +24,8 @@
     <dependencies>
         <!-- Internal -->
         <dependency>
-            <groupId>com.oryxos</groupId>
-            <artifactId>oryxos-core</artifactId>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-core</artifactId>
         </dependency>
 
         <!-- Spring AI（LLM provider 抽象 + 协议转换；1.0 GA 起 starter 更名为 spring-ai-starter-model-openai） -->

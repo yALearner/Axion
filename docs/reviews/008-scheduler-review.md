@@ -23,7 +23,7 @@ AGENT.md frontmatter schedules（cron/zone/message 三键，002/003 已交付；
 
 ## 二、逐文件梳理
 
-### oryxos-core/com/oryxos/core（1 新增 + pom 依赖，主代码零改动其余）
+### axion-core/com/axion/core（1 新增 + pom 依赖，主代码零改动其余）
 
 | 文件 | 关键点 |
 |------|--------|
@@ -31,7 +31,7 @@ AGENT.md frontmatter schedules（cron/zone/message 三键，002/003 已交付；
 | `pom.xml` | +spotbugs-annotations（provided）——004/006/007 各模块用抑制注解时各自声明的机械延伸 |
 | 前序公共接口（Profile/Profile.Schedule/ProfileRegistry/SessionManager/AgentService） | **零改动**（git diff 空——拍板 B 承诺兑现） |
 
-### oryxos-cli（1 改造）
+### axion-cli（1 改造）
 
 | 文件 | 关键点 |
 |------|--------|

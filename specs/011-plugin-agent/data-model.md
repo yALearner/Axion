@@ -5,12 +5,12 @@
 ## 一、Agent 目录结构（唯一真相源）
 
 ```text
-.oryxos/agents/<name>/            # 一个目录 = 一个 Agent（目录名 = frontmatter name，坑八校验）
+.axion/agents/<name>/            # 一个目录 = 一个 Agent（目录名 = frontmatter name，坑八校验）
 ├── AGENT.md                      # 必填：frontmatter（运行配置）+ 正文（任务指令）
 ├── REFERENCE.md                  # 可选：参考（字段字典/已知差异）
 ├── scripts/                      # 可选：脚本（解释器命令经 L3 校验后运行）
-└── skills/<skill-name>           # 可选：指向 .oryxos/skills/<skill-name>/ 的相对软连接/junction（绑定真相源）
-.oryxos/skills/<skill-name>/      # 公共技能实体：SKILL.md（frontmatter: name/description + 正文）
+└── skills/<skill-name>           # 可选：指向 .axion/skills/<skill-name>/ 的相对软连接/junction（绑定真相源）
+.axion/skills/<skill-name>/      # 公共技能实体：SKILL.md（frontmatter: name/description + 正文）
 ```
 
 **身份规则**：`name` = 目录名（坑八：不一致 deriveProfile 报错点名）；**绑定规则**：软连接集合是唯一绑定真相源，frontmatter MUST NOT 声明 skills（宪法 IV）；**渠道规则**：frontmatter 无 notify_channels，正文按名引用（004 拍板）。
@@ -37,7 +37,7 @@ load(profile) =
   ② Bootstrap 文件（003 既有；缺失报错）
   ③ Skill 元数据（每绑定一条）：
      "- 技能: {name} — {description}（读取路径: <agentDir>/skills/<name>/SKILL.md）"
-     绑定路径 = agentDir + 绑定名（修订说明 ⑦；目标仍校验位于 .oryxos/skills/ 内、逃逸报错）
+     绑定路径 = agentDir + 绑定名（修订说明 ⑦；目标仍校验位于 .axion/skills/ 内、逃逸报错）
 ```
 
 ## 四、L3 脚本沙箱判定状态机（SHELL_COMMAND 分支）

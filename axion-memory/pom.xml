@@ -5,25 +5,25 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.oryxos</groupId>
-        <artifactId>oryxos</artifactId>
+        <groupId>com.axion</groupId>
+        <artifactId>axion</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>oryxos-memory</artifactId>
-    <name>OryxOS :: Memory</name>
+    <artifactId>axion-memory</artifactId>
+    <name>Axion :: Memory</name>
     <description>核心能力三：MemoryService 统一门面、LongTermMemory 可插拔后端、MemoryTools（save_memory / recall_memory）</description>
 
     <dependencies>
         <!-- Internal -->
         <dependency>
-            <groupId>com.oryxos</groupId>
-            <artifactId>oryxos-core</artifactId>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.oryxos</groupId>
-            <artifactId>oryxos-storage</artifactId>
+            <groupId>com.axion</groupId>
+            <artifactId>axion-storage</artifactId>
         </dependency>
 
         <!-- Spring Boot -->

@@ -1,4 +1,4 @@
-package com.oryxos.boot;
+package com.axion.boot;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -9,10 +9,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.oryxos.core.AgentScheduler;
-import com.oryxos.core.Profile;
-import com.oryxos.core.ProfileRegistry;
-import com.oryxos.provider.ProviderService;
+import com.axion.core.AgentScheduler;
+import com.axion.core.Profile;
+import com.axion.core.ProfileRegistry;
+import com.axion.provider.ProviderService;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -39,23 +39,23 @@ import org.springframework.test.web.servlet.MockMvc;
  * 断言落库：run_count=1、last_status=success、executions 一条成功、GET /memory 查得到写入 ⑤ PUT 停用 → 列表显示已停用 +
  * 停用后到点不触发、不记历史。
  */
-@SpringBootTest(classes = OryxOsApplication.class)
+@SpringBootTest(classes = AxionApplication.class)
 @AutoConfigureMockMvc
 class ScheduledTaskE2ETest {
 
-  private static final String AGENT_DIR = ".oryxos/agents/weather-agent";
+  private static final String AGENT_DIR = ".axion/agents/weather-agent";
   private static final String DB_FILE =
-      ".oryxos/e2e-test.db"; // 类专属库：与 MultiAgentIsolationTest 各自独立（Windows 打开中的文件不可删）
+      ".axion/e2e-test.db"; // 类专属库：与 MultiAgentIsolationTest 各自独立（Windows 打开中的文件不可删）
 
   static {
-    // 坑八：surefire 工作目录 = 模块目录，相对路径数据源/工作区落 oryxos-boot/.oryxos——先清库、再放 mock Agent（008 实录）。
+    // 坑八：surefire 工作目录 = 模块目录，相对路径数据源/工作区落 axion-boot/.axion——先清库、再放 mock Agent（008 实录）。
     // agents 目录整体重建：与 MultiAgentIsolationTest 共用同一测试工作区，各自独占所需 Agent（测试类加载顺序不定）。
     try {
-      deleteRecursively(Path.of(".oryxos", "agents"));
+      deleteRecursively(Path.of(".axion", "agents"));
       Files.createDirectories(Path.of(AGENT_DIR));
-      Files.createDirectories(Path.of(".oryxos", "memory"));
+      Files.createDirectories(Path.of(".axion", "memory"));
       Files.deleteIfExists(Path.of(DB_FILE)); // 全新库：登记断言 run_count=0 不受前次测试污染
-      Files.writeString(Path.of(".oryxos", "memory", "MEMORY.md"), ""); // GET /memory 断言干净起点
+      Files.writeString(Path.of(".axion", "memory", "MEMORY.md"), ""); // GET /memory 断言干净起点
       Files.writeString(
           Path.of(AGENT_DIR, "AGENT.md"),
           """
@@ -79,7 +79,7 @@ class ScheduledTaskE2ETest {
     }
   }
 
-  /** 递归删除（测试工作区专属——生产 .oryxos 在仓库根，与此无关）。 */
+  /** 递归删除（测试工作区专属——生产 .axion 在仓库根，与此无关）。 */
   private static void deleteRecursively(Path dir) throws Exception {
     if (!Files.exists(dir)) {
       return;
@@ -95,12 +95,12 @@ class ScheduledTaskE2ETest {
   static void providerProperties(DynamicPropertyRegistry registry) {
     registry.add("spring.datasource.url", () -> "jdbc:sqlite:" + DB_FILE); // 类专属库（F2 独立工作区口径）
     // 坑表：索引式覆盖必须补全整元素字段（008 实录）
-    registry.add("oryxos.providers[0].name", () -> "deepseek");
-    registry.add("oryxos.providers[0].api-key", () -> "dummy");
-    registry.add("oryxos.providers[0].base-url", () -> "http://127.0.0.1:9");
-    registry.add("oryxos.providers[1].name", () -> "kimi");
-    registry.add("oryxos.providers[1].api-key", () -> "dummy");
-    registry.add("oryxos.providers[1].base-url", () -> "http://127.0.0.1:9");
+    registry.add("axion.providers[0].name", () -> "deepseek");
+    registry.add("axion.providers[0].api-key", () -> "dummy");
+    registry.add("axion.providers[0].base-url", () -> "http://127.0.0.1:9");
+    registry.add("axion.providers[1].name", () -> "kimi");
+    registry.add("axion.providers[1].api-key", () -> "dummy");
+    registry.add("axion.providers[1].base-url", () -> "http://127.0.0.1:9");
   }
 
   /** T002 核实：Spring Framework 6.2 的 @MockitoBean 替换真实 Provider bean（注入点全量收 mock）。 */

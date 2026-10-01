@@ -1,17 +1,17 @@
 ---
-name: oryxos-admin-ui
+name: axion-admin-ui
 description: >-
-  生成 OryxOS 管理台前端页面（Vue 3 + Vite，只读五页 + 定时任务页（010 第一个写操作页，⑦d 例外）调
-  /api/v1 端点）——固化 OryxOS 官网首页的设计 token（深色 + 橙色强调）、工程约定（base '/admin/'、
+  生成 Axion 管理台前端页面（Vue 3 + Vite，只读五页 + 定时任务页（010 第一个写操作页，⑦d 例外）调
+  /api/v1 端点）——固化 Axion 官网首页的设计 token（深色 + 橙色强调）、工程约定（base '/admin/'、
   产物落 static/admin、SPA 回落、双信封统一请求封装）、三态规范与验收清单。30 节 Agent 管理页复用同一套。
   当用户说「生成管理台页面 / 给管理台加一页 / 管理台 前端」时使用。
 user-invocable: true
 disable-model-invocation: false
 ---
 
-# oryxos-admin-ui：OryxOS 管理台前端规范
+# axion-admin-ui：Axion 管理台前端规范
 
-OryxOS 管理平台（`/admin`）与官网首页同源的设计语言——本 skill 是**唯一风格来源**，token 值直接取自
+Axion 管理平台（`/admin`）与官网首页同源的设计语言——本 skill 是**唯一风格来源**，token 值直接取自
 `website/.vitepress/theme/custom.css`，生成页面时照抄，不得自创新值。
 
 ## 一、设计 token（照抄，一字不改）
@@ -22,13 +22,13 @@ OryxOS 管理平台（`/admin`）与官网首页同源的设计语言——本 s
 - **字体**：正文 Inter；代码/ID/JSON 用 JetBrains Mono（等宽）
 - **布局**：左侧竖直导航（深色）+ 右侧内容区；表格深色、行分隔用 `#222`
 - **状态**：小圆点/标签——成功绿、失败红、警告橙
-- **顶部**：`/logo.svg` + "OryxOS 管理台"；整体克制、留白足、圆角小（4–6px），与官网首页一个气质
+- **顶部**：`/logo.svg` + "Axion 管理台"；整体克制、留白足、圆角小（4–6px），与官网首页一个气质
 
 ## 二、工程约定（不可违反）
 
 1. 技术栈 Vue 3 + Vite（与 website/ 同栈），TypeScript 可选但推荐
-2. `vite.config`：`base: '/admin/'`，`build.outDir` 指向 `oryxos-web/src/main/resources/static/admin/`（相对资源路径）
-3. 前端源码落 `oryxos-web/src/main/frontend/`；构建 = `npm ci && npm run build`（frontend-maven-plugin 绑进 mvn package；后端迭代用 `-Dskip.npm` 跳过）
+2. `vite.config`：`base: '/admin/'`，`build.outDir` 指向 `axion-web/src/main/resources/static/admin/`（相对资源路径）
+3. 前端源码落 `axion-web/src/main/frontend/`；构建 = `npm ci && npm run build`（frontend-maven-plugin 绑进 mvn package；后端迭代用 `-Dskip.npm` 跳过）
 4. **只读纪律（⑦d 例外，010-scheduler-mgmt）**：除**定时任务页**外，任何页面不得出现写按钮（新建/编辑/删除）——「能管」要等 30 节，界面上不出现假按钮；定时任务页允许「立即执行」（POST /api/v1/schedules/{id}/run）与「启用·停用」（PUT /api/v1/schedules/{id}）两类写操作——课件 28 节点名的第一个写操作页，其余页面仍只读
 5. 除定时任务页外只调 `/api/v1` 的 GET 端点；SPA 路由刷新回落由后端配置（前端只管 `createWebHistory('/admin/')` 或 hash 路由）
 

@@ -1,5 +1,5 @@
 /**
- * OryxOS Storage — 持久化层.
+ * Axion Storage — 持久化层.
  *
  * <p>SQLite + Spring Data JPA 持久化，包含：
  *
@@ -9,4 +9,4 @@
  *   <li>LlmCallRepository — LLM 调用审计
  * </ul>
  */
-package com.oryxos.storage;
+package com.axion.storage;

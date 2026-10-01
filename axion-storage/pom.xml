@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.oryxos</groupId>
-        <artifactId>oryxos</artifactId>
+        <groupId>com.axion</groupId>
+        <artifactId>axion</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>oryxos-storage</artifactId>
-    <name>OryxOS :: Storage</name>
+    <artifactId>axion-storage</artifactId>
+    <name>Axion :: Storage</name>
     <description>持久化层：SQLite、SessionRepository、ToolInvocationRepository、LlmCallRepository</description>
 
     <dependencies>

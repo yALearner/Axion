@@ -1,5 +1,5 @@
 <script setup>
-// oryxos-admin-ui skill：左侧竖直导航（深色）+ 右侧内容区；只读五页 + 定时任务页（010：第一个写操作页，⑦d 例外条款）
+// axion-admin-ui skill：左侧竖直导航（深色）+ 右侧内容区；只读五页 + 定时任务页（010：第一个写操作页，⑦d 例外条款）
 const navItems = [
   { path: '/sessions', label: '会话列表' },
   { path: '/profiles', label: 'Profile 列表' },
@@ -14,7 +14,7 @@ const navItems = [
   <div class="layout">
     <aside class="sidebar">
       <div class="brand">
-        <span>OryxOS 管理台</span>
+        <span>Axion 管理台</span>
       </div>
       <nav>
         <RouterLink v-for="item in navItems" :key="item.path" :to="item.path" class="nav-item">

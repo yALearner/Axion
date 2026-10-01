@@ -1,52 +1,52 @@
-package com.oryxos.cli;
+package com.axion.cli;
 
+import com.axion.channel.cli.CliChannel;
+import com.axion.core.AgentLoader;
+import com.axion.core.AgentScheduler;
+import com.axion.core.AgentService;
+import com.axion.core.ContextLoader;
+import com.axion.core.LongTermMemoryStore;
+import com.axion.core.MemoryService;
+import com.axion.core.Profile;
+import com.axion.core.ProfileRegistry;
+import com.axion.core.PromptBuilder;
+import com.axion.core.ReActLoop;
+import com.axion.core.SessionManager;
+import com.axion.core.ToolExecutor;
+import com.axion.core.ToolSchemaAdapter;
+import com.axion.memory.MarkdownMemoryStore;
+import com.axion.memory.Mem0MemoryStore;
+import com.axion.memory.MemoryServiceImpl;
+import com.axion.memory.RecallMemoryTool;
+import com.axion.memory.SaveMemoryTool;
+import com.axion.memory.SqliteMemoryStore;
+import com.axion.provider.ProviderProperties;
+import com.axion.provider.ProviderService;
+import com.axion.storage.JpaScheduledTaskStore;
+import com.axion.storage.NotifyChannelRepository;
+import com.axion.storage.ScheduledTaskRepository;
+import com.axion.storage.ScheduledTaskStore;
+import com.axion.storage.SessionRepository;
+import com.axion.storage.TaskExecutionRepository;
+import com.axion.storage.ToolInvocationRepository;
+import com.axion.tool.AnnotatedMethodToolAdapter;
+import com.axion.tool.FileSandboxProperties;
+import com.axion.tool.HttpSandboxProperties;
+import com.axion.tool.Sandbox;
+import com.axion.tool.ShellSandboxProperties;
+import com.axion.tool.ToolRegistry;
+import com.axion.tool.WhitelistSandbox;
+import com.axion.tool.builtin.HttpGetTool;
+import com.axion.tool.builtin.HttpPostTool;
+import com.axion.tool.builtin.ListDirTool;
+import com.axion.tool.builtin.NotifyTools;
+import com.axion.tool.builtin.ReadFileTool;
+import com.axion.tool.builtin.ShellTools;
+import com.axion.tool.builtin.WriteFileTool;
+import com.axion.tool.notify.NotifyChannelAdapter;
+import com.axion.tool.notify.NotifyChannelRegistry;
+import com.axion.tool.notify.WebhookNotifyAdapter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.channel.cli.CliChannel;
-import com.oryxos.core.AgentLoader;
-import com.oryxos.core.AgentScheduler;
-import com.oryxos.core.AgentService;
-import com.oryxos.core.ContextLoader;
-import com.oryxos.core.LongTermMemoryStore;
-import com.oryxos.core.MemoryService;
-import com.oryxos.core.Profile;
-import com.oryxos.core.ProfileRegistry;
-import com.oryxos.core.PromptBuilder;
-import com.oryxos.core.ReActLoop;
-import com.oryxos.core.SessionManager;
-import com.oryxos.core.ToolExecutor;
-import com.oryxos.core.ToolSchemaAdapter;
-import com.oryxos.memory.MarkdownMemoryStore;
-import com.oryxos.memory.Mem0MemoryStore;
-import com.oryxos.memory.MemoryServiceImpl;
-import com.oryxos.memory.RecallMemoryTool;
-import com.oryxos.memory.SaveMemoryTool;
-import com.oryxos.memory.SqliteMemoryStore;
-import com.oryxos.provider.ProviderProperties;
-import com.oryxos.provider.ProviderService;
-import com.oryxos.storage.JpaScheduledTaskStore;
-import com.oryxos.storage.NotifyChannelRepository;
-import com.oryxos.storage.ScheduledTaskRepository;
-import com.oryxos.storage.ScheduledTaskStore;
-import com.oryxos.storage.SessionRepository;
-import com.oryxos.storage.TaskExecutionRepository;
-import com.oryxos.storage.ToolInvocationRepository;
-import com.oryxos.tool.AnnotatedMethodToolAdapter;
-import com.oryxos.tool.FileSandboxProperties;
-import com.oryxos.tool.HttpSandboxProperties;
-import com.oryxos.tool.Sandbox;
-import com.oryxos.tool.ShellSandboxProperties;
-import com.oryxos.tool.ToolRegistry;
-import com.oryxos.tool.WhitelistSandbox;
-import com.oryxos.tool.builtin.HttpGetTool;
-import com.oryxos.tool.builtin.HttpPostTool;
-import com.oryxos.tool.builtin.ListDirTool;
-import com.oryxos.tool.builtin.NotifyTools;
-import com.oryxos.tool.builtin.ReadFileTool;
-import com.oryxos.tool.builtin.ShellTools;
-import com.oryxos.tool.builtin.WriteFileTool;
-import com.oryxos.tool.notify.NotifyChannelAdapter;
-import com.oryxos.tool.notify.NotifyChannelRegistry;
-import com.oryxos.tool.notify.WebhookNotifyAdapter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -78,7 +78,7 @@ import org.springframework.web.client.RestClient;
  * ToolRegistry 全量、004 遗留 NotifyTools 接线（契约不变量 9）、 WhitelistSandbox 三层白名单接线（007-sandbox FR-6， 24
  * 节替换收口）、Profile tools 引用启动校验（001 同款纪律）。
  *
- * <p>落 oryxos-cli（CLAUDE.md 依赖方向：cli 组装所有模块）；轻命令不起 Spring 即不加载本类。{@code ProviderService} 由 001 的
+ * <p>落 axion-cli（CLAUDE.md 依赖方向：cli 组装所有模块）；轻命令不起 Spring 即不加载本类。{@code ProviderService} 由 001 的
  * ProviderConfiguration 自动装配；仓储/实体扫描由启动类显式声明（坑九，002 fix 已落）。
  *
  * <p>core 零改动：PromptBuilder/ToolExecutor 仍注入按名 Map（全量），PromptBuilder.selectTools 按 Profile 过滤 沿用
@@ -97,9 +97,9 @@ public class CliAgentConfiguration {
   @Bean
   public ProfileRegistry profileRegistry(Environment environment) {
     ProfileRegistry registry = new ProfileRegistry();
-    Path agentsRoot = Path.of(".oryxos", "agents");
+    Path agentsRoot = Path.of(".axion", "agents");
     if (!Files.isDirectory(agentsRoot)) {
-      LOG.warn("工作区未初始化（先执行 oryxos init）: .oryxos/agents");
+      LOG.warn("工作区未初始化（先执行 axion init）: .axion/agents");
       return registry; // 空表：chat 时"Profile 未注册"清晰报错，不静默
     }
     Set<String> providerNames = providerNamesOf(environment);
@@ -110,7 +110,7 @@ public class CliAgentConfiguration {
 
   @Bean
   public ContextLoader contextLoader() {
-    return new ContextLoader(Path.of(".oryxos"));
+    return new ContextLoader(Path.of(".axion"));
   }
 
   @Bean
@@ -129,7 +129,7 @@ public class CliAgentConfiguration {
       ShellSandboxProperties shellProps,
       HttpSandboxProperties httpProps) {
     // 011 FR-5/FR-6：workspaceRoot 供 FILE_READ 动态根（当前 Agent 目录）与解释器命令 scripts/ 限定派生
-    return new WhitelistSandbox(Path.of(".oryxos"), fileProps, shellProps, httpProps);
+    return new WhitelistSandbox(Path.of(".axion"), fileProps, shellProps, httpProps);
   }
 
   /**
@@ -172,7 +172,7 @@ public class CliAgentConfiguration {
   }
 
   /**
-   * 006-memory FR-6：长期记忆后端显式 @Bean（宪法 III 哲学——不扫描），按 {@code oryxos.memory.backend} 换档装配：缺省
+   * 006-memory FR-6：长期记忆后端显式 @Bean（宪法 III 哲学——不扫描），按 {@code axion.memory.backend} 换档装配：缺省
    * markdown；sqlite 用 Boot 自动装配的数据源（可选注入——markdown 档不要求数据源在场）；mem0 要求环境变量 MEM0_BASE_URL +
    * MEM0_API_KEY（占位缺失 → 启动校验明确报错不静默，001 ConfigLoader 口径）。
    */
@@ -181,13 +181,13 @@ public class CliAgentConfiguration {
       Environment environment,
       RestClient restClient,
       ObjectProvider<javax.sql.DataSource> dataSourceProvider) {
-    String backend = environment.getProperty("oryxos.memory.backend", "markdown");
+    String backend = environment.getProperty("axion.memory.backend", "markdown");
     return switch (backend) {
-      case "markdown" -> new MarkdownMemoryStore(Path.of(".oryxos", "memory", "MEMORY.md"));
+      case "markdown" -> new MarkdownMemoryStore(Path.of(".axion", "memory", "MEMORY.md"));
       case "sqlite" -> {
         javax.sql.DataSource dataSource = dataSourceProvider.getIfAvailable();
         if (dataSource == null) {
-          throw new IllegalStateException("oryxos.memory.backend=sqlite 需要数据源（Boot 自动装配缺失）");
+          throw new IllegalStateException("axion.memory.backend=sqlite 需要数据源（Boot 自动装配缺失）");
         }
         yield new SqliteMemoryStore(dataSource);
       }
@@ -196,13 +196,13 @@ public class CliAgentConfiguration {
         String apiKey = environment.getProperty("MEM0_API_KEY");
         if (baseUrl == null || baseUrl.isBlank() || apiKey == null || apiKey.isBlank()) {
           throw new IllegalStateException(
-              "oryxos.memory.backend=mem0 需要环境变量 MEM0_BASE_URL 与 MEM0_API_KEY");
+              "axion.memory.backend=mem0 需要环境变量 MEM0_BASE_URL 与 MEM0_API_KEY");
         }
         yield new Mem0MemoryStore(restClient, baseUrl, apiKey);
       }
       default ->
           throw new IllegalStateException(
-              "oryxos.memory.backend 非法值: " + backend + "（取值 markdown/sqlite/mem0）");
+              "axion.memory.backend 非法值: " + backend + "（取值 markdown/sqlite/mem0）");
     };
   }
 
@@ -245,7 +245,7 @@ public class CliAgentConfiguration {
     // 011 FR-5：解释器集合 + workspaceRoot 注入（坑六：解释器命令 cwd = 当前 Agent 目录）
     registry.register(
         new ShellTools(
-            sandbox, 30_000, Set.copyOf(shellProps.allowedInterpreters()), Path.of(".oryxos")));
+            sandbox, 30_000, Set.copyOf(shellProps.allowedInterpreters()), Path.of(".axion")));
     registry.register(new HttpGetTool(sandbox, restClient));
     registry.register(new HttpPostTool(sandbox, restClient));
     registry.register(notifyTools);
@@ -257,7 +257,7 @@ public class CliAgentConfiguration {
   }
 
   /**
-   * 方式三接线（FR-6/FR-7）：扫描容器内 @Tool 方法、包装成 OryxTool 注册（仅借 Spring AI 扫描与 schema 生成——坑二，执行走
+   * 方式三接线（FR-6/FR-7）：扫描容器内 @Tool 方法、包装成 AxionTool 注册（仅借 Spring AI 扫描与 schema 生成——坑二，执行走
    * ToolExecutor）。Provider bean 不可用（Spring AI 自动配置未生效）→ 记录 INFO 跳过 （FR-6 降级路径：业务方改为装配处手动注册）。
    */
   @Bean
@@ -354,10 +354,10 @@ public class CliAgentConfiguration {
   }
 
   /** core 零改动：全量按名 Map 注入 PromptBuilder/ToolExecutor（002 现有路径）。 */
-  private Map<String, com.oryxos.core.OryxTool> nameMapOf(ToolRegistry registry) {
+  private Map<String, com.axion.core.AxionTool> nameMapOf(ToolRegistry registry) {
     return registry.all().stream()
         .collect(
-            Collectors.toUnmodifiableMap(com.oryxos.core.OryxTool::getName, Function.identity()));
+            Collectors.toUnmodifiableMap(com.axion.core.AxionTool::getName, Function.identity()));
   }
 
   /** Profile tools 引用启动校验（FR-1 自审补钉）：未注册名 ERROR 级明确报错、不静默少一个。 */
@@ -384,7 +384,7 @@ public class CliAgentConfiguration {
   private Set<String> providerNamesOf(Environment environment) {
     List<ProviderProperties> providers =
         Binder.get(environment)
-            .bind("oryxos.providers", Bindable.listOf(ProviderProperties.class))
+            .bind("axion.providers", Bindable.listOf(ProviderProperties.class))
             .orElse(List.of());
     return providers.stream().map(ProviderProperties::getName).collect(Collectors.toSet());
   }

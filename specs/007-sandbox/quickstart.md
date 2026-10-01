@@ -5,7 +5,7 @@
 ## 前置
 
 - Java 21 + Maven；构建前 JAVA_HOME/PATH export（002-react-prerequisites 先例）
-- 前序交付物就位（实测 2026-09-06）：接口墙四件 + 七工具 enforce 接线在 `oryxos-tool`，`CliAgentConfiguration.sandbox()` 返回 PermissiveSandbox
+- 前序交付物就位（实测 2026-09-06）：接口墙四件 + 七工具 enforce 接线在 `axion-tool`，`CliAgentConfiguration.sandbox()` 返回 PermissiveSandbox
 
 ## 机器判卷：harness 全绿
 
@@ -29,8 +29,8 @@ mvn clean verify                            # 收尾全量门禁（全绿，不�
 
 ## 人工项（做完怎么验）
 
-1. **集成验证（真实链路）**：application.yaml 配 `shell.allowed_commands: [ls]`，`oryxos chat` 让 Agent 跑白名单外命令（如 `rm`）——确认链路上抛 `SandboxViolationException`、`tool_invocations` 有 `success=false` 记录、`error_message` 人能读懂（课件 24 §五）
+1. **集成验证（真实链路）**：application.yaml 配 `shell.allowed_commands: [ls]`，`axion chat` 让 Agent 跑白名单外命令（如 `rm`）——确认链路上抛 `SandboxViolationException`、`tool_invocations` 有 `success=false` 记录、`error_message` 人能读懂（课件 24 §五）
 2. **接口中立性自查（思维练习）**：`Sandbox.enforce(SandboxAction)` 签名换成 `KataMicroVmSandbox` 实现需要加方法吗？不需要才算墙立住了（1 分钟练习）
 3. **配置边界文档化核对**：白名单为空 = "什么都不允许"而非"不校验"，与 FR-002 一致
-4. **回归**：改造后七工具原有测试全绿（含 005 的 OryxToolContractTest/ToolRegistryTest）
+4. **回归**：改造后七工具原有测试全绿（含 005 的 AxionToolContractTest/ToolRegistryTest）
 5. **上层零改动目检**：`git diff` 确认七工具类、`Sandbox` 接口、`ToolExecutor` 零改动（SC-004）

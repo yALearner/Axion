@@ -20,11 +20,11 @@
 
 **Target Platform**: Windows（开发本机，⑦b 大小写归一）与 Linux（部署目标，维持大小写敏感）双口径
 
-**Project Type**: Maven 多模块（9 模块不动，改动只在 oryxos-tool 新增 + oryxos-cli 装配替换）
+**Project Type**: Maven 多模块（9 模块不动，改动只在 axion-tool 新增 + axion-cli 装配替换）
 
 **Performance Goals**: enforce 校验微秒级纯内存操作（Path 归一/URI 解析/流式前缀匹配），相对 LLM 秒级延迟可忽略——无额外性能目标
 
-**Constraints**: 宪法 VI（接口先行，enforce(SandboxAction) 不改）、V（审计 day one，复用既有不新增）、VII（同步阻塞）、IX（oryxos-tool 三合一）；交付清单白名单（超出即停）；上层零改动（七工具/Sandbox 接口/ToolExecutor 逐字节一致）
+**Constraints**: 宪法 VI（接口先行，enforce(SandboxAction) 不改）、V（审计 day one，复用既有不新增）、VII（同步阻塞）、IX（axion-tool 三合一）；交付清单白名单（超出即停）；上层零改动（七工具/Sandbox 接口/ToolExecutor 逐字节一致）
 
 **Scale/Scope**: 核心阶段单实例；一个实现类 + 三配置类 + 一处装配替换 + 一个测试类增补；无新表、无新依赖、无新模块
 
@@ -42,7 +42,7 @@
 | VI 不使用 SecurityManager / Sandbox 接口先行 | **本 feature 主体**：实现 002 已定死的 `enforce(SandboxAction)` 第一档 `WhitelistSandbox`；不碰接口签名 | ✅ |
 | VII 同步执行模型 | NFR-001：全程同步阻塞，无 Reactor/CompletableFuture | ✅ |
 | VIII 三种触发源共用一个引擎 | 不涉及（沙箱与入口无关） | ✅ |
-| IX Tool 模块三合一 | WhitelistSandbox + 三配置类落 oryxos-tool（com.oryxos.tool），不拆新模块 | ✅ |
+| IX Tool 模块三合一 | WhitelistSandbox + 三配置类落 axion-tool（com.axion.tool），不拆新模块 | ✅ |
 
 无违反 → Complexity Tracking 不需要。
 
@@ -64,7 +64,7 @@ specs/007-sandbox/
 ### Source Code (repository root)
 
 ```text
-oryxos-tool/src/main/java/com/oryxos/tool/
+axion-tool/src/main/java/com/axion/tool/
 ├── Sandbox.java                    # 002 已交付，零改动（接口墙）
 ├── SandboxAction.java              # 002 已交付，零改动
 ├── SandboxViolationException.java  # 002 已交付，零改动
@@ -75,13 +75,13 @@ oryxos-tool/src/main/java/com/oryxos/tool/
 ├── HttpSandboxProperties.java      # 本节新增
 └── builtin/                        # 005 已交付七工具，零改动
 
-oryxos-cli/src/main/java/com/oryxos/cli/
+axion-cli/src/main/java/com/axion/cli/
 └── CliAgentConfiguration.java      # 本节改造：sandbox() @Bean 替换 + @EnableConfigurationProperties
 
-oryxos-tool/src/test/java/com/oryxos/tool/
+axion-tool/src/test/java/com/axion/tool/
 └── WhitelistSandboxTest.java       # 本节新增（四组 harness）
-oryxos-cli/src/test/java/com/oryxos/cli/
+axion-cli/src/test/java/com/axion/cli/
 └── CliAgentConfigurationTest.java  # 本节增补（装配断言）
 ```
 
-**Structure Decision**: 沿用 9 模块与既有包结构（com.oryxos.tool 单包 flat，007 交付物全部落 oryxos-tool；装配改造点落 oryxos-cli——003/005 先例）。不新建模块、不改依赖方向。
+**Structure Decision**: 沿用 9 模块与既有包结构（com.axion.tool 单包 flat，007 交付物全部落 axion-tool；装配改造点落 axion-cli——003/005 先例）。不新建模块、不改依赖方向。

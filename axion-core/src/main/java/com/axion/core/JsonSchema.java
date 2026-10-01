@@ -1,11 +1,11 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import java.util.Map;
 
 /**
- * {@link OryxTool} 的参数说明（JSON Schema）。
+ * {@link AxionTool} 的参数说明（JSON Schema）。
  *
- * <p>core 保持框架无关：本类型只承载 schema 对象本身，向 Spring AI 工具格式的翻译 由 oryxos-provider 的适配层完成。
+ * <p>core 保持框架无关：本类型只承载 schema 对象本身，向 Spring AI 工具格式的翻译 由 axion-provider 的适配层完成。
  *
  * @param value JSON Schema 对象（name/type/properties/required 等字段的映射）
  */

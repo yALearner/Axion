@@ -1,4 +1,4 @@
-package com.oryxos.cli;
+package com.axion.cli;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,7 +20,7 @@ public class ProfileShowCommand implements Runnable {
 
   @Override
   public void run() {
-    Path agentFile = Path.of(".oryxos", "agents", name, "AGENT.md");
+    Path agentFile = Path.of(".axion", "agents", name, "AGENT.md");
     if (!Files.isRegularFile(agentFile)) {
       throw new IllegalStateException("Agent 不存在: " + name);
     }

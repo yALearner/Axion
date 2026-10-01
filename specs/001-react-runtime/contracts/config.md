@@ -2,7 +2,7 @@
 
 两份配置 + 环境变量注入规则。所有敏感凭证只允许 `${ENV_VAR}` 占位，不得明文（FR-003）；`ConfigLoader` 加载时校验，缺失/非法给指明具体变量名的报错。
 
-## 1. `AGENT.md`（`.oryxos/agents/<name>/AGENT.md`）
+## 1. `AGENT.md`（`.axion/agents/<name>/AGENT.md`）
 
 frontmatter（YAML，SnakeYAML 解析）+ 正文（任务指令，注入 system prompt）。
 
@@ -33,7 +33,7 @@ settings:                     # 可选
 
 校验失败（缺 name、正文为空、provider 不存在、tool 未注册、channel 不支持、api_key 明文）→ 错误日志 + 该 Agent 不可用，**不阻断其他 Agent**（FR-018、US-3 场景 4）。
 
-## 2. `.oryxos/config.yaml`（全局，Clarification Q2 引入）
+## 2. `.axion/config.yaml`（全局，Clarification Q2 引入）
 
 ```yaml
 sandbox:

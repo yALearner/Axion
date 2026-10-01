@@ -18,18 +18,18 @@ mvn clean package
 export DEEPSEEK_API_KEY="sk-..."
 
 # 3. 初始化工作区（幂等）
-java -jar oryxos-cli/target/oryxos-cli-*.jar init
-# 期望：创建 .oryxos/{agents,skills,memory,logs} + AGENTS.md/SOUL.md/USER.md；再次执行提示"已初始化"且不覆盖
+java -jar axion-cli/target/axion-cli-*.jar init
+# 期望：创建 .axion/{agents,skills,memory,logs} + AGENTS.md/SOUL.md/USER.md；再次执行提示"已初始化"且不覆盖
 
 # 4. 配置全局 HTTP 域名白名单（Clarification Q2）
-# 编辑 .oryxos/config.yaml：
+# 编辑 .axion/config.yaml：
 #   sandbox:
 #     http:
 #       allowed_domains: ["wttr.in"]
 
 # 5. 创建天气 Agent
-java -jar oryxos-cli/target/oryxos-cli-*.jar profile create weather
-# 期望：.oryxos/agents/weather/AGENT.md 模板生成
+java -jar axion-cli/target/axion-cli-*.jar profile create weather
+# 期望：.axion/agents/weather/AGENT.md 模板生成
 
 # 6. 编辑 AGENT.md：provider.name=deepseek、model=deepseek-chat、
 #    api_key=${DEEPSEEK_API_KEY}、tools=[http_get]、正文写天气助手指令
@@ -40,7 +40,7 @@ java -jar oryxos-cli/target/oryxos-cli-*.jar profile create weather
 ### 场景 1：多轮对话 + 上下文保持（US-1，SC-004）
 
 ```bash
-java -jar oryxos-cli/target/oryxos-cli-*.jar chat --profile weather
+java -jar axion-cli/target/axion-cli-*.jar chat --profile weather
 > 你好，我叫小王，我在杭州
 # 期望：Agent 回应并记住
 > 我刚才说了什么？
@@ -59,7 +59,7 @@ java -jar oryxos-cli/target/oryxos-cli-*.jar chat --profile weather
 ### 场景 3：单条消息模式（US-4 场景 3）
 
 ```bash
-java -jar oryxos-cli/target/oryxos-cli-*.jar chat --profile weather --message "今天适合出门吗"
+java -jar axion-cli/target/axion-cli-*.jar chat --profile weather --message "今天适合出门吗"
 # 期望：输出单条回复后进程退出（exit 0）
 ```
 
@@ -82,7 +82,7 @@ Agent 的 `sandbox.allowed_domains` 声明（覆盖全局）或两级均未配�
 完成一次含 Tool 调用的对话后：
 
 ```bash
-sqlite3 .oryxos/oryxos.db "select count(*) from llm_calls; select count(*) from tool_invocations;"
+sqlite3 .axion/axion.db "select count(*) from llm_calls; select count(*) from tool_invocations;"
 ```
 期望：每次 LLM 调用与每次 Tool 调用（含失败）各一行；抽任意一次对话可还原调用链。
 

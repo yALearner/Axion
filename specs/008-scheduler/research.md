@@ -17,7 +17,7 @@
 ## 裁决 3：调度池大小 setPoolSize(4)（⑦a，P1 修复）
 
 - **Decision**: 装配处 `setPoolSize(4)`——默认单线程下同步阻塞的长 ReAct 占住唯一调度线程，跨任务互相拖累（四文档之外盲点：防重叠锁只管同任务）
-- **Rationale**: 多 Agent 多任务是 OryxOS 定位形态；任务体同步（宪法 VII）无需大池，2~4 足够
+- **Rationale**: 多 Agent 多任务是 Axion 定位形态；任务体同步（宪法 VII）无需大池，2~4 足够
 - **Alternatives considered**: 默认 poolSize=1（否决：跨任务串行阻塞）；大池（否决：任务体同步，无 IO 密集并行需求）
 
 ## 裁决 4：zone 合法性校验（⑦b，P1 修复）

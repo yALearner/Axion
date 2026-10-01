@@ -1,4 +1,4 @@
-package com.oryxos.cli;
+package com.axion.cli;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -18,7 +18,7 @@ public class ProfileDeleteCommand implements Runnable {
 
   @Override
   public void run() {
-    Path agentDir = Path.of(".oryxos", "agents", name);
+    Path agentDir = Path.of(".axion", "agents", name);
     if (!Files.exists(agentDir)) {
       throw new IllegalStateException("Agent 不存在: " + name);
     }

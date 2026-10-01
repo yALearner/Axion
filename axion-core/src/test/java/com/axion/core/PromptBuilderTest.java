@@ -1,11 +1,11 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.axion.storage.SessionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.storage.SessionRepository;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -26,8 +26,8 @@ class PromptBuilderTest {
 
   private final ToolSchemaAdapter adapter = new ToolSchemaAdapter(new ObjectMapper());
 
-  private static OryxTool toolNamed(String name) {
-    return new OryxTool() {
+  private static AxionTool toolNamed(String name) {
+    return new AxionTool() {
       @Override
       public String getName() {
         return name;
@@ -72,11 +72,11 @@ class PromptBuilderTest {
     return new SessionManager(repository, new ObjectMapper());
   }
 
-  private PromptBuilder builder(Path workspace, List<OryxTool> tools) {
+  private PromptBuilder builder(Path workspace, List<AxionTool> tools) {
     // 011 改造点适配：ContextLoader 现注入 AGENT.md 正文（FR-2）——fixture 补 agent 目录（frontmatter-only，正文为空）
     writeAgentDir(workspace);
-    Map<String, OryxTool> toolSet = new java.util.HashMap<>();
-    for (OryxTool t : tools) {
+    Map<String, AxionTool> toolSet = new java.util.HashMap<>();
+    for (AxionTool t : tools) {
       toolSet.put(t.getName(), t);
     }
     MemoryService memoryService = mock(MemoryService.class);

@@ -1,8 +1,8 @@
-package com.oryxos.channel.cli;
+package com.axion.channel.cli;
 
-import com.oryxos.core.AgentService;
-import com.oryxos.core.Session;
-import com.oryxos.core.SessionManager;
+import com.axion.core.AgentService;
+import com.axion.core.Session;
+import com.axion.core.SessionManager;
 import java.nio.charset.Charset;
 import java.util.Scanner;
 

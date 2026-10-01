@@ -1,20 +1,20 @@
-package com.oryxos.boot;
+package com.axion.boot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import com.oryxos.core.AgentScheduler;
-import com.oryxos.core.Message;
-import com.oryxos.core.Profile;
-import com.oryxos.core.ProfileRegistry;
-import com.oryxos.core.PromptBuilder;
-import com.oryxos.core.Session;
-import com.oryxos.core.SessionManager;
-import com.oryxos.provider.ProviderService;
-import com.oryxos.storage.ScheduledTaskStore;
-import com.oryxos.storage.TaskExecutionView;
+import com.axion.core.AgentScheduler;
+import com.axion.core.Message;
+import com.axion.core.Profile;
+import com.axion.core.ProfileRegistry;
+import com.axion.core.PromptBuilder;
+import com.axion.core.Session;
+import com.axion.core.SessionManager;
+import com.axion.provider.ProviderService;
+import com.axion.storage.ScheduledTaskStore;
+import com.axion.storage.TaskExecutionView;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -36,17 +36,17 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
  * prompt 上下文不含 B 独有工具）/ 会话隔离（各自会话互不串）/ 定时隔离（A 定时异常，B 下个触发点照常）。 mock provider 按 profile
  * 分派：file-agent 抛异常、http-agent 正常答复——gate 内无 key 可跑。
  */
-@SpringBootTest(classes = OryxOsApplication.class)
+@SpringBootTest(classes = AxionApplication.class)
 class MultiAgentIsolationTest {
 
-  private static final String AGENT_A_DIR = ".oryxos/agents/file-agent";
-  private static final String AGENT_B_DIR = ".oryxos/agents/http-agent";
-  private static final String DB_FILE = ".oryxos/multiagent-test.db"; // 类专属库：与 E2E 各自独立
+  private static final String AGENT_A_DIR = ".axion/agents/file-agent";
+  private static final String AGENT_B_DIR = ".axion/agents/http-agent";
+  private static final String DB_FILE = ".axion/multiagent-test.db"; // 类专属库：与 E2E 各自独立
 
   static {
     // 与 ScheduledTaskE2ETest 共用测试工作区：agents 目录整体重建、各自独占（测试类加载顺序不定，见 E2E 同款注释）
     try {
-      deleteRecursively(Path.of(".oryxos", "agents"));
+      deleteRecursively(Path.of(".axion", "agents"));
       Files.createDirectories(Path.of(AGENT_A_DIR));
       Files.createDirectories(Path.of(AGENT_B_DIR));
       Files.deleteIfExists(Path.of(DB_FILE));
@@ -105,12 +105,12 @@ class MultiAgentIsolationTest {
   @DynamicPropertySource
   static void providerProperties(DynamicPropertyRegistry registry) {
     registry.add("spring.datasource.url", () -> "jdbc:sqlite:" + DB_FILE); // 类专属库（F2 独立工作区口径）
-    registry.add("oryxos.providers[0].name", () -> "deepseek");
-    registry.add("oryxos.providers[0].api-key", () -> "dummy");
-    registry.add("oryxos.providers[0].base-url", () -> "http://127.0.0.1:9");
-    registry.add("oryxos.providers[1].name", () -> "kimi");
-    registry.add("oryxos.providers[1].api-key", () -> "dummy");
-    registry.add("oryxos.providers[1].base-url", () -> "http://127.0.0.1:9");
+    registry.add("axion.providers[0].name", () -> "deepseek");
+    registry.add("axion.providers[0].api-key", () -> "dummy");
+    registry.add("axion.providers[0].base-url", () -> "http://127.0.0.1:9");
+    registry.add("axion.providers[1].name", () -> "kimi");
+    registry.add("axion.providers[1].api-key", () -> "dummy");
+    registry.add("axion.providers[1].base-url", () -> "http://127.0.0.1:9");
   }
 
   @MockitoBean private ProviderService providerService;

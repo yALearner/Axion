@@ -1,4 +1,4 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.definition.DefaultToolDefinition;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
-/** ToolSchemaAdapter 验收 harness——schema 字段一一对齐、产物不含执行逻辑（002 自 oryxos-provider 随迁，逻辑零改动）。 */
+/** ToolSchemaAdapter 验收 harness——schema 字段一一对齐、产物不含执行逻辑（002 自 axion-provider 随迁，逻辑零改动）。 */
 class ToolSchemaAdapterTest {
 
   private final ToolSchemaAdapter adapter = new ToolSchemaAdapter(new ObjectMapper());
@@ -20,7 +20,7 @@ class ToolSchemaAdapterTest {
   @Test
   @DisplayName("schema 字段一一对齐")
   void translatesSchemaFields() throws Exception {
-    OryxTool tool = mock(OryxTool.class);
+    AxionTool tool = mock(AxionTool.class);
     when(tool.getName()).thenReturn("http_get");
     when(tool.getDescription()).thenReturn("发起 HTTP GET 请求");
     when(tool.getInputSchema())
@@ -42,7 +42,7 @@ class ToolSchemaAdapterTest {
   @Test
   @DisplayName("产物不含执行逻辑：翻译结果是纯数据定义")
   void noExecutionLogicInOutput() {
-    OryxTool tool = mock(OryxTool.class);
+    AxionTool tool = mock(AxionTool.class);
     when(tool.getName()).thenReturn("t");
     when(tool.getDescription()).thenReturn("d");
     when(tool.getInputSchema()).thenReturn(new JsonSchema(Map.of()));

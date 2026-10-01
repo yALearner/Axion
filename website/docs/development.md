@@ -1,6 +1,6 @@
 # Website Development & Deployment
 
-This document covers how to develop the OryxOS documentation website locally and deploy it to production.
+This document covers how to develop the Axion documentation website locally and deploy it to production.
 
 ## Tech Stack
 
@@ -13,7 +13,7 @@ The website is a pure static site. It has zero runtime dependencies — no backe
 ## Project Structure
 
 ```
-oryxos/
+axion/
 ├── package.json                    # npm config, build scripts
 ├── website/
 │   ├── index.md                    # English home page (renders <Home />)
@@ -48,7 +48,7 @@ oryxos/
 
 ```bash
 # From the project root:
-cd oryxos
+cd axion
 
 # Install dependencies (first time only)
 npm install
@@ -111,7 +111,7 @@ description: SEO description
 
 ### Production URL
 
-`https://oryxos.dev` (update `config.mts` and index.md files when the real domain is known).
+`https://axion.dev` (update `config.mts` and index.md files when the real domain is known).
 
 ### Method: GitHub Pages (recommended)
 
@@ -170,9 +170,9 @@ npm run docs:build
 Brand tokens are in `website/.vitepress/theme/custom.css` under `:root`:
 
 ```css
---oryx-teal: #2dd4bf;
---oryx-indigo: #818cf8;
---oryx-cyan: #22d3ee;
+--axion-teal: #2dd4bf;
+--axion-indigo: #818cf8;
+--axion-cyan: #22d3ee;
 ```
 
 Home page styles are **scoped** inside `Home.vue` — they don't leak to other pages.

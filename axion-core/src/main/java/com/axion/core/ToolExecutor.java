@@ -1,10 +1,10 @@
-package com.oryxos.core;
+package com.axion.core;
 
+import com.axion.storage.ToolInvocation;
+import com.axion.storage.ToolInvocationRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.storage.ToolInvocation;
-import com.oryxos.storage.ToolInvocationRepository;
 import java.time.Instant;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -14,22 +14,22 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 /**
  * 工具执行点——全系统唯一的工具调度与执行入口（执行权唯一，宪法 II：不能有第二条路）。
  *
- * <p>按名从注入的工具集找到 {@link OryxTool} → 执行 → 结果包装成 {@link ToolResult} → **成功与失败都写 {@code
+ * <p>按名从注入的工具集找到 {@link AxionTool} → 执行 → 结果包装成 {@link ToolResult} → **成功与失败都写 {@code
  * tool_invocations}**（宪法 V）。失败不吞：错误原因进审计与结果、带 retryable 提示回传——重试是 LLM 下一轮 的决定，本类不内部自动重试。
  *
  * <p>**不持 Sandbox 引用**：涉外 IO 的 enforce 由各工具在 execute 首行自执行（contracts/sandbox.md）——core 不反向 依赖
- * oryxos-tool。工具集以 {@code Map<String, OryxTool>} 注入，第 20 节换成 ToolRegistry 不改本类。
+ * axion-tool。工具集以 {@code Map<String, AxionTool>} 注入，第 20 节换成 ToolRegistry 不改本类。
  */
 public final class ToolExecutor {
 
   private static final Logger LOG = LoggerFactory.getLogger(ToolExecutor.class);
 
-  private final Map<String, OryxTool> tools;
+  private final Map<String, AxionTool> tools;
   private final ToolInvocationRepository audit;
   private final ObjectMapper objectMapper;
 
   public ToolExecutor(
-      Map<String, OryxTool> tools, ToolInvocationRepository audit, ObjectMapper objectMapper) {
+      Map<String, AxionTool> tools, ToolInvocationRepository audit, ObjectMapper objectMapper) {
     this.tools = Map.copyOf(tools);
     this.audit = audit;
     this.objectMapper = objectMapper.copy();
@@ -40,7 +40,7 @@ public final class ToolExecutor {
     String toolName = call.name();
     String inputJson = call.arguments();
     long startedAt = System.currentTimeMillis();
-    OryxTool tool = tools.get(toolName);
+    AxionTool tool = tools.get(toolName);
     if (tool == null) {
       String message = "工具不存在: " + toolName;
       auditAndLog(

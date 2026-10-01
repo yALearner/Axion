@@ -10,7 +10,7 @@
 
 **Purpose**: H0 依赖检查——确认前序交付物与需求文档「现状确认」一致（机械 grep，不得跳过）
 
-- [X] T001 前序现状核对：grep 确认 `Profile.Schedule`（cron/zone/message 三字段嵌套 record，oryxos-core/src/main/java/com/oryxos/core/Profile.java）、`ProfileRegistry.list()`（注意方法名为 list 非 all——④ 适配）、`SessionManager.getOrCreate(String, String, String)`、`AgentService.process(Session, String)` 签名；确认 AgentScheduler 类不存在、全仓无 ThreadPoolTaskScheduler/CronTrigger 使用——与需求文档「现状确认（2026-09-07 实测）」逐项一致
+- [X] T001 前序现状核对：grep 确认 `Profile.Schedule`（cron/zone/message 三字段嵌套 record，axion-core/src/main/java/com/axion/core/Profile.java）、`ProfileRegistry.list()`（注意方法名为 list 非 all——④ 适配）、`SessionManager.getOrCreate(String, String, String)`、`AgentService.process(Session, String)` 签名；确认 AgentScheduler 类不存在、全仓无 ThreadPoolTaskScheduler/CronTrigger 使用——与需求文档「现状确认（2026-09-07 实测）」逐项一致
 
 ## Phase 2: User Story 1 - 到点自动触发完整 ReAct 循环 (Priority: P1) ★ MVP
 
@@ -20,11 +20,11 @@
 
 ### Tests for User Story 1（先行，确保 FAIL 再实现）
 
-- [X] T002 [US1] 创建 `AgentSchedulerTest` 于 oryxos-core/src/test/java/com/oryxos/core/AgentSchedulerTest.java，一次写全四坑核心组（课件 25 §四同款「实现之前写最划算」）：① 注册参数对——mock ThreadPoolTaskScheduler + ArgumentCaptor 抓 `schedule(Runnable, Trigger)`，断言 CronTrigger 带配置 cron 与时区（zone 非空 `TimeZone.getTimeZone(zone)` 等价；坑四/坑一）；② **最值钱之二（锁占跳过）**——先 `scheduler.lockFor(taskKey).lock()` 占锁 → runOnce → `verify(agentService, never()).process(...)`；③ **最值钱之一（异常不外抛 + 锁释放二进宫）**——`when(agentService.process(...)).thenThrow(RuntimeException)` → `assertDoesNotThrow(runOnce)` → **再跑一次** `verify(times(2))`（finally 漏 unlock 只有二进宫能抓住；坑三）；④ 会话三元组——`verify(sessionManager).getOrCreate("scheduler", "scheduler", profileName)` + 两次 runOnce 同一 Session。此时 AgentScheduler 不存在——编译失败即 red 证据
+- [X] T002 [US1] 创建 `AgentSchedulerTest` 于 axion-core/src/test/java/com/axion/core/AgentSchedulerTest.java，一次写全四坑核心组（课件 25 §四同款「实现之前写最划算」）：① 注册参数对——mock ThreadPoolTaskScheduler + ArgumentCaptor 抓 `schedule(Runnable, Trigger)`，断言 CronTrigger 带配置 cron 与时区（zone 非空 `TimeZone.getTimeZone(zone)` 等价；坑四/坑一）；② **最值钱之二（锁占跳过）**——先 `scheduler.lockFor(taskKey).lock()` 占锁 → runOnce → `verify(agentService, never()).process(...)`；③ **最值钱之一（异常不外抛 + 锁释放二进宫）**——`when(agentService.process(...)).thenThrow(RuntimeException)` → `assertDoesNotThrow(runOnce)` → **再跑一次** `verify(times(2))`（finally 漏 unlock 只有二进宫能抓住；坑三）；④ 会话三元组——`verify(sessionManager).getOrCreate("scheduler", "scheduler", profileName)` + 两次 runOnce 同一 Session。此时 AgentScheduler 不存在——编译失败即 red 证据
 
 ### Implementation for User Story 1
 
-- [X] T003 [US1] 创建 `AgentScheduler` 于 oryxos-core/src/main/java/com/oryxos/core/AgentScheduler.java（需求文档「核心代码骨架」逐字对照 + ⑦ 项修订）：无组件注解纯类（G4-C1，②）；构造注入 taskScheduler/ProfileRegistry/SessionManager/AgentService 四依赖；`registerAll()` 扫 `profileRegistry.list()`（④ 适配）逐条 `taskScheduler.schedule(() -> runOnce(profile, sc), zone 空 ? new CronTrigger(cron) : new CronTrigger(cron, validatedZone(...)))`——**validatedZone 用 `ZoneId.of(zone)` 校验、非法抛带 profile/zone 的 IllegalStateException**（⑦b）；**schedule 返回值存 `scheduledTasks` Map**（⑦c）；`runOnce`——派生 key `profileName|cron|message`（拍板 B）computeIfAbsent ReentrantLock → tryLock 失败 log.info 跳过返回 → 三元组 `getOrCreate("scheduler","scheduler",profileName)` → `agentService.process(session, sc.message())` → catch Exception log.error(taskKey, e) 不外抛（不带 message 内容，NFR-3）→ finally unlock；package-private 测试钩子 `Lock lockFor(String taskKey)`（课件骨架同款）与 `int scheduledTaskCount()`（⑦c 断言用）
+- [X] T003 [US1] 创建 `AgentScheduler` 于 axion-core/src/main/java/com/axion/core/AgentScheduler.java（需求文档「核心代码骨架」逐字对照 + ⑦ 项修订）：无组件注解纯类（G4-C1，②）；构造注入 taskScheduler/ProfileRegistry/SessionManager/AgentService 四依赖；`registerAll()` 扫 `profileRegistry.list()`（④ 适配）逐条 `taskScheduler.schedule(() -> runOnce(profile, sc), zone 空 ? new CronTrigger(cron) : new CronTrigger(cron, validatedZone(...)))`——**validatedZone 用 `ZoneId.of(zone)` 校验、非法抛带 profile/zone 的 IllegalStateException**（⑦b）；**schedule 返回值存 `scheduledTasks` Map**（⑦c）；`runOnce`——派生 key `profileName|cron|message`（拍板 B）computeIfAbsent ReentrantLock → tryLock 失败 log.info 跳过返回 → 三元组 `getOrCreate("scheduler","scheduler",profileName)` → `agentService.process(session, sc.message())` → catch Exception log.error(taskKey, e) 不外抛（不带 message 内容，NFR-3）→ finally unlock；package-private 测试钩子 `Lock lockFor(String taskKey)`（课件骨架同款）与 `int scheduledTaskCount()`（⑦c 断言用）
 
 **Checkpoint**: T002 全部转绿（实现后），US1 独立可验证
 
@@ -38,7 +38,7 @@
 
 ### Tests for User Story 2
 
-- [X] T004 [US2] `AgentSchedulerTest` 补重叠跳过细节（oryxos-core/src/test/java/com/oryxos/core/AgentSchedulerTest.java）：锁占跳过的**日志断言**——ListAppender（ContextLoaderTest 同款模式）捕获 runOnce 跳过分支的 log.info 含「跳过本次触发」与派生 taskKey；锁占跳过路径不产生任何 process 调用（verify never 已随 T002 覆盖，本任务补日志证据）。若暴露实现缺口随测即修
+- [X] T004 [US2] `AgentSchedulerTest` 补重叠跳过细节（axion-core/src/test/java/com/axion/core/AgentSchedulerTest.java）：锁占跳过的**日志断言**——ListAppender（ContextLoaderTest 同款模式）捕获 runOnce 跳过分支的 log.info 含「跳过本次触发」与派生 taskKey；锁占跳过路径不产生任何 process 调用（verify never 已随 T002 覆盖，本任务补日志证据）。若暴露实现缺口随测即修
 
 ---
 
@@ -50,7 +50,7 @@
 
 ### Tests for User Story 3
 
-- [X] T005 [US3] `AgentSchedulerTest` 补失败日志口径（oryxos-core/src/test/java/com/oryxos/core/AgentSchedulerTest.java）：process 抛异常时 ListAppender 捕获 log.error——**断言含派生 taskKey 与异常、不含 message 内容**（NFR-3：用户可控值不进日志参数的机器证据）；异常路径后 `scheduledTaskCount()` 与锁状态不受影响（调度器不死）
+- [X] T005 [US3] `AgentSchedulerTest` 补失败日志口径（axion-core/src/test/java/com/axion/core/AgentSchedulerTest.java）：process 抛异常时 ListAppender 捕获 log.error——**断言含派生 taskKey 与异常、不含 message 内容**（NFR-3：用户可控值不进日志参数的机器证据）；异常路径后 `scheduledTaskCount()` 与锁状态不受影响（调度器不死）
 
 ---
 
@@ -62,7 +62,7 @@
 
 ### Tests for User Story 4
 
-- [X] T006 [US4] `AgentSchedulerTest` 补注册组（oryxos-core/src/test/java/com/oryxos/core/AgentSchedulerTest.java）：**⑦b 非法 zone**——Profile 带 `zone=Asia/Shangha`（拼错）→ registerAll 抛 IllegalStateException，message 含 profile 名与 zone；**多 Profile 多 schedules 全量注册**——schedule 调用次数 = schedules 总数；**⑦c 句柄**——registerAll 后 `scheduledTaskCount()` = schedules 总数；zone 空 → 单参 CronTrigger（系统时区，ArgumentCaptor 断言）
+- [X] T006 [US4] `AgentSchedulerTest` 补注册组（axion-core/src/test/java/com/axion/core/AgentSchedulerTest.java）：**⑦b 非法 zone**——Profile 带 `zone=Asia/Shangha`（拼错）→ registerAll 抛 IllegalStateException，message 含 profile 名与 zone；**多 Profile 多 schedules 全量注册**——schedule 调用次数 = schedules 总数；**⑦c 句柄**——registerAll 后 `scheduledTaskCount()` = schedules 总数；zone 空 → 单参 CronTrigger（系统时区，ArgumentCaptor 断言）
 
 ---
 
@@ -70,15 +70,15 @@
 
 **Goal**: 装配改造（ThreadPoolTaskScheduler setPoolSize(4) + AgentScheduler bean + registerAll）+ 装配断言
 
-**Independent Test**: `CliAgentConfigurationTest` 增补全绿；`mvn test -pl oryxos-cli -am` 全绿
+**Independent Test**: `CliAgentConfigurationTest` 增补全绿；`mvn test -pl axion-cli -am` 全绿
 
 ### Tests for User Story 5（先行，装配断言当前 red——bean 不存在）
 
-- [X] T007 [US5] `CliAgentConfigurationTest` 增补（oryxos-cli/src/test/java/com/oryxos/cli/CliAgentConfigurationTest.java）：① AgentScheduler bean 存在且为 AgentScheduler 实例；② ThreadPoolTaskScheduler bean 的 `getScheduledThreadPoolExecutor().getCorePoolSize() > 1`（**⑦a 默认单线程跨任务阻塞的回归钉**）；③ 上下文启动无异常（registerAll 已在装配时调用——真实 taskScheduler 空 registry 零注册不炸）——当前 red，装配改造后转绿
+- [X] T007 [US5] `CliAgentConfigurationTest` 增补（axion-cli/src/test/java/com/axion/cli/CliAgentConfigurationTest.java）：① AgentScheduler bean 存在且为 AgentScheduler 实例；② ThreadPoolTaskScheduler bean 的 `getScheduledThreadPoolExecutor().getCorePoolSize() > 1`（**⑦a 默认单线程跨任务阻塞的回归钉**）；③ 上下文启动无异常（registerAll 已在装配时调用——真实 taskScheduler 空 registry 零注册不炸）——当前 red，装配改造后转绿
 
 ### Implementation for User Story 5
 
-- [X] T008 [US5] 装配改造：oryxos-cli/src/main/java/com/oryxos/cli/CliAgentConfiguration.java 新增 `ThreadPoolTaskScheduler` @Bean（`new ThreadPoolTaskScheduler()` + **`setPoolSize(4)`**（⑦a）+ `initialize()`；javadoc 注明容器关闭随 DisposableBean 自动 shutdown）+ `AgentScheduler` @Bean（构造注入 taskScheduler/ProfileRegistry/SessionManager/AgentService，方法体内**显式调 `registerAll()`**——替代 @PostConstruct，②；javadoc 注明钟推入口与 31 节 Demo 契约）
+- [X] T008 [US5] 装配改造：axion-cli/src/main/java/com/axion/cli/CliAgentConfiguration.java 新增 `ThreadPoolTaskScheduler` @Bean（`new ThreadPoolTaskScheduler()` + **`setPoolSize(4)`**（⑦a）+ `initialize()`；javadoc 注明容器关闭随 DisposableBean 自动 shutdown）+ `AgentScheduler` @Bean（构造注入 taskScheduler/ProfileRegistry/SessionManager/AgentService，方法体内**显式调 `registerAll()`**——替代 @PostConstruct，②；javadoc 注明钟推入口与 31 节 Demo 契约）
 
 **Checkpoint**: 装配替换完成，cli 测试全绿
 
@@ -89,7 +89,7 @@
 **Purpose**: 全量回归、收尾 DoD 证据、人工项清单
 
 - [X] T009 全量门禁：`mvn clean verify` 全绿（**不写死用例数**——007 ⑦e 口径；静态门禁一并全绿）
-- [X] T010 收尾 DoD 证据 + 人工项清单：① git diff 目检前序公共接口零改动——`Profile`/`Profile.Schedule`/`ProfileRegistry`/`SessionManager`/`AgentService` 逐字节未动（拍板 B 承诺）；② grep 核对 NFR-003：调度相关日志（info/error）只含派生 key 与异常、不含 message 内容；③ 对照 quickstart.md 输出机器判卷结论与**剩余人工项清单**（真实到点触发一次 / 配置驱动体感 / 端到端预演——人工项不自动执行，如实列待办）；④ 按 oryx-spec gates.md 收尾 DoD 七项出具证据（宪法不变量 ⑥ 条含「无 Reactor/CompletableFuture/自建线程池」——ThreadPoolTaskScheduler 为陷阱表点名组件，grep 证实无其他自建池）
+- [X] T010 收尾 DoD 证据 + 人工项清单：① git diff 目检前序公共接口零改动——`Profile`/`Profile.Schedule`/`ProfileRegistry`/`SessionManager`/`AgentService` 逐字节未动（拍板 B 承诺）；② grep 核对 NFR-003：调度相关日志（info/error）只含派生 key 与异常、不含 message 内容；③ 对照 quickstart.md 输出机器判卷结论与**剩余人工项清单**（真实到点触发一次 / 配置驱动体感 / 端到端预演——人工项不自动执行，如实列待办）；④ 按 axion-spec gates.md 收尾 DoD 七项出具证据（宪法不变量 ⑥ 条含「无 Reactor/CompletableFuture/自建线程池」——ThreadPoolTaskScheduler 为陷阱表点名组件，grep 证实无其他自建池）
 
 ---
 
@@ -120,7 +120,7 @@
 
 ### MVP First（US1 优先）
 
-1. T001 现状核对 → T002 测试先行（red）→ T003 实现 → **STOP and VALIDATE**：`mvn test -pl oryxos-core -am` 全绿
+1. T001 现状核对 → T002 测试先行（red）→ T003 实现 → **STOP and VALIDATE**：`mvn test -pl axion-core -am` 全绿
 2. US1 即完整调度器（注册 + 触发 + 防重叠 + 失败隔离）——可独立演示「到点自动跑 ReAct」
 
 ### Incremental Delivery

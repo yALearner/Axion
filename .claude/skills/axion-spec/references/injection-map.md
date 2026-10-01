@@ -25,7 +25,7 @@ S3: 「spec：specs/002-memory-system/spec.md。
     技术方案：docs/TechnicalSolution.md（第 10 章 9 模块结构为准，模块数必须一致）。
     陷阱：CLAUDE.md 常见陷阱表（Spring AI 双调用、Provider 扫描、SQLite 迁移等）。」
 
-S6（交给 speckit-implement 前）: 「执行 tasks.md。每 task 遵守 .claude/skills/oryx-spec/references/gates.md
+S6（交给 speckit-implement 前）: 「执行 tasks.md。每 task 遵守 .claude/skills/axion-spec/references/gates.md
     的过程纪律与停止清单；新建 Maven 模块时用 java-spring-init 且跳过 commit；
     不自动 commit / push / 运行 package.sh。」
 ```

@@ -1,7 +1,7 @@
-package com.oryxos.tool.mcp;
+package com.axion.tool.mcp;
 
+import com.axion.tool.ToolRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oryxos.tool.ToolRegistry;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
@@ -21,13 +21,13 @@ import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 
 /**
- * MCP 方式二客户端（FR-5）：启动时读 {@code .oryxos/mcp_servers.yaml}，逐个 stdio 连接、{@code tools/list} 拉取、包装成
- * {@link com.oryxos.tool.mcp.McpToolAdapter} 注册进 ToolRegistry。
+ * MCP 方式二客户端（FR-5）：启动时读 {@code .axion/mcp_servers.yaml}，逐个 stdio 连接、{@code tools/list} 拉取、包装成
+ * {@link com.axion.tool.mcp.McpToolAdapter} 注册进 ToolRegistry。
  *
  * <p>坑十三：连接失败只 WARN 带 server 名、不抛、不拖垮启动——外部依赖的可用性不是自己的可用性；其余工具照常 注册。配置缺失/空列表 = 正常启动（无 MCP server
  * 是合法状态）；yaml 结构非法 → 明确报错阻断启动（本地配置 错误不静默）。
  *
- * <p>可 {@code @Component}（G4-C1 口径：依赖 ToolRegistry bean 就位后扫描拾取，boot 扫描 com.oryxos 全树）； 业务层同步门面调用，零
+ * <p>可 {@code @Component}（G4-C1 口径：依赖 ToolRegistry bean 就位后扫描拾取，boot 扫描 com.axion 全树）； 业务层同步门面调用，零
  * Reactor 代码（宪法 VII 口径）。
  */
 @Component
@@ -79,7 +79,7 @@ public class McpClientService {
 
   /** 测试 seam：子类覆写配置来源。 */
   protected List<McpServerConfig> loadConfigs() {
-    Path configFile = Path.of(".oryxos", "mcp_servers.yaml");
+    Path configFile = Path.of(".axion", "mcp_servers.yaml");
     if (!Files.exists(configFile)) {
       return List.of();
     }

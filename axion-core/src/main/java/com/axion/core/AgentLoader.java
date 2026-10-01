@@ -1,4 +1,4 @@
-package com.oryxos.core;
+package com.axion.core;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +21,7 @@ import org.yaml.snakeyaml.Yaml;
 /**
  * Agent 目录解析与 Profile 派生（003 交付物 ProfileLoader 更名 + 011-plugin-agent 扩职责，修订说明 ④）。
  *
- * <p>一个目录 = 一个 Agent（宪法 IV）：扫 {@code .oryxos/agents/} 下各子目录，把每个 {@code AGENT.md} 拆成
+ * <p>一个目录 = 一个 Agent（宪法 IV）：扫 {@code .axion/agents/} 下各子目录，把每个 {@code AGENT.md} 拆成
  * frontmatter（运行配置）与正文（任务指令）——拆分与派生**同一解析器**（坑一：两套解析各拆各的会 frontmatter/正文错位）； 认出 {@code
  * scripts/}、{@code skills/}、{@code REFERENCE.md} 资源所在；{@code deriveProfile} 把 frontmatter 派生成底座认识的
  * {@link Profile}（正文不进 Profile 值对象——由 {@link ContextLoader} 每轮现读，修订说明 ⑤）。

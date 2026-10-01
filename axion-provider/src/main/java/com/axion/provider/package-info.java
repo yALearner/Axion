@@ -1,5 +1,5 @@
 /**
- * OryxOS Provider — 核心能力一：对接 LLM.
+ * Axion Provider — 核心能力一：对接 LLM.
  *
  * <p>Provider 抽象层，包含：
  *
@@ -11,4 +11,4 @@
  *
  * <p>基于 Spring AI Alibaba 做协议转换，只用其 Provider 抽象和 协议转换能力，禁用其自动 Tool 执行。
  */
-package com.oryxos.provider;
+package com.axion.provider;

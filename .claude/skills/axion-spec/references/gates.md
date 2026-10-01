@@ -1,4 +1,4 @@
-# oryx-spec 门禁细则与执行纪律
+# axion-spec 门禁细则与执行纪律
 
 ## 门禁
 
@@ -10,10 +10,10 @@
 六条清单（继承 `docs/AiProgrammingGuide.md` §3.4）：
 
 1. Memory 没有被简化成跟 Session 合并（应为 `MemoryService` 三层统一门面）
-2. Tool 没有被拆成多个模块（应为合并的 `oryxos-tool` 一个模块，宪法原则 IX）
+2. Tool 没有被拆成多个模块（应为合并的 `axion-tool` 一个模块，宪法原则 IX）
 3. `AgentLoader` / `AGENT.md` 没有被当成 Tool（Agent 目录归 core 的 `ContextLoader`）
 4. 没有启用 Spring AI 自动 tool 执行（宪法原则 II，**最容易被写错的一条**）
-5. plan 的模块结构 = 技术方案第 10 章的 9 个模块（新增 Channel/Tool 只加新模块，不改 `oryxos-core`）
+5. plan 的模块结构 = 技术方案第 10 章的 9 个模块（新增 Channel/Tool 只加新模块，不改 `axion-core`）
 6. 核心阶段不做清单被遵守（无认证/SSE/WebSocket/限流/RBAC 等扩展项混入）
 
 操作方式：用 AskUserQuestion 一次列出六条，每条选项「通过 / 不过（附原因）」；

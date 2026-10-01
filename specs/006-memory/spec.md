@@ -12,7 +12,7 @@
 
 ### User Story 1 - 跨对话记偏好（Priority: P1）
 
-第一次对话告诉 Agent"我项目用 Spring Boot，部署在 K8s 上"，Agent 主动调 `save_memory` 写入长期记忆；重启 OryxOS 或新开会话；第二次对话问"我的项目能用什么数据库"，Agent 在响应里引用之前记的偏好给建议。这是 Agent OS 区别于 chatbot 的核心体验（Demo 二对话版，编程指南 §4.3）。
+第一次对话告诉 Agent"我项目用 Spring Boot，部署在 K8s 上"，Agent 主动调 `save_memory` 写入长期记忆；重启 Axion 或新开会话；第二次对话问"我的项目能用什么数据库"，Agent 在响应里引用之前记的偏好给建议。这是 Agent OS 区别于 chatbot 的核心体验（Demo 二对话版，编程指南 §4.3）。
 
 **Why this priority**: 本课存在的意义（课件 21 §一：Agent 从 Demo 到生产要跨的头号坎是记忆）；需求文档 §13 的 Memory 验收点与 Demo 二都锚定这条链。
 
@@ -31,7 +31,7 @@
 
 用户的关键约束（身份、项目背景、偏好）存在核心区，每次对话都完整注入 system prompt——不管归档区积累了多少、截断了多少，核心区一字不能少（坑十六）。
 
-**Why this priority**: 核心记忆是 MemGPT core memory 思想在 OryxOS 的落地（课件 21 §十），解决"每次对话都记得你是谁"这个最影响体感的需求；实现成本接近零但底线最该钉死（截断逻辑将来任何"优化"都不能碰它）。
+**Why this priority**: 核心记忆是 MemGPT core memory 思想在 Axion 的落地（课件 21 §十），解决"每次对话都记得你是谁"这个最影响体感的需求；实现成本接近零但底线最该钉死（截断逻辑将来任何"优化"都不能碰它）。
 
 **Independent Test**: 最值钱回归测试：灌 500 条归档流水 → load 含核心条目、不含最早归档、含最近归档（坑十六）；并发追加 50 条零丢失。
 
@@ -95,8 +95,8 @@
 - **FR-003**: 系统 MUST 提供 `MarkdownMemoryStore`（默认档）：MEMORY.md 两 header 分区；**并发与原子写约定**——append 双层互斥（进程内 synchronized + 跨进程 FileChannel.lock）且**锁内重读**、写回用临时文件（UUID 名）+ ATOMIC_MOVE 原子替换、load 免锁（原子写保证读不到半写）、append 失败异常上抛由 ToolExecutor 审计
 - **FR-004**: 系统 MUST 提供 `SqliteMemoryStore`：memory_entries 表（手工 schema.sql 增量，坑八口径）；append→INSERT、load→CORE 全量 + ARCHIVAL 时间倒序 LIMIT、recall→LIKE；与 markdown 档语义一致（契约测试钉死）
 - **FR-005**: 系统 MUST 提供 `Mem0MemoryStore`：自托管 Mem0 REST 集成（RestClient 直连，凭证/地址 `${ENV_VAR}` 占位；自托管应 HTTPS）；append/load/recall 翻译 add/get/search；REST 协议实施时 H3 核实（核实不到 → 停止清单第 5 条）；非 2xx 异常上抛不吞
-- **FR-006**: 系统 MUST 提供 `oryxos.memory.backend` 配置键（markdown 缺省 / sqlite / mem0）：非法值启动校验明确报错；装配处显式 @Bean 按值装配（宪法 III 哲学）；**后端故障快速失败明确报错**（不静默空记忆、不自动降级）
-- **FR-007**: 系统 MUST 提供 `SaveMemoryTool`/`RecallMemoryTool`（implements OryxTool 纯实现，005 机械适配）：save_memory——content 必填、scope 可选（core/archival 缺省 archival、非法值明确报错）、成功返回"已记住"；recall_memory——keyword 必填、未命中返回"没有找到相关记忆"不抛异常
+- **FR-006**: 系统 MUST 提供 `axion.memory.backend` 配置键（markdown 缺省 / sqlite / mem0）：非法值启动校验明确报错；装配处显式 @Bean 按值装配（宪法 III 哲学）；**后端故障快速失败明确报错**（不静默空记忆、不自动降级）
+- **FR-007**: 系统 MUST 提供 `SaveMemoryTool`/`RecallMemoryTool`（implements AxionTool 纯实现，005 机械适配）：save_memory——content 必填、scope 可选（core/archival 缺省 archival、非法值明确报错）、成功返回"已记住"；recall_memory——keyword 必填、未命中返回"没有找到相关记忆"不抛异常
 - **FR-008**: 系统 MUST 完成 PromptBuilder 集成（002 改造点）：构造器新增 MemoryService 参数；组装 system prompt 时 buildContext(session) 拼入（核心记忆 + 会话历史，归档经 load 截断后注入）；每次重新读（坑十五联动）
 
 ### Non-Functional Requirements
@@ -125,7 +125,7 @@
 
 ## Assumptions
 
-- **前序交付物已就位、无缺口**：OryxTool/ToolResult/JsonSchema/LlmGateway 先例（001）、PromptBuilder/SessionManager/Session/ToolExecutor（002）、InitCommand 已建 MEMORY.md 模板（003）、ToolRegistry/RestClient 装配/坑八模式（005）——现状实测确认（2026-09-06）
+- **前序交付物已就位、无缺口**：AxionTool/ToolResult/JsonSchema/LlmGateway 先例（001）、PromptBuilder/SessionManager/Session/ToolExecutor（002）、InitCommand 已建 MEMORY.md 模板（003）、ToolRegistry/RestClient 装配/坑八模式（005）——现状实测确认（2026-09-06）
 - **单实例假设**：核心阶段单实例部署；跨进程 FileChannel 锁为纵深防御（多实例共享文件系统的已知边界）
 - **三档一次交付（拍板 B）**：MarkdownMemoryStore 默认 + SqliteMemoryStore + Mem0MemoryStore + memory.backend 切换；整体以 D:\项目\ 新版 PDF 课件为准
 - **Mem0 协议 H3 核实**：实施时核实自托管版 REST 形态，核实不到停下报告；本地无实例 → mock HTTP 层单测 + 真机验证待办
