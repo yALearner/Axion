@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.axion.core.MemoryScope;
+import com.axion.core.ToolExecutionContext;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -22,7 +23,8 @@ class MarkdownMemoryStoreTest {
 
   @BeforeEach
   void setUp(@TempDir Path tempDir) {
-    store = new MarkdownMemoryStore(tempDir.resolve("MEMORY.md"));
+    // 012：构造改 workspaceRoot——无上下文回退全局 memory/MEMORY.md（行为与改造前一致）
+    store = new MarkdownMemoryStore(tempDir);
   }
 
   @Test
@@ -43,13 +45,40 @@ class MarkdownMemoryStoreTest {
   @Test
   @DisplayName("FR-6 故障路径：记忆文件不可读 → append/load 异常上抛不静默（快速失败，不返回空记忆）")
   void unreadableFileFailsFast(@TempDir Path tempDir) throws Exception {
-    Path dirAsFile = tempDir.resolve("MEMORY.md");
+    Path dirAsFile = tempDir.resolve("memory").resolve("MEMORY.md");
     Files.createDirectories(dirAsFile); // 目录冒充文件：读必失败
-    MarkdownMemoryStore broken = new MarkdownMemoryStore(dirAsFile);
+    MarkdownMemoryStore broken = new MarkdownMemoryStore(tempDir);
 
     assertThatThrownBy(broken::load).isInstanceOf(IllegalStateException.class);
     assertThatThrownBy(() -> broken.append("写不进去", MemoryScope.ARCHIVAL))
         .isInstanceOf(IllegalStateException.class);
+  }
+
+  @Test
+  @DisplayName("012 坑十六回归：有 Agent 上下文落 per-agent 路径、无上下文回退全局、互不串扰")
+  void perAgentPathResolvedByContext(@TempDir Path tempDir) throws Exception {
+    MarkdownMemoryStore perAgentStore = new MarkdownMemoryStore(tempDir);
+    try {
+      ToolExecutionContext.set("ops-agent"); // 模拟 ToolExecutor 执行期间置入
+      perAgentStore.append("运维偏好：先看监控再动配置", MemoryScope.ARCHIVAL);
+    } finally {
+      ToolExecutionContext.clear(); // 坑十六：测试内也必须必清（002 坑四泄漏纪律）
+    }
+
+    assertThat(Files.exists(tempDir.resolve("agents").resolve("ops-agent").resolve("MEMORY.md")))
+        .isTrue(); // 落 per-agent 路径
+    assertThat(Files.exists(tempDir.resolve("memory").resolve("MEMORY.md"))).isFalse(); // 全局未被碰
+
+    perAgentStore.append("全局条目", MemoryScope.ARCHIVAL); // 无上下文 → 回退全局
+    assertThat(Files.exists(tempDir.resolve("memory").resolve("MEMORY.md"))).isTrue();
+
+    try {
+      ToolExecutionContext.set("ops-agent");
+      assertThat(perAgentStore.load()).contains("运维偏好").doesNotContain("全局条目"); // per-agent 隔离
+    } finally {
+      ToolExecutionContext.clear();
+    }
+    assertThat(perAgentStore.load()).contains("全局条目"); // 全局读回退
   }
 
   @Test

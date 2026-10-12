@@ -5,6 +5,7 @@ import com.axion.core.MemoryScope;
 import com.axion.core.MemoryService;
 import com.axion.core.Message;
 import com.axion.core.Session;
+import com.axion.core.ToolExecutionContext;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 
@@ -34,7 +35,15 @@ public class MemoryServiceImpl implements MemoryService {
   @Override
   public String buildContext(Session session) {
     StringBuilder context = new StringBuilder(MEMORY_HEADER);
-    context.append(System.lineSeparator()).append(longTermStore.load()); // 坑十五：每次重新读
+    // 5.2.1：读路径不经 ToolExecutor——委托 store.load 前临时置入本会话 Agent 名（per-agent 记忆），读完复原
+    ToolExecutionContext.set(session.profileName());
+    String longTerm;
+    try {
+      longTerm = longTermStore.load(); // 坑十五：每次重新读
+    } finally {
+      ToolExecutionContext.clear();
+    }
+    context.append(System.lineSeparator()).append(longTerm);
     context.append(System.lineSeparator()).append(HISTORY_HEADER).append(System.lineSeparator());
     for (Message message : session.messages()) {
       String content = message.content();
@@ -55,6 +64,17 @@ public class MemoryServiceImpl implements MemoryService {
   @Override
   public List<String> recall(String keyword) {
     return longTermStore.recallByKeyword(keyword);
+  }
+
+  @Override
+  public String readAll(String agentName) {
+    // 5.2.1：读路径不经 ToolExecutor——委托 store.load 前临时置入入参 Agent 名，读完复原
+    ToolExecutionContext.set(agentName);
+    try {
+      return longTermStore.load();
+    } finally {
+      ToolExecutionContext.clear();
+    }
   }
 
   private String roleLabel(Message.MessageRole role) {

@@ -23,4 +23,7 @@ public interface MemoryService {
 
   /** 关键词检索长期记忆归档区（recall_memory 的落点）；未命中返回空列表。 */
   List<String> recall(String keyword);
+
+  /** 读指定 Agent 的长期记忆全文（012-agent-mgmt 5.2.1：GET /agents/{name}/memory 的读路径）。 */
+  String readAll(String agentName);
 }

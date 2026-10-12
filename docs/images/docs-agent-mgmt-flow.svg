@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 810" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="a" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L6,2.5 L0,5 Z" fill="#64748b"/></marker>
+    <marker id="aGray" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L6,2.5 L0,5 Z" fill="#94a3b8"/></marker>
+    <filter id="sh"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-opacity="0.08"/></filter>
+  </defs>
+  <rect width="860" height="810" fill="#f8fafc" rx="6"/>
+  <rect x="0" y="0" width="860" height="32" fill="#1e293b" rx="6"/>
+  <rect x="0" y="16" width="860" height="16" fill="#1e293b"/>
+  <text x="430" y="21" text-anchor="middle" fill="#f1f5f9" font-size="12" font-weight="bold">Agent 动态管理 — 三条录入一条路 · register(agentDir) → 派生注册 → 免重启即上线 · 管理台详情 5 tab（生成/文件/会话/记忆）</text>
+  <rect x="30" y="55" width="430" height="66" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="245" y="72" text-anchor="middle" font-size="10" font-weight="bold" fill="#b45309">三条录入路径（坑十七：殊途同归，都汇入同一段注册代码）</text>
+  <text x="245" y="87" text-anchor="middle" font-size="8" fill="#92400e">管理台「新建 Agent」（name+description → 模板脚手架）· POST /api/v1/agents · 手工丢目录（scp/git/编辑器）· 启动全量扫</text>
+  <text x="245" y="101" text-anchor="middle" font-size="8" fill="#92400e">上传即上线 = 丢目录即上线：都只是写一个 Agent 目录进去，全程免重启（WorkspaceWatcher 实时拾取）</text>
+  <rect x="30" y="155" width="430" height="76" rx="6" fill="#dcfce7" stroke="#10b981" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="245" y="172" text-anchor="middle" font-size="10" font-weight="bold" fill="#15803d">register(agentDir) 唯一注册入口（坑十七：三条录入同一段代码）</text>
+  <text x="245" y="187" text-anchor="middle" font-size="8" fill="#166534">AgentLoader.deriveProfile（与启动同一套校验 · name=目录名）→ ProfileRegistry.register</text>
+  <text x="245" y="201" text-anchor="middle" font-size="8" fill="#166534">有 schedules → AgentScheduler.registerProfile（scheduledTasks 句柄 + registrations 登记）</text>
+  <text x="245" y="215" text-anchor="middle" font-size="8" fill="#166534">011 债②：注册入口重跑 tools 引用告警校验（装配层钩子注入）· name 冲突第一步就拒（坑十八）</text>
+  <rect x="30" y="265" width="430" height="66" rx="6" fill="#dcfce7" stroke="#10b981" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="245" y="282" text-anchor="middle" font-size="10" font-weight="bold" fill="#15803d">到点自跑（宪法 VIII：channel/user = scheduler）</text>
+  <text x="245" y="297" text-anchor="middle" font-size="8" fill="#166534">AgentService.process —— 与 CLI/Web 同一入口，底座零重写（全程同步，宪法 VII）</text>
+  <rect x="30" y="365" width="430" height="66" rx="6" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="245" y="382" text-anchor="middle" font-size="10" font-weight="bold" fill="#6b21a8">免重启即上线</text>
+  <text x="245" y="397" text-anchor="middle" font-size="8" fill="#7e22ce">GET /api/v1/agents 立即可见 · cron 到点真自己跑（守护线程不进请求链路，宪法 VII）</text>
+  <rect x="30" y="465" width="430" height="66" rx="6" fill="#dcfce7" stroke="#10b981" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="245" y="482" text-anchor="middle" font-size="10" font-weight="bold" fill="#15803d">删除顺序钉死（坑十：先停定时 → 移出索引 → 归档）</text>
+  <text x="245" y="497" text-anchor="middle" font-size="8" fill="#166534">unregisterProfile 先停定时（011 留白兑现）→ remove → archive 归档不物理删（可追溯）</text>
+  <text x="245" y="511" text-anchor="middle" font-size="8" fill="#166534">手工删目录对称注销（watcher 与 API 同一段注销代码）</text>
+  <rect x="30" y="565" width="430" height="50" rx="6" fill="#fecdd3" stroke="#be123c" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="245" y="584" text-anchor="middle" font-size="8" fill="#9f1239">失败路径（坑十一）：create 任一步失败 → agentStore.delete 回滚，不留半个 Agent</text>
+  <text x="245" y="598" text-anchor="middle" font-size="8" fill="#9f1239">400：name 已存在/AGENT.md 非法/provider 不存在/生成非法（code 区分）· 404：查改删不存在（2.5 口径）</text>
+  <rect x="30" y="655" width="800" height="50" rx="6" fill="#fecdd3" stroke="#be123c" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="430" y="674" text-anchor="middle" font-size="10" font-weight="bold" fill="#9f1239">审计 day one（宪法 V）：generate-files 落 llm_calls（成败都落）· 会话消息/到点自跑落 llm_calls + tool_invocations · create/update/delete 配置变更不落审计双表</text>
+  <rect x="500" y="55" width="330" height="66" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="665" y="72" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e40af">.axion/agents/ 唯一真相源（一个目录 = 一个 Agent）</text>
+  <text x="665" y="87" text-anchor="middle" font-size="8" fill="#1d4ed8">.axion/archive/ 归档区（删除不物理删）</text>
+  <text x="665" y="101" text-anchor="middle" font-size="8" fill="#1d4ed8">sessions/llm_calls/tool_invocations 复用（无新表）</text>
+  <rect x="500" y="155" width="330" height="150" rx="6" fill="#f3e8ff" stroke="#9333ea" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="665" y="172" text-anchor="middle" font-size="10" font-weight="bold" fill="#6b21a8">管理台 Agent 页（能看 → 真能管，5.4 最终形态）</text>
+  <text x="665" y="187" text-anchor="middle" font-size="8" fill="#7e22ce">列表 + 新建（只填 name + description）· 详情 5 tab</text>
+  <text x="665" y="201" text-anchor="middle" font-size="8" fill="#7e22ce">基本信息 · 生成（预览可改）· 文件（tree/file 可编辑保存）</text>
+  <text x="665" y="215" text-anchor="middle" font-size="8" fill="#7e22ce">会话（固定会话气泡 + 输入框发消息）· 记忆（per-agent MEMORY.md 只读）</text>
+  <text x="665" y="229" text-anchor="middle" font-size="8" fill="#7e22ce">「长期记忆」页移除（全局端点退役）· api.js 增 POST/PUT/DELETE</text>
+  <text x="665" y="243" text-anchor="middle" font-size="8" fill="#7e22ce">三态/只读纪律/深蓝 token（2026-10-01 拍板）沿用</text>
+  <rect x="500" y="339" width="330" height="80" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="665" y="356" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e40af">按描述重生成（5.2.4）</text>
+  <text x="665" y="371" text-anchor="middle" font-size="8" fill="#1d4ed8">generate-files → LlmGateway（与 ProviderService.chat 同签名）</text>
+  <text x="665" y="385" text-anchor="middle" font-size="8" fill="#1d4ed8">剥 ``` 围栏 + AgentLoader 解析校验（坑十四：非法 400 可读原因）</text>
+  <text x="665" y="399" text-anchor="middle" font-size="8" fill="#1d4ed8">配置 axion.author.provider/model（坑十五：model 留空 → 可读 503）</text>
+  <rect x="500" y="453" width="330" height="80" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="665" y="470" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e40af">per-agent 记忆 + 固定会话（5.2.1/5.2.2）</text>
+  <text x="665" y="485" text-anchor="middle" font-size="8" fill="#1d4ed8">置入/清除 ThreadLocal（坑十六：finally 必清，002 坑四同款）</text>
+  <text x="665" y="499" text-anchor="middle" font-size="8" fill="#1d4ed8">→ agents/&lt;name&gt;/MEMORY.md · 无上下文回退全局 · SPI 契约零改动</text>
+  <text x="665" y="513" text-anchor="middle" font-size="8" fill="#1d4ed8">固定会话 admin:console:&lt;name&gt;（session_id 拼接规则未动，宪法不变量④）</text>
+  <rect x="500" y="565" width="330" height="80" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="665" y="582" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e40af">工作区文件浏览/编辑（5.2.3）</text>
+  <text x="665" y="597" text-anchor="middle" font-size="8" fill="#1d4ed8">tree / file?path= 读 · POST /workspace/file 写盘</text>
+  <text x="665" y="611" text-anchor="middle" font-size="8" fill="#1d4ed8">防目录穿越 normalize+startsWith(root)（坑十二，唯一安全要点）</text>
+  <text x="665" y="625" text-anchor="middle" font-size="8" fill="#1d4ed8">编辑 AGENT.md 显式走 update 重注册（坑十三：macOS 子目录不监听）</text>
+  <rect x="500" y="715" width="330" height="66" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="5,3" filter="url(#sh)"/>
+  <text x="665" y="732" text-anchor="middle" font-size="10" font-weight="bold" fill="#94a3b8">扩展阶段（本节不做）</text>
+  <text x="665" y="747" text-anchor="middle" font-size="8" fill="#94a3b8">认证鉴权/RBAC · multipart/zip · 启用停用 · 版本历史</text>
+  <text x="665" y="761" text-anchor="middle" font-size="8" fill="#94a3b8">多轮追问 · 启动失败清单可见性（011 债③延续：课件未点名端点，盲区注记）</text>
+  <line x1="245" y1="121" x2="245" y2="153" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+  <line x1="245" y1="231" x2="245" y2="263" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+  <line x1="245" y1="331" x2="245" y2="363" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+  <line x1="245" y1="431" x2="245" y2="463" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+  <line x1="245" y1="531" x2="245" y2="563" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+  <line x1="245" y1="615" x2="245" y2="653" stroke="#64748b" stroke-width="1.3" marker-end="url(#a)"/>
+  <line x1="500" y1="88" x2="462" y2="193" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#aGray)"/>
+  <line x1="500" y1="230" x2="462" y2="121" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#aGray)"/>
+  <line x1="500" y1="270" x2="462" y2="380" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#aGray)"/>
+  <line x1="500" y1="290" x2="462" y2="500" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#aGray)"/>
+  <line x1="500" y1="379" x2="462" y2="590" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#aGray)"/>
+  <line x1="500" y1="493" x2="462" y2="415" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#aGray)"/>
+  <line x1="500" y1="605" x2="462" y2="480" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#aGray)"/>
+</svg>

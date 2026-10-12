@@ -1,15 +1,15 @@
-/* axion-admin-ui skill 设计 token——值取自 website/.vitepress/theme/custom.css，照抄勿改 */
+/* axion-admin-ui skill 设计 token——2026-10-01 用户拍板改版：深蓝 + 科技感 + 简约（原黑橙体系废弃） */
 :root {
-  --bg: #000000;
-  --card: #111111;
-  --hover: #1a1a1a;
-  --border: #222222;
-  --primary: #f97316;
-  --primary-hover: #ea6a00;
-  --primary-dark: #c2550a;
-  --text: #f5f5f5;
-  --text-secondary: #a3a3a3;
-  --text-weak: #666666;
+  --bg: #050b18;
+  --card: #0b1526;
+  --hover: #12203a;
+  --border: #1b2c4a;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --primary-dark: #2563eb;
+  --text: #e8eefb;
+  --text-secondary: #94a8c9;
+  --text-weak: #5a6f96;
 }
 
 * {
@@ -48,7 +48,7 @@ th {
 
 code {
   font-family: 'JetBrains Mono', monospace;
-  color: var(--primary);
+  color: #7dd3fc;
 }
 
 .card {
@@ -81,7 +81,7 @@ code {
 }
 
 .status-dot.warn {
-  background: #f97316;
+  background: #f59e0b;
 }
 
 .retry-btn {
@@ -96,7 +96,7 @@ code {
 
 .retry-btn:hover {
   background: var(--primary-hover);
-  color: #000000;
+  color: var(--bg);
 }
 
 @media (max-width: 768px) {

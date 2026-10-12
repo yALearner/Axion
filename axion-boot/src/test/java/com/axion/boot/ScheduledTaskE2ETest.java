@@ -152,7 +152,7 @@ class ScheduledTaskE2ETest {
         .andExpect(jsonPath("$.data.taskId").value("weather-8am"))
         .andExpect(jsonPath("$.data.success").value(true));
 
-    // ④ 断言落库：run_count=1、last_status=success、executions 一条成功、GET /memory 查得到写入
+    // ④ 断言落库：run_count=1、last_status=success、executions 一条成功、per-agent 记忆端点查得到写入（012：全局 /memory 退役）
     mockMvc
         .perform(get("/api/v1/schedules"))
         .andExpect(status().isOk())
@@ -168,7 +168,7 @@ class ScheduledTaskE2ETest {
         .andExpect(jsonPath("$.data[0].sessionId").value("scheduler|scheduler|weather-agent"));
 
     mockMvc
-        .perform(get("/api/v1/memory"))
+        .perform(get("/api/v1/agents/weather-agent/memory")) // 012：save_memory 落本 Agent 的 MEMORY.md
         .andExpect(status().isOk())
         .andExpect(
             jsonPath("$.data.content").value(org.hamcrest.Matchers.containsString("用户喜欢极简风格")));

@@ -50,6 +50,12 @@ public class GlobalExceptionHandler {
     return build(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, ex.getMessage());
   }
 
+  /** 012：Agent 管理域异常——code 各自区分（400 已存在/非法/生成非法、404 不存在、503 生成模型未配置）。 */
+  @ExceptionHandler(AgentManagementException.class)
+  public ResponseEntity<ErrorResponse> handleAgentManagement(AgentManagementException ex) {
+    return build(HttpStatus.valueOf(ex.code().httpStatus()), ex.code(), ex.getMessage());
+  }
+
   /** 009：Agent 调用超时（60 秒上限，⑨c 任务体继续后台跑完）。 */
   @ExceptionHandler(AgentTimeoutException.class)
   public ResponseEntity<ErrorResponse> handleTimeout(AgentTimeoutException ex) {

@@ -134,14 +134,14 @@ onMounted(load)
 }
 .schedule-table th {
   text-align: left;
-  color: #a3a3a3;
+  color: var(--text-secondary);
   font-weight: 500;
   padding: 10px 12px;
-  border-bottom: 1px solid #222222;
+  border-bottom: 1px solid var(--border);
 }
 .schedule-table td {
   padding: 10px 12px;
-  border-bottom: 1px solid #222222;
+  border-bottom: 1px solid var(--border);
   color: var(--text);
 }
 .mono {
@@ -162,25 +162,25 @@ onMounted(load)
   border: 1px solid #7f1d1d;
 }
 .status-off {
-  color: #a3a3a3;
-  border: 1px solid #404040;
+  color: var(--text-secondary);
+  border: 1px solid #2a3a5c;
 }
 .status-idle {
-  color: #666666;
-  border: 1px solid #333333;
+  color: var(--text-weak);
+  border: 1px solid #243455;
 }
 .actions {
   white-space: nowrap;
 }
 .hint {
-  color: #666666;
+  color: var(--text-weak);
   font-size: 12px;
   margin-top: 4px;
 }
 .btn {
-  background: #1a1a1a;
-  color: #f5f5f5;
-  border: 1px solid #222222;
+  background: var(--hover);
+  color: var(--text);
+  border: 1px solid var(--border);
   border-radius: 4px;
   padding: 6px 12px;
   margin-right: 8px;
@@ -188,8 +188,8 @@ onMounted(load)
   font-size: 13px;
 }
 .btn:hover:not(:disabled) {
-  border-color: #f97316;
-  color: #f97316;
+  border-color: var(--primary);
+  color: var(--primary-hover);
 }
 .btn:disabled {
   opacity: 0.5;

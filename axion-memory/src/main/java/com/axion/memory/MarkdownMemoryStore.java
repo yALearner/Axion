@@ -2,6 +2,7 @@ package com.axion.memory;
 
 import com.axion.core.LongTermMemoryStore;
 import com.axion.core.MemoryScope;
+import com.axion.core.ToolExecutionContext;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -55,29 +56,49 @@ public class MarkdownMemoryStore implements LongTermMemoryStore {
           + ARCHIVE_HEADER
           + System.lineSeparator();
 
-  private final Path memoryFile;
+  private final Path workspaceRoot;
 
-  /** 跨进程互斥的锁文件：记忆文件会被 ATOMIC_MOVE 替换，锁只能挂在同目录的伴生文件上。 */
-  private final Path lockFile;
+  public MarkdownMemoryStore(Path workspaceRoot) {
+    this.workspaceRoot = workspaceRoot;
+  }
 
-  public MarkdownMemoryStore(Path memoryFile) {
-    this.memoryFile = memoryFile;
-    this.lockFile = memoryFile.resolveSibling(memoryFile.getFileName() + ".lock");
+  /**
+   * 当前记忆文件（012-agent-mgmt 5.2.1 per-agent）：有 Agent 上下文 → {@code agents/<name>/MEMORY.md}（这个 Agent
+   * 自己的成长记录，跟它的 AGENT.md 同目录，合宪法 IV）；无上下文 → 回退全局 {@code memory/MEMORY.md}（行为与改造前一致——CLI
+   * 直连等场景）。每次调用现算，不缓存。
+   */
+  private Path memoryFile() {
+    String agentName = ToolExecutionContext.current();
+    if (agentName == null || agentName.isBlank()) {
+      return workspaceRoot.resolve("memory").resolve("MEMORY.md");
+    }
+    return workspaceRoot.resolve("agents").resolve(agentName).resolve("MEMORY.md");
   }
 
   @Override
   public synchronized void append(String content, MemoryScope scope) {
+    Path memoryFile = memoryFile();
+    Path lockFile = lockFileOf(memoryFile);
+    Path parent = memoryFile.getParent(); // 单次取值入局部变量再判空（011 实录：@Nullable 二次调用判空无效）
+    if (parent == null) {
+      throw new IllegalStateException("记忆文件路径缺少父目录: " + memoryFile);
+    }
+    try {
+      Files.createDirectories(parent); // per-agent 路径首写时父目录可能不存在
+    } catch (IOException e) {
+      throw new IllegalStateException("创建记忆目录失败: " + parent, e);
+    }
     // 双层互斥：进程内 synchronized（本方法）+ 跨进程 FileChannel.lock（锁文件）。
     try (FileChannel channel =
             FileChannel.open(lockFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         FileLock ignored = channel.lock()) {
-      String current = readExisting(); // 锁内重读：读-改-写全程互斥，不基于旧内容覆盖
+      String current = readExisting(memoryFile); // 锁内重读：读-改-写全程互斥，不基于旧内容覆盖
       if (current.isEmpty()) {
         current = TEMPLATE;
       }
       String header = scope == MemoryScope.CORE ? CORE_HEADER : ARCHIVE_HEADER;
       String entry = "- [" + LocalDate.now(ZoneId.systemDefault()) + "] " + content;
-      writeAtomic(insertUnder(current, header, entry));
+      writeAtomic(memoryFile, insertUnder(current, header, entry));
     } catch (IOException e) {
       // 锁文件不可用/写入失败：快速失败上抛，由 ToolExecutor 审计 success=false
       throw new IllegalStateException("写入记忆文件失败: " + memoryFile, e);
@@ -86,7 +107,8 @@ public class MarkdownMemoryStore implements LongTermMemoryStore {
 
   @Override
   public String load() {
-    String raw = readExisting(); // 坑十五：每次重新读，不缓存
+    Path memoryFile = memoryFile();
+    String raw = readExisting(memoryFile); // 坑十五：每次重新读，不缓存
     if (raw.isEmpty()) {
       return "";
     }
@@ -103,7 +125,8 @@ public class MarkdownMemoryStore implements LongTermMemoryStore {
 
   @Override
   public List<String> recallByKeyword(String keyword) {
-    String raw = readExisting(); // 坑十五：每次重新读，不缓存
+    Path memoryFile = memoryFile();
+    String raw = readExisting(memoryFile); // 坑十五：每次重新读，不缓存
     if (raw.isEmpty() || keyword == null || keyword.isBlank()) {
       return List.of();
     }
@@ -115,8 +138,13 @@ public class MarkdownMemoryStore implements LongTermMemoryStore {
         .toList();
   }
 
+  /** 锁文件：记忆文件会被 ATOMIC_MOVE 替换，锁只能挂在同目录的伴生文件上。 */
+  private static Path lockFileOf(Path memoryFile) {
+    return memoryFile.resolveSibling(memoryFile.getFileName() + ".lock");
+  }
+
   /** 每次读文件，文件不存在 = 合法空态（首次使用），存在但读不了 = 后端故障上抛（FR-6）。 */
-  private String readExisting() {
+  private String readExisting(Path memoryFile) {
     if (!Files.exists(memoryFile)) {
       return "";
     }
@@ -131,7 +159,7 @@ public class MarkdownMemoryStore implements LongTermMemoryStore {
    * 原子写：临时文件（UUID 名）+ {@code Files.move(ATOMIC_MOVE, REPLACE_EXISTING)} 同盘原子替换——任何时刻磁盘上要么旧文件要么
    * 新文件，不存在半写状态（load 免锁的正确性前提）。失败异常上抛，临时文件尽力清理（清理失败仅 WARN 不吞）。
    */
-  private void writeAtomic(String content) {
+  private void writeAtomic(Path memoryFile, String content) {
     Path temp = memoryFile.resolveSibling(memoryFile.getFileName() + ".tmp-" + UUID.randomUUID());
     try {
       Files.writeString(temp, content, StandardCharsets.UTF_8);

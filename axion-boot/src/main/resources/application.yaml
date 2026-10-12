@@ -72,6 +72,13 @@ axion:
   memory:
     backend: markdown
 
+  # 生成类端点（012-agent-mgmt FR-7）：系统默认的生成用 provider/model——
+  # provider 缺省取上面 providers 第一个；model 留空则生成端点返回可读 503，
+  # 不向 OpenAI 兼容端点发 model=null（坑十五）。
+  author:
+    provider: deepseek
+    model: deepseek-chat
+
 # Sandbox 三层白名单（007-sandbox FR-2）——核心阶段唯一实现 WhitelistSandbox 的配置源。
 # 空 = 什么都不允许（fail-closed，不是"不校验"）；任一为空启动打 WARN 诊断。
 # 相对根按启动目录解析（构造期 toAbsolutePath）；配置构造期拷贝、不可热更新——改后须重启。

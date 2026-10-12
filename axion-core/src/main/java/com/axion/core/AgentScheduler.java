@@ -120,6 +120,22 @@ public class AgentScheduler {
     }
   }
 
+  /**
+   * 注销单 Profile 全部 schedules（012-agent-mgmt FR-3，011 留白兑现）：从 scheduledTasks 取每条 ScheduledFuture 调
+   * {@code cancel(false)} 再移除句柄与 registrations 登记——只注销定时触发，**不动 taskLocks**、不动 scheduled_tasks
+   * 表（011 债① 的 store 增删半边归后续节）。
+   */
+  public void unregisterProfile(Profile profile) {
+    for (Profile.Schedule sc : profile.schedules()) {
+      String taskId = sc.id();
+      ScheduledFuture<?> future = scheduledTasks.remove(taskId);
+      if (future != null) {
+        future.cancel(false);
+      }
+      registrations.remove(taskId);
+    }
+  }
+
   /** 到点触发入口：先看启用状态（停用直接跳过、不执行、不记历史——最值钱回归），再进真正执行。 */
   public void runOnce(Profile profile, Profile.Schedule sc) {
     if (!store.isEnabled(sc.id())) {
