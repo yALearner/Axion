@@ -73,8 +73,13 @@ public class MarkdownMemoryStore implements LongTermMemoryStore {
     if (agentName == null || agentName.isBlank()) {
       return workspaceRoot.resolve("memory").resolve("MEMORY.md");
     }
-    AgentStore.validateName(agentName); // 012 CodeQL 门禁实录：名字进路径前先过同一把尺（防穿越兜底）
-    return workspaceRoot.resolve("agents").resolve(agentName).resolve("MEMORY.md");
+    AgentStore.validateName(agentName); // 012 CodeQL 门禁实录：名字先过同一把尺（语义校验）
+    Path agentsRoot = workspaceRoot.resolve("agents").normalize();
+    Path agentDir = agentsRoot.resolve(agentName).normalize();
+    if (!agentDir.startsWith(agentsRoot)) { // 兜底防穿越（normalize 后仍逃逸 = 拒绝）
+      throw new IllegalArgumentException("Agent 记忆路径越界: " + agentName);
+    }
+    return agentDir.resolve("MEMORY.md");
   }
 
   @Override
