@@ -37,6 +37,14 @@ public final class ToolExecutor {
 
   /** 执行一次模型请求的工具调用；任何路径都不上抛（错误以失败结果回传，异常不吞、进审计与结果）。 */
   public ToolResult execute(String sessionId, AssistantMessage.ToolCall call) {
+    return execute(sessionId, null, call);
+  }
+
+  /**
+   * 执行一次模型请求的工具调用（012-agent-mgmt FR-8 签名扩展：agentName 置入 {@link ToolExecutionContext} 供
+   * save_memory/recall_memory 落 per-agent 路径）；任何路径都不上抛（错误以失败结果回传，异常不吞、进审计与结果）。
+   */
+  public ToolResult execute(String sessionId, String agentName, AssistantMessage.ToolCall call) {
     String toolName = call.name();
     String inputJson = call.arguments();
     long startedAt = System.currentTimeMillis();
@@ -55,6 +63,7 @@ public final class ToolExecutor {
     }
     try {
       JsonNode input = parseArguments(inputJson);
+      ToolExecutionContext.set(agentName); // 坑十六：执行前置入（finally 必清）
       ToolResult result = tool.execute(input);
       long durationMs = System.currentTimeMillis() - startedAt;
       if (result.success()) {
@@ -69,6 +78,8 @@ public final class ToolExecutor {
       auditAndLog(sessionId, toolName, inputJson, null, false, message, durationMs);
       // 异常不吞：原因进审计与结果；retryable 提示为 true，重试与否由 LLM 下一轮判断
       return ToolResult.failure(message, true);
+    } finally {
+      ToolExecutionContext.clear(); // 坑十六：任何路径（含工具抛异常）必清，防串号
     }
   }
 

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.axion.core.MemoryScope;
 import com.axion.core.MemoryService;
+import com.axion.core.ToolExecutionContext;
 import com.axion.core.ToolExecutor;
 import com.axion.core.ToolResult;
 import com.axion.storage.ToolInvocation;
@@ -172,5 +173,32 @@ class MemoryToolsTest {
     verify(auditRepo).save(captor.capture());
     assertThat(captor.getValue().getSuccess()).isFalse();
     assertThat(captor.getValue().getErrorMessage()).isNotNull();
+  }
+
+  @Test
+  @DisplayName("012 坑十六链路：ToolExecutor 置入 agentName → save_memory 执行期间上下文可见（per-agent 落点依据）")
+  void toolExecutionCarriesAgentContext() throws Exception {
+    org.mockito.Mockito.doAnswer(
+            inv -> {
+              assertThat(ToolExecutionContext.current()).isEqualTo("ops-agent"); // 执行期间可见
+              return null;
+            })
+        .when(memoryService)
+        .remember(
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.any(MemoryScope.class));
+    ToolExecutor executor =
+        new ToolExecutor(
+            Map.of("save_memory", saveMemoryTool), mock(ToolInvocationRepository.class), mapper);
+
+    ToolResult result =
+        executor.execute(
+            "s-1",
+            "ops-agent",
+            new AssistantMessage.ToolCall(
+                "c1", "function", "save_memory", "{\"content\":\"项目用 Spring Boot\"}"));
+
+    assertThat(result.success()).isTrue();
+    assertThat(ToolExecutionContext.current()).isNull(); // finally 必清（坑十六）
   }
 }

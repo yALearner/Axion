@@ -50,7 +50,8 @@ public final class ReActLoop {
         return textOf(response);
       }
       for (AssistantMessage.ToolCall call : toolCallsOf(response)) {
-        ToolResult result = toolExecutor.execute(session.id(), call);
+        ToolResult result =
+            toolExecutor.execute(session.id(), profile.name(), call); // 012：per-agent 上下文
         session.append(toToolMessage(call, result));
       }
     }

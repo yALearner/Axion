@@ -11,6 +11,7 @@ import com.axion.core.MemoryScope;
 import com.axion.core.Message;
 import com.axion.core.Session;
 import com.axion.core.SessionManager;
+import com.axion.core.ToolExecutionContext;
 import com.axion.storage.SessionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -77,5 +78,43 @@ class MemoryServiceTest {
     assertThat(service.recall("偏好")).containsExactly("条目一", "条目二");
     verify(store).recallByKeyword("偏好");
     verifyNoMoreInteractions(store);
+  }
+
+  @Test
+  @DisplayName("012 坑十六：readAll(agentName) 委托 load 前后临时置入 Agent 名并复原")
+  void readAllSetsAgentContextAroundLoad() {
+    LongTermMemoryStore store = mock(LongTermMemoryStore.class);
+    when(store.load())
+        .thenAnswer(
+            inv -> {
+              assertThat(ToolExecutionContext.current()).isEqualTo("ops-agent"); // 委托期间可见
+              return "## 核心记忆\n记忆内容\n## 归档记忆\n";
+            });
+    MemoryServiceImpl service = new MemoryServiceImpl(store);
+
+    String content = service.readAll("ops-agent");
+
+    assertThat(content).contains("记忆内容");
+    assertThat(ToolExecutionContext.current()).isNull(); // 复原（坑十六：不泄漏）
+    verify(store).load();
+    verifyNoMoreInteractions(store);
+  }
+
+  @Test
+  @DisplayName("012 坑十六：buildContext 委托 load 时以 session.profileName 置入上下文并复原")
+  void buildContextSetsSessionProfileContextAroundLoad() {
+    LongTermMemoryStore store = mock(LongTermMemoryStore.class);
+    when(store.load())
+        .thenAnswer(
+            inv -> {
+              assertThat(ToolExecutionContext.current())
+                  .isEqualTo("ops-agent"); // newSession 的 profileName
+              return "## 核心记忆\n\n## 归档记忆\n";
+            });
+    MemoryServiceImpl service = new MemoryServiceImpl(store);
+
+    service.buildContext(newSession());
+
+    assertThat(ToolExecutionContext.current()).isNull(); // 复原（坑十六）
   }
 }

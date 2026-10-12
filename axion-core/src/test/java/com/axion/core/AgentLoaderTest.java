@@ -94,6 +94,19 @@ class AgentLoaderTest {
   }
 
   @Test
+  @DisplayName("012 CodeQL 门禁回归：目录名非法（空白等）→ 派生期统一拒绝——watcher/启动扫描同口径")
+  void invalidDirNameFailsAtDerive(@TempDir Path tmp) throws Exception {
+    Path agentDir = Files.createDirectories(tmp.resolve("bad name"));
+    Files.writeString(
+        agentDir.resolve("AGENT.md"),
+        "---\nname: bad name\nprovider:\n  name: deepseek\n---\n正文\n");
+
+    assertThatThrownBy(() -> new AgentLoader().deriveProfile(agentDir, Set.of("deepseek")))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("非法 Agent 名");
+  }
+
+  @Test
   @DisplayName("缺 AGENT.md：loadBody 报错点名")
   void missingAgentMdLoadBodyFails(@TempDir Path tmp) throws Exception {
     Path agentDir = Files.createDirectories(tmp.resolve("empty-agent"));

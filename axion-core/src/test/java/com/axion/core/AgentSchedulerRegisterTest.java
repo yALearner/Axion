@@ -147,6 +147,52 @@ class AgentSchedulerRegisterTest {
   }
 
   @Test
+  @DisplayName("unregisterProfile：句柄 cancel(false) + 句柄/登记移除、不动 taskLocks（012 FR-3，坑十前置）")
+  void unregisterProfileCancelsAndRemovesHandles() {
+    ThreadPoolTaskScheduler taskScheduler = mock(ThreadPoolTaskScheduler.class);
+    ScheduledFuture<?> morning = mock(ScheduledFuture.class);
+    ScheduledFuture<?> evening = mock(ScheduledFuture.class);
+    java.util.concurrent.atomic.AtomicInteger sequence =
+        new java.util.concurrent.atomic.AtomicInteger();
+    when(taskScheduler.schedule(any(Runnable.class), any(CronTrigger.class)))
+        .thenAnswer(inv -> sequence.getAndIncrement() == 0 ? morning : evening); // twoSchedules 顺序
+    AgentScheduler scheduler = scheduler(taskScheduler);
+    Profile profile = twoSchedules();
+
+    scheduler.registerProfile(profile);
+    scheduler.unregisterProfile(profile);
+
+    verify(morning).cancel(false);
+    verify(evening).cancel(false);
+    assertThat(scheduler.scheduledTaskCount()).isZero();
+    // 注销后同名 id 可重新注册（registrations 已移除——30 节更新重注册前置）
+    scheduler.registerProfile(profile);
+    assertThat(scheduler.scheduledTaskCount()).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("unregisterProfile：无 schedules 的 Profile 零操作（幂等注销）")
+  void unregisterProfileWithoutSchedulesIsNoop() {
+    AgentScheduler scheduler = scheduler(mock(ThreadPoolTaskScheduler.class));
+    Profile bare =
+        new Profile(
+            "bare-agent",
+            null,
+            new Profile.Identity(null, null),
+            new Profile.ProviderRef("deepseek", null, null),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            new Profile.Settings(10, 20));
+
+    scheduler.unregisterProfile(bare);
+
+    assertThat(scheduler.scheduledTaskCount()).isZero();
+  }
+
+  @Test
   @DisplayName("无 schedules 的 Profile：registerProfile 零注册（合法空态）")
   void profileWithoutSchedulesRegistersNothing() {
     ThreadPoolTaskScheduler taskScheduler = mock(ThreadPoolTaskScheduler.class);

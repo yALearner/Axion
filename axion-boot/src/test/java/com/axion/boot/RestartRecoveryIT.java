@@ -180,9 +180,9 @@ class RestartRecoveryIT {
           .isGreaterThanOrEqualTo(llmCallsBefore);
     }
 
-    // GET /memory 核心记忆：markdown 后端文件在重启前后一致可读（本 IT 不写记忆——验证读取链路恢复）
+    // per-agent 记忆端点（012：全局 /memory 退役）：markdown 后端文件在重启前后一致可读（本 IT 不写记忆——验证读取链路恢复）
     mockMvc
-        .perform(get("/api/v1/memory"))
+        .perform(get("/api/v1/agents/weather-agent/memory"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.code").value(0));
   }

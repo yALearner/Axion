@@ -456,6 +456,11 @@ provider:
 | ErrorProne `-Werror` 报 StringConcatToTextBlock | spotless 把长字符串重排成 `+` 连接后撞 ErrorProne 门禁 | 直接写 Java text block（`"""..."""`），两者都满意（011 实录） |
 | SpotBugs `NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE`：`getFileName() == null ? "" : getFileName().toString()` | @Nullable 方法二次调用判空无效——第二次调用仍可能返回 null | 单次取值入局部变量再判空（011 实录） |
 | 给 ContextLoader/PromptBuilder 相关测试加新行为（如正文注入） | 前序测试全部依赖"工作区无 agents 目录"隐式假设，改造后逐个炸（晚失败在他人测试里） | 改造点波及的前序测试（PromptBuilderTest/ReActLoopTest/CliAgentConfigurationTest 等）同步补 agent 目录 fixture（011 实录） |
+| WatchService 目录监听测试偶发超时/事件丢失 | 启动竞态（事件先于监听注册）+ Windows 不递归监听子项：目录 CREATE 事件到达时 AGENT.md 可能还没写完（cp -r 半成品窗口），注册失败后文件内容变化不再触发目录事件 | 注册失败有限重试（守护线程内 sleep）；测试断言前等 isWatching 测试钩子就绪、丢目录用原子 move 整目录（scp/git 形态）模拟（012 实录） |
+| Mockito `when()` 用于 void 方法报「此处不允许使用 null 类型」 | `when(voidMethod(...))` 的泛型推导撞 javac illegal nulltype，报错行号指向 when 调用处 | void 方法用 `doAnswer(...).when(mock).method(...)`（012 实录） |
+| SpotBugs 报 `US_USELESS_SUPPRESSION_ON_CLASS`（EI_EXPOSE_REP2 抑制在 record 上无用） | record 构造器不可覆写，REP2 判定不适用；只保留 EI_EXPOSE_REP | 记录类集合字段抑制只写 `EI_EXPOSE_REP`（012 实录） |
+| 端点退役后前序 IT 晚失败 404 | 010 的 ScheduledTaskE2ETest/RestartRecoveryIT 断言全局 `GET /api/v1/memory`——012 退役该端点后全量门禁在他人测试里炸 | 端点退役（改造点）时 grep 全仓调用方一并重指（012 实录：改指 per-agent 记忆端点） |
+| CodeQL path-injection 14 个 high 告警（012：agent 名从此来自 API 入参） | 名字直接 `resolve(name)` 进路径——`../` 可写越界/读越界；本地 verify 全绿拦不住（CodeQL 只在 CI） | 名字合法性在收口点统一校验：`AgentStore.AGENT_NAME_PATTERN`（字母数字开头 + 点下划线连字符，最长 64）+ normalize/startsWith 兜底；三处同尺：AgentStore.agentDirOf / AgentLoader.deriveProfile（watcher 同口径）/ MarkdownMemoryStore.memoryFile（012 实录） |
 
 ---
 

@@ -48,7 +48,7 @@ class LongTermMemoryStoreTest {
     mem0Servers.add(mem0Server);
 
     return Stream.of(
-        Arguments.of("markdown", new MarkdownMemoryStore(dir.resolve("MEMORY.md"))),
+        Arguments.of("markdown", new MarkdownMemoryStore(dir)), // 012：构造改 workspaceRoot（契约方法不变）
         Arguments.of("sqlite", sqliteStore(dir.resolve("contract.db"))),
         Arguments.of(
             "mem0",

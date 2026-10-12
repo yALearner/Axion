@@ -103,14 +103,15 @@ class ReActLoopTest {
     when(gateway.chat(anyString(), any(), any()))
         .thenReturn(toolCallResponse())
         .thenReturn(textResponse("建议穿外套"));
-    when(toolExecutor.execute(anyString(), any())).thenReturn(ToolResult.success("北京 22°C"));
+    when(toolExecutor.execute(anyString(), anyString(), any()))
+        .thenReturn(ToolResult.success("北京 22°C"));
 
     Session session = newSessionManager().getOrCreate("cli", "alice", "test-agent");
     String reply = loop().run(session, "查天气", profileWith(10));
 
     assertThat(reply).isEqualTo("建议穿外套");
     verify(gateway, times(2)).chat(anyString(), any(), any());
-    verify(toolExecutor, times(1)).execute(anyString(), any());
+    verify(toolExecutor, times(1)).execute(anyString(), anyString(), any());
   }
 
   @Test
@@ -119,7 +120,8 @@ class ReActLoopTest {
     when(gateway.chat(anyString(), any(), any()))
         .thenReturn(toolCallResponse())
         .thenReturn(textResponse("最终答复"));
-    when(toolExecutor.execute(anyString(), any())).thenReturn(ToolResult.success("北京 22°C"));
+    when(toolExecutor.execute(anyString(), anyString(), any()))
+        .thenReturn(ToolResult.success("北京 22°C"));
 
     Session session = newSessionManager().getOrCreate("cli", "alice", "test-agent");
     loop().run(session, "查天气", profileWith(10));
@@ -142,13 +144,14 @@ class ReActLoopTest {
   @DisplayName("坑一回归：模型一直要调工具 → 恰好最大轮数强制停止")
   void forcedStopAtMaxIterationsWhenModelNeverConverges() {
     when(gateway.chat(anyString(), any(), any())).thenReturn(toolCallResponse());
-    when(toolExecutor.execute(anyString(), any())).thenReturn(ToolResult.success("ok"));
+    when(toolExecutor.execute(anyString(), anyString(), any()))
+        .thenReturn(ToolResult.success("ok"));
 
     Session session = newSessionManager().getOrCreate("cli", "alice", "test-agent");
     String reply = loop().run(session, "查天气", profileWith(10));
 
     verify(gateway, times(10)).chat(anyString(), any(), any());
-    verify(toolExecutor, times(10)).execute(anyString(), any());
+    verify(toolExecutor, times(10)).execute(anyString(), anyString(), any());
     assertThat(reply).contains("达到最大轮数");
   }
 
@@ -160,7 +163,7 @@ class ReActLoopTest {
     loop()
         .run(newSessionManager().getOrCreate("cli", "alice", "test-agent"), "hi", profileWith(10));
 
-    verify(toolExecutor, times(0)).execute(anyString(), any());
+    verify(toolExecutor, times(0)).execute(anyString(), anyString(), any());
   }
 
   @Test
@@ -180,7 +183,7 @@ class ReActLoopTest {
     when(gateway.chat(anyString(), any(), any()))
         .thenReturn(toolCallResponse()) // 第 1 轮：模型决定调 http_get
         .thenReturn(textResponse("网络不可用，已改从本地缓存查询，建议穿外套")); // 第 2 轮：看到失败后直接给最终答复
-    when(toolExecutor.execute(anyString(), any()))
+    when(toolExecutor.execute(anyString(), anyString(), any()))
         .thenReturn(ToolResult.failure("网络错误", true)); // 失败结果带 retryable 回传
 
     Session session = newSessionManager().getOrCreate("cli", "alice", "test-agent");
@@ -193,6 +196,6 @@ class ReActLoopTest {
     assertThat(toolMessage.content()).contains("网络错误");
     assertThat(toolMessage.content()).contains("（可重试）");
     // 执行层无内部自动重试：失败的 http_get 恰好执行一次
-    verify(toolExecutor, times(1)).execute(anyString(), any());
+    verify(toolExecutor, times(1)).execute(anyString(), anyString(), any());
   }
 }

@@ -1,9 +1,11 @@
 package com.axion.cli;
 
 import com.axion.channel.cli.CliChannel;
+import com.axion.core.AgentLifecycleService;
 import com.axion.core.AgentLoader;
 import com.axion.core.AgentScheduler;
 import com.axion.core.AgentService;
+import com.axion.core.AgentStore;
 import com.axion.core.ContextLoader;
 import com.axion.core.LongTermMemoryStore;
 import com.axion.core.MemoryService;
@@ -14,6 +16,7 @@ import com.axion.core.ReActLoop;
 import com.axion.core.SessionManager;
 import com.axion.core.ToolExecutor;
 import com.axion.core.ToolSchemaAdapter;
+import com.axion.core.WorkspaceWatcher;
 import com.axion.memory.MarkdownMemoryStore;
 import com.axion.memory.Mem0MemoryStore;
 import com.axion.memory.MemoryServiceImpl;
@@ -183,7 +186,8 @@ public class CliAgentConfiguration {
       ObjectProvider<javax.sql.DataSource> dataSourceProvider) {
     String backend = environment.getProperty("axion.memory.backend", "markdown");
     return switch (backend) {
-      case "markdown" -> new MarkdownMemoryStore(Path.of(".axion", "memory", "MEMORY.md"));
+      case "markdown" ->
+          new MarkdownMemoryStore(Path.of(".axion")); // 012：构造改 workspaceRoot（per-agent 运行时解析）
       case "sqlite" -> {
         javax.sql.DataSource dataSource = dataSourceProvider.getIfAvailable();
         if (dataSource == null) {
@@ -210,6 +214,55 @@ public class CliAgentConfiguration {
   @Bean
   public MemoryService memoryService(LongTermMemoryStore longTermMemoryStore) {
     return new MemoryServiceImpl(longTermMemoryStore);
+  }
+
+  /** 012 FR-4：Agent 目录读写（文件系统真相源唯一写入口）。 */
+  @Bean
+  public AgentStore agentStore() {
+    return new AgentStore(Path.of(".axion"));
+  }
+
+  /**
+   * 012 FR-2：生命周期编排者装配——三条录入路径共用的注册代码（坑十七）+ tools 引用告警校验钩子（011 债②，装配层 注入、core 不反向依赖 tool）+
+   * 生成用系统默认配置（axion.author.*：provider 缺省取 providers 第一个；坑十五 model 留空由生命周期生成时抛
+   * IllegalArgumentException → web 层映射 503）。
+   */
+  @Bean
+  public AgentLifecycleService agentLifecycleService(
+      ProfileRegistry registry,
+      AgentScheduler agentScheduler,
+      AgentStore agentStore,
+      com.axion.core.LlmGateway llmGateway,
+      ToolRegistry toolRegistry,
+      Environment environment) {
+    String authorProvider =
+        environment.getProperty(
+            "axion.author.provider",
+            environment.getProperty("axion.providers[0].name", "deepseek"));
+    String authorModel = environment.getProperty("axion.author.model");
+    return new AgentLifecycleService(
+        new AgentLoader(),
+        registry,
+        agentScheduler,
+        agentStore,
+        llmGateway,
+        profile -> validateToolRef(profile, toolRegistry), // 011 债②：注册入口重跑同一校验
+        providerNamesOf(environment),
+        authorProvider,
+        authorModel);
+  }
+
+  /**
+   * 012 FR-1：目录监听守护线程（与 AgentScheduler 调度线程同类，不进请求链路——宪法 VII 不违反；R10）：启动全量扫 + WatchService
+   * 实时监听——手工丢目录与 API 上传殊途同归的落点（坑十七）。
+   */
+  @Bean
+  public WorkspaceWatcher workspaceWatcher(AgentLifecycleService lifecycle) {
+    WorkspaceWatcher watcher = new WorkspaceWatcher(Path.of(".axion"), lifecycle);
+    Thread thread = new Thread(watcher::run, "axion-workspace-watcher");
+    thread.setDaemon(true);
+    thread.start();
+    return watcher;
   }
 
   /** 004 契约不变量 9：Boot 自动配置 factory + connect/read timeout（connect 3s / read 10s）。 */
@@ -363,15 +416,20 @@ public class CliAgentConfiguration {
   /** Profile tools 引用启动校验（FR-1 自审补钉）：未注册名 ERROR 级明确报错、不静默少一个。 */
   private void validateToolRefs(ProfileRegistry profileRegistry, ToolRegistry registry) {
     for (Profile profile : profileRegistry.list()) {
-      List<String> declared = profile.tools();
-      if (declared == null) {
-        continue;
-      }
-      for (String name : declared) {
-        if (!registry.contains(name)) {
-          // 名称入日志前净化 CR/LF（CRLF 注入防线，无抑制注解依赖的机器可判写法）
-          LOG.error("Profile [{}] 声明的工具未注册: {}", sanitize(profile.name()), sanitize(name));
-        }
+      validateToolRef(profile, registry);
+    }
+  }
+
+  /** 单 Profile tools 引用校验（012：运行时注册钩子复用同一逻辑——011 债②）。 */
+  private void validateToolRef(Profile profile, ToolRegistry registry) {
+    List<String> declared = profile.tools();
+    if (declared == null) {
+      return;
+    }
+    for (String name : declared) {
+      if (!registry.contains(name)) {
+        // 名称入日志前净化 CR/LF（CRLF 注入防线，无抑制注解依赖的机器可判写法）
+        LOG.error("Profile [{}] 声明的工具未注册: {}", sanitize(profile.name()), sanitize(name));
       }
     }
   }

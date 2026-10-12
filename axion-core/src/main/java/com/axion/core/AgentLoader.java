@@ -137,6 +137,8 @@ public final class AgentLoader {
     Path fileName =
         agentDir.getFileName(); // 单次取值：SpotBugs NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE 契约——二次调用判空无效
     String dirName = fileName == null ? "" : fileName.toString();
+    AgentStore.validateName(
+        dirName); // 012 CodeQL 门禁实录：目录名就是路径元素——分隔符/.. 等在注册入口统一拒绝（watcher/启动扫描同口径）
     // 坑八：唯一标识 = 目录名——不校验则注册成功、ContextLoader 按 profile.name 找错目录、首次触发才炸的晚失败
     if (!name.equals(dirName)) {
       throw new IllegalArgumentException(

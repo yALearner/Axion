@@ -16,9 +16,13 @@ export async function apiGet(path) {
   return body.data
 }
 
-/** 写操作统一封装（010 定时任务页：POST run / PUT enabled）——与 apiGet 同款双信封解析，错误信封统一抛 message。 */
-export async function apiPost(path) {
-  const res = await fetch(path, { method: 'POST' })
+/** 写操作统一封装（010 定时任务页：POST run；012：新建/生成/保存/发消息）——与 apiGet 同款双信封解析，错误信封统一抛 message。 */
+export async function apiPost(path, payload) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload ?? {}),
+  })
   const body = await res.json()
   if (!res.ok || body.errorCode !== undefined) {
     throw new Error(body.message ?? `HTTP ${res.status}`)
@@ -26,13 +30,23 @@ export async function apiPost(path) {
   return body.data
 }
 
-/** 写操作统一封装（PUT enabled）——双信封解析同上。 */
+/** 写操作统一封装（PUT enabled / 012 更新）——双信封解析同上。 */
 export async function apiPut(path, payload) {
   const res = await fetch(path, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   })
+  const body = await res.json()
+  if (!res.ok || body.errorCode !== undefined) {
+    throw new Error(body.message ?? `HTTP ${res.status}`)
+  }
+  return body.data
+}
+
+/** 写操作统一封装（012 DELETE Agent）——双信封解析同上。 */
+export async function apiDelete(path) {
+  const res = await fetch(path, { method: 'DELETE' })
   const body = await res.json()
   if (!res.ok || body.errorCode !== undefined) {
     throw new Error(body.message ?? `HTTP ${res.status}`)

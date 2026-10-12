@@ -130,4 +130,38 @@ class ToolExecutorTest {
     assertThat(result.success()).isFalse();
     assertThat(events).containsExactly("execute", "audit");
   }
+
+  @Test
+  @DisplayName("坑十六：agentName 执行前置入 ToolExecutionContext、finally 清除（含工具抛异常路径）")
+  void setsAndClearsToolExecutionContext() throws Exception {
+    when(httpGet.execute(any(JsonNode.class)))
+        .thenAnswer(
+            inv -> {
+              assertThat(ToolExecutionContext.current()).isEqualTo("ops-agent"); // 执行期间可见
+              return ToolResult.success("ok");
+            });
+
+    executor().execute("s-1", "ops-agent", toolCall("http_get"));
+
+    assertThat(ToolExecutionContext.current()).isNull(); // 正常路径必清
+
+    when(httpGet.execute(any(JsonNode.class))).thenThrow(new RuntimeException("boom"));
+    executor().execute("s-1", "ops-agent", toolCall("http_get"));
+    assertThat(ToolExecutionContext.current()).isNull(); // 异常路径也必清（防串号）
+  }
+
+  @Test
+  @DisplayName("坑十六：旧两参路径上下文为 null（回退全局——006 契约不回退）")
+  void legacyOverloadKeepsContextNull() throws Exception {
+    when(httpGet.execute(any(JsonNode.class)))
+        .thenAnswer(
+            inv -> {
+              assertThat(ToolExecutionContext.current()).isNull();
+              return ToolResult.success("ok");
+            });
+
+    executor().execute("s-1", toolCall("http_get"));
+
+    assertThat(ToolExecutionContext.current()).isNull();
+  }
 }
