@@ -82,6 +82,19 @@ class MarkdownMemoryStoreTest {
   }
 
   @Test
+  @DisplayName("012 CodeQL 门禁回归：上下文里的非法 agent 名拒绝——记忆路径不越界")
+  void invalidContextNameRejected() {
+    try {
+      ToolExecutionContext.set("../escape"); // 模拟 ToolExecutor 期间传入穿越名
+      assertThatThrownBy(() -> store.append("写不进去", MemoryScope.ARCHIVAL))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessageContaining("非法 Agent 名");
+    } finally {
+      ToolExecutionContext.clear();
+    }
+  }
+
+  @Test
   @DisplayName("并发回归：50 虚拟线程各 append 一条 → load 全部命中零丢失（双层互斥 + 原子写回归钉）")
   void concurrentAppendsLoseNothing() throws Exception {
     // 需求文档验收标准明定的并发形态：跨会话虚拟线程并发追加是单实例多 Agent 的真实场景。

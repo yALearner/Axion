@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Agent 目录读写（012-agent-mgmt FR-4）——文件系统真相源 {@code .axion/agents/<name>/} 的唯一写入口。
@@ -21,6 +22,20 @@ public final class AgentStore {
 
   private static final String AGENT_MD = "AGENT.md";
   private static final String REFERENCE_MD = "REFERENCE.md";
+
+  /**
+   * Agent 名合法性（012 CodeQL 门禁实录）：字母数字开头、后续仅字母数字/点/下划线/连字符、最长 64——路径分隔符、空白与 {@code ..} 进不了名字。API
+   * 入参、watcher 目录名、per-agent 记忆路径共用同一把尺。
+   */
+  public static final Pattern AGENT_NAME_PATTERN =
+      Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}");
+
+  /** 名字校验（非法名 = 调用方过错，抛 {@link IllegalArgumentException} 不带修复建议）。 */
+  public static void validateName(String name) {
+    if (name == null || !AGENT_NAME_PATTERN.matcher(name).matches()) {
+      throw new IllegalArgumentException("非法 Agent 名: " + name);
+    }
+  }
 
   private final Path workspaceRoot;
 
@@ -43,9 +58,15 @@ public final class AgentStore {
     return workspaceRoot.resolve("archive");
   }
 
-  /** 单个 Agent 目录（不保证存在）。 */
+  /** 单个 Agent 目录（不保证存在）。名字非法或路径穿越直接拒绝（防 API 入参写越界）。 */
   public Path agentDirOf(String name) {
-    return agentsRoot().resolve(name);
+    validateName(name);
+    Path root = agentsRoot().normalize();
+    Path agentDir = root.resolve(name).normalize();
+    if (!agentDir.startsWith(root)) {
+      throw new IllegalArgumentException("Agent 路径越界: " + name);
+    }
+    return agentDir;
   }
 
   /** 写单个 AGENT.md（create 与 update 共用；与手工丢目录格式一模一样）。 */
@@ -84,6 +105,7 @@ public final class AgentStore {
 
   /** 归档：整个 Agent 目录移入 {@code .axion/archive/}（不物理删，可追溯）。 */
   public void archive(String name) {
+    validateName(name); // 目标路径同样由 name 拼接（归档根下），先过同一把尺
     Path source = agentDirOf(name);
     if (!Files.isDirectory(source)) {
       throw new IllegalStateException("Agent 目录不存在: " + source);

@@ -460,6 +460,7 @@ provider:
 | Mockito `when()` 用于 void 方法报「此处不允许使用 null 类型」 | `when(voidMethod(...))` 的泛型推导撞 javac illegal nulltype，报错行号指向 when 调用处 | void 方法用 `doAnswer(...).when(mock).method(...)`（012 实录） |
 | SpotBugs 报 `US_USELESS_SUPPRESSION_ON_CLASS`（EI_EXPOSE_REP2 抑制在 record 上无用） | record 构造器不可覆写，REP2 判定不适用；只保留 EI_EXPOSE_REP | 记录类集合字段抑制只写 `EI_EXPOSE_REP`（012 实录） |
 | 端点退役后前序 IT 晚失败 404 | 010 的 ScheduledTaskE2ETest/RestartRecoveryIT 断言全局 `GET /api/v1/memory`——012 退役该端点后全量门禁在他人测试里炸 | 端点退役（改造点）时 grep 全仓调用方一并重指（012 实录：改指 per-agent 记忆端点） |
+| CodeQL path-injection 14 个 high 告警（012：agent 名从此来自 API 入参） | 名字直接 `resolve(name)` 进路径——`../` 可写越界/读越界；本地 verify 全绿拦不住（CodeQL 只在 CI） | 名字合法性在收口点统一校验：`AgentStore.AGENT_NAME_PATTERN`（字母数字开头 + 点下划线连字符，最长 64）+ normalize/startsWith 兜底；三处同尺：AgentStore.agentDirOf / AgentLoader.deriveProfile（watcher 同口径）/ MarkdownMemoryStore.memoryFile（012 实录） |
 
 ---
 

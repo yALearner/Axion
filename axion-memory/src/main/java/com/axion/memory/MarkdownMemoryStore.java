@@ -1,5 +1,6 @@
 package com.axion.memory;
 
+import com.axion.core.AgentStore;
 import com.axion.core.LongTermMemoryStore;
 import com.axion.core.MemoryScope;
 import com.axion.core.ToolExecutionContext;
@@ -72,6 +73,7 @@ public class MarkdownMemoryStore implements LongTermMemoryStore {
     if (agentName == null || agentName.isBlank()) {
       return workspaceRoot.resolve("memory").resolve("MEMORY.md");
     }
+    AgentStore.validateName(agentName); // 012 CodeQL 门禁实录：名字进路径前先过同一把尺（防穿越兜底）
     return workspaceRoot.resolve("agents").resolve(agentName).resolve("MEMORY.md");
   }
 

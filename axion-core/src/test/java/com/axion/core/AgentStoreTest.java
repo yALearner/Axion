@@ -25,6 +25,47 @@ class AgentStoreTest {
   }
 
   @Test
+  @DisplayName("012 CodeQL 门禁回归：agent 名含路径分隔符/.. 被 agentDirOf 拒绝——API 入参写不越界")
+  void agentDirOfRejectsTraversalNames(@TempDir Path tempDir) {
+    AgentStore store = new AgentStore(tempDir);
+
+    assertThatThrownBy(() -> store.agentDirOf("../escape"))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> store.agentDirOf("..")).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> store.agentDirOf("a/b")).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> store.agentDirOf("a\\b")).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> store.write("../escape", "---\nname: escape\n---\n正文"))
+        .isInstanceOf(IllegalArgumentException.class);
+
+    assertThat(Files.exists(tempDir.resolve("escape"))).isFalse(); // 越界目录根本没被写出来
+  }
+
+  @Test
+  @DisplayName("012 CodeQL 门禁回归：合法名过检（连字符/点/下划线皆可），空与非法字符拒绝")
+  void validateNameAcceptsLegitimateNamesOnly() {
+    assertThat(AgentStore.AGENT_NAME_PATTERN.matcher("ops-agent").matches()).isTrue();
+    assertThat(AgentStore.AGENT_NAME_PATTERN.matcher("a.b_c-1").matches()).isTrue();
+
+    assertThatThrownBy(() -> AgentStore.validateName(""))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> AgentStore.validateName("a b"))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> AgentStore.validateName(".hidden"))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> AgentStore.validateName(null))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  @DisplayName("012 CodeQL 门禁回归：archive 目标路径与源同尺校验——非法名拒绝")
+  void archiveRejectsInvalidName(@TempDir Path tempDir) {
+    AgentStore store = new AgentStore(tempDir);
+
+    assertThatThrownBy(() -> store.archive("../escape"))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
   @DisplayName("archive 移入 .axion/archive/ 不物理删（可追溯）")
   void archiveMovesDirectoryNotDeletes(@TempDir Path tempDir) throws Exception {
     AgentStore store = new AgentStore(tempDir);
